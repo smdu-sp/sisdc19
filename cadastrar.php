@@ -11,27 +11,25 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 		nomeServidor,
 		rf,
 		orgao,
-		coordenadoria,
+		setor,
 		divisao,
-		assessoria,
 		sala,
 		andar,
 		chapa,
 		chapaOutraUnidade,
 		nomeOutraUnidade
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
 	$listaDeBens = json_decode($_POST['insertList']);
 	
 	if($stmt = mysqli_prepare($link, $sql)){
 		// Vincula as variáveis como parâmetros
-		mysqli_stmt_bind_param($stmt, "sssssssssss", 
+		mysqli_stmt_bind_param($stmt, "ssssssssss", 
 			$param_nomeServidor,
 			$param_rf,
 			$param_orgao,
-			$param_coordenadoria,
+			$param_setor,
 			$param_divisao,
-			$param_assessoria,
 			$param_sala,
 			$param_andar,
 			$param_chapa,
@@ -43,9 +41,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 			$param_nomeServidor = utf8_decode($item->nomeServidor);
 			$param_rf = $item->rf;
 			$param_orgao = isset($item->orgao) ? utf8_decode($item->orgao) : NULL;
-			$param_coordenadoria = isset($item->coordenadoria) ? utf8_decode($item->coordenadoria) : NULL;
+			$param_setor = isset($item->setor) ? utf8_decode($item->setor) : NULL;
 			$param_divisao = isset($item->divisao) ? utf8_decode($item->divisao) : NULL;
-			$param_assessoria = isset($item->assessoria) ? utf8_decode($item->assessoria) : NULL;
 			$param_sala = isset($item->sala) ? utf8_decode($item->sala) : NULL;
 			$param_andar = isset($item->andar) ? $item->andar : NULL;
 			$param_chapa = isset($item->chapa) ? $item->chapa : NULL;

@@ -70,7 +70,7 @@ if (!mysqli_set_charset($link, "utf8")) {
             <div class="card-body">
                 <form class="form-group">
                     <div class="form-row">
-                        <div class="col col-2">
+                        <div class="col col-3">
                             <input 
                             class="form-control form-control-sm"
                             v-model="usuario.nome"
@@ -100,14 +100,14 @@ if (!mysqli_set_charset($link, "utf8")) {
                         <div class="col">
                             <select
                             class="form-control form-control-sm"
-                            name="coordenadoria"
-                            id="coordenadoria"
-                            v-model="coordenadoria"
-                            placeholder="Coordenadoria"
+                            name="setor"
+                            id="setor"
+                            v-model="setor"
+                            placeholder="Setor"
                             :disabled="!orgao"
                             >
-                                <option value="" selected>Coordenadoria</option>
-                                <option v-for="coordenadoria in coordenadorias">{{coordenadoria.sigla}}</option>
+                                <option value="" selected>Setor</option>
+                                <option v-for="setor in setores">{{setor.sigla}}</option>
                             </select>
                         </div>
                         <div class="col">
@@ -117,23 +117,10 @@ if (!mysqli_set_charset($link, "utf8")) {
                             id="divisao"
                             v-model="divisao"
                             placeholder="Divisão"
-                            :disabled="!coordenadoria"
+                            :disabled="!divisoes || !divisoes.length > 0"
                             >
                                 <option value="" selected>Divisão</option>
                                 <option v-for="divisao in divisoes">{{divisao.sigla}}</option>
-                            </select>
-                        </div>
-                        <div class="col">
-                            <select
-                            class="form-control form-control-sm"
-                            name="assessoria"
-                            id="assessoria"
-                            v-model="assessoria"
-                            placeholder="Assessoria"
-                            :disabled="!orgao"
-                            >
-                                <option value="" selected>Assessoria</option>
-                                <option v-for="assessoria in assessorias">{{assessoria.sigla}}</option>
                             </select>
                         </div>
                         <div class="col">
@@ -172,61 +159,111 @@ if (!mysqli_set_charset($link, "utf8")) {
             <div class="form-group">
                 <div class="form-row">
                     <div class="col">
-                        <!-- <label for="chapa">Número da Chapa</label> -->
-                        <input 
-                        class="form-control form-control-sm"
-                        v-model="novoItem.chapa"
-                        id="chapa"
-                        placeholder="Nº da chapa"
-                        autocomplete="off"
-                        >
-                    </div>
-                    <div class="input-group input-group-sm col">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">Chapa de outra unidade</span>
+                        <div class="form-row">
+                            <div class="col">
+                                <!-- <label for="chapa">Número da Chapa</label> -->
+                                <input 
+                                class="form-control form-control-sm"
+                                v-model="novoItem.chapa"
+                                id="chapa"
+                                placeholder="Nº da chapa"
+                                autocomplete="off"
+                                >
+                            </div>
+                            <div class="input-group input-group-sm col col-8">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Chapa de outra unidade</span>
+                                </div>
+                                <!-- <div class="col"> -->
+                                    <!-- <label for="chapaOutraUnidade">Nº da chapa</label> -->
+                                    <input
+                                    v-model="novoItem.chapaOutraUnidade"
+                                    id="chapaOutraUnidade"
+                                    aria-label="Nº da chapa"
+                                    placeholder="Nº da chapa"
+                                    class="form-control form-control-sm"
+                                    autocomplete="off"
+                                    >
+                                <!-- </div> -->
+                                <!-- <div class="col"> -->
+                                    <!-- <label for="nomeOutraUnidade">Nome da unidade</label> -->
+                                    <input v-model="novoItem.nomeOutraUnidade" id="nomeOutraUnidade" aria-label="Nome da unidade" placeholder="Nome da unidade" class="form-control form-control-sm">
+                                <!-- </div> -->
+                            </div>
                         </div>
-                        <!-- <div class="col"> -->
-                            <!-- <label for="chapaOutraUnidade">Nº da chapa</label> -->
-                            <input
-                            v-model="novoItem.chapaOutraUnidade"
-                            id="chapaOutraUnidade"
-                            aria-label="Nº da chapa"
-                            placeholder="Nº da chapa"
-                            class="form-control form-control-sm"
-                            autocomplete="off"
-                            >
-                        <!-- </div> -->
-                        <!-- <div class="col"> -->
-                            <!-- <label for="nomeOutraUnidade">Nome da unidade</label> -->
-                            <input v-model="novoItem.nomeOutraUnidade" id="nomeOutraUnidade" aria-label="Nome da unidade" placeholder="Nome da unidade" class="form-control form-control-sm">
-                        <!-- </div> -->
+                        <br>
+                        <!-- DESCRIÇÃO -->
+                        <!-- <label for="discriminacao">Discriminação do bem</label> -->
+                        
+                        <!-- MARCA/MODELO -->
+                        <div class="form-row">                    
+                            <div class="col">
+                                <!-- <input type="text" class="form-control form-control-sm" v-model="novoItem.discriminacao" id="discriminacao" placeholder="Discriminação do bem"> -->
+                                <select
+                                class="form-control form-control-sm"
+                                name="discriminacao"
+                                id="discriminacao"
+                                v-model="novoItem.discriminacao"
+                                placeholder="Discriminação do bem"
+                                @change="atualizaFoto()"
+                                >
+                                    <option value="undefined" selected disabled>Discriminação do bem</option>
+                                    <option v-for="descritivo in descritivos">{{descritivo}}</option>
+                                </select>
+                            </div>                            
+                        </div>
+                        <br>
+                        <div class="form-row">
+                            <div class="col">
+                                <input type="text" class="form-control form-control-sm" v-model="novoItem.cor" placeholder="Cor">
+                            </div>
+                            <div class="input-group input-group-sm col col-8">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Dimensões (cm)</span>
+                                </div>                                
+                                    <input
+                                    v-model="novoItem.comprimento"
+                                    placeholder="Comprimento"
+                                    class="form-control form-control-sm"
+                                    autocomplete="off"
+                                    type="number"
+                                    >
+                                    <input
+                                    v-model="novoItem.profundidade"
+                                    placeholder="Profundidade"
+                                    class="form-control form-control-sm"
+                                    autocomplete="off"
+                                    >
+                                    <input
+                                    v-model="novoItem.altura"
+                                    placeholder="Altura"
+                                    class="form-control form-control-sm"
+                                    autocomplete="off"
+                                    >
+                            </div>
+                        </div>
+                        <br>
+                        <div class="form-row">
+                            <div class="col">
+                                <!-- <label for="marca">Marca</label> -->
+                                <input type="text" class="form-control form-control-sm" v-model="novoItem.marca" id="marca" placeholder="Marca">
+                            </div>
+                            <div class="col">
+                                <!-- <label for="modelo">Modelo</label> -->
+                                <input type="text" class="form-control form-control-sm" v-model="novoItem.modelo" id="modelo" placeholder="Modelo" title="Modelo">
+                            </div>
+                            <div class="col input-group">
+                                <!-- <div class="input-group-prepend">
+                                    <span class="input-group-text">Equipamento elétrico/eletrônico</span>
+                                </div> -->
+                                <input type="text" class="form-control form-control-sm" v-model="novoItem.numSerie" id="numSerie" placeholder="Nº de série (Equipamento elétrico/eletrônico)" title="Nº de série (Equipamento elétrico/eletrônico)">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <img :src="fotoUrl" :alt="novoItem.discriminacao" class="mw-100">
                     </div>
                 </div>
-                <br>
-                <!-- DESCRIÇÃO -->
-                <!-- <label for="discriminacao">Discriminação do bem</label> -->
-                
-                <!-- MARCA/MODELO -->
-                <div class="form-row">                    
-                    <div class="col">
-                        <input type="text" class="form-control form-control-sm" v-model="novoItem.discriminacao" id="discriminacao" placeholder="Discriminação do bem">
-                    </div>
-                    <div class="col">
-                        <!-- <label for="marca">Marca</label> -->
-                        <input type="text" class="form-control form-control-sm" v-model="novoItem.marca" id="marca" placeholder="Marca">
-                    </div>
-                    <div class="col">
-                        <!-- <label for="modelo">Modelo</label> -->
-                        <input type="text" class="form-control form-control-sm" v-model="novoItem.modelo" id="modelo" placeholder="Modelo" title="Modelo">
-                    </div>
-                    <div class="col input-group">
-                        <!-- <div class="input-group-prepend">
-                            <span class="input-group-text">Equipamento elétrico/eletrônico</span>
-                        </div> -->
-                        <input type="text" class="form-control form-control-sm" v-model="novoItem.numSerie" id="numSerie" placeholder="Nº de série (Equipamento elétrico/eletrônico)" title="Nº de série (Equipamento elétrico/eletrônico)">
-                    </div>
-                </div>
-
                 <br>
                 <button class="btn btn-primary" style="cursor: pointer;" v-on:click="adicionarItem()">Adicionar</button>
             </div>
@@ -301,11 +338,10 @@ if (!mysqli_set_charset($link, "utf8")) {
                     sel: {
                         nome: 'SEL - Secretaria Executiva de Licenciamento',
                         sigla: 'SEL',
-                        assessorias: [
+                        setores: [                            
+                            {sigla: 'Gabinete'},
                             {sigla: 'ASSEC'},
-                            {sigla: 'ATEL'}
-                        ],
-                        coordenadorias: [
+                            {sigla: 'ATEL'},                            
                             {
                                 sigla: 'RESID',
                                 divisoes: [
@@ -371,14 +407,13 @@ if (!mysqli_set_charset($link, "utf8")) {
                     smdu: {
                         nome: 'SMDU - Secretaria Municipal de Desenvolvimento Urbano',
                         sigla: 'SMDU',
-                        assessorias: [
+                        setores: [
+                            {sigla: 'Gabinete'},
                             {sigla: 'AJ'},
                             {sigla: 'AOC'},
                             {sigla: 'ASCOM'},
                             {sigla: 'ATIC'},
-                            {sigla: 'ATU'}
-                        ],
-                        coordenadorias: [
+                            {sigla: 'ATU'},
                             {
                                 sigla: 'CAF',
                                 divisoes: [
@@ -438,19 +473,28 @@ if (!mysqli_set_charset($link, "utf8")) {
                 'Cadeira para escritório operacional',
                 'Mesa retangular de vidro, com estrutura metálica'
             ],
+            fotoUrl: '',
             orgaos: [],
-            coordenadorias: [],
+            setores: [],
             divisoes: [],
-            assessorias: [],
             andares: [8,17,18,19,20,21,22],
             orgao: '',
-            coordenadoria: '',
+            setor: '',
             divisao: '',
-            assessoria: '',
             andar: '',
             sala: ''
         },
         methods: {
+            atualizaFoto: function(){
+                for(i in this.descritivos){
+                    // console.log("Descritivo: "+i+", texto: "+this.descritivos[i]);
+                    if(this.novoItem.discriminacao === this.descritivos[i]){
+                        let num = i++;
+                        let addZero = num < 10 ? "0" : "";
+                        this.fotoUrl = 'img/bens/'+addZero+i+'.jpg';
+                    }
+                }                
+            },
             /**
                 LIMPA NÚMEROS
             */
@@ -470,9 +514,8 @@ if (!mysqli_set_charset($link, "utf8")) {
                 this.novoItem.nomeServidor = this.usuario.nome;
                 this.novoItem.rf = this.usuario.rf;
                 this.novoItem.orgao = this.orgao;
-                this.novoItem.coordenadoria = this.coordenadoria;
+                this.novoItem.setor = this.setor;
                 this.novoItem.divisao = this.divisao;
-                this.novoItem.assessoria = this.assessoria;
                 this.novoItem.sala = this.sala;
                 this.novoItem.andar = this.andar;
                 this.itens.push(this.novoItem);
@@ -485,6 +528,14 @@ if (!mysqli_set_charset($link, "utf8")) {
             cadastrarBens: function () {
                 if(this.itens.length === 0){
                     window.alert("A lista está vazia! Adicione itens para cadastrar.");
+                    return;
+                }
+                if(!this.orgao){
+                    window.alert('Preencha o campo "Órgão"');
+                    return;
+                }
+                if(!this.setor){
+                    window.alert('Preencha o campo "Setor"');
                     return;
                 }
 
@@ -504,7 +555,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                             document.getElementById("chapa").focus();
                         }                        
                         else {
-                            window.alert("Falha ao caadastrar. Verifique os campos e tente novamente.\nSe o problema persistir, contate o desenvolvedor.");
+                            window.alert("Falha ao cadastrar. Verifique os campos e tente novamente.\nSe o problema persistir, contate o desenvolvedor.");
                             console.warn(this.response);
                         }
                     }
@@ -516,34 +567,24 @@ if (!mysqli_set_charset($link, "utf8")) {
         },
         watch: {
             orgao: function(){
-                this.coordenadorias = [];
-                this.coordenadoria = '';
+                this.setores = [];
+                this.setor = '';
                 if (this.orgao.length > 0){
-                    this.coordenadorias = this.prefeitura.orgaos[this.orgao.toLowerCase()].coordenadorias;
+                    this.setores = this.prefeitura.orgaos[this.orgao.toLowerCase()].setores;
                 }
-                this.assessorias = [];
-                this.assessoria = '';
-                if (this.orgao.length > 0)
-                    this.assessorias = this.prefeitura.orgaos[this.orgao.toLowerCase()].assessorias;
             },
-            coordenadoria: function(){
-                if(this.coordenadoria !== '')
-                    this.assessoria = '';
+            setor: function(){
                 this.divisoes = [];
                 this.divisao = '';
-                if (this.coordenadoria.length > 0){
-                    let allCoordenadorias = this.prefeitura.orgaos[this.orgao.toLowerCase()].coordenadorias;
-                    for (var i = 0; i < allCoordenadorias.length; i++) {
-                        if (allCoordenadorias[i].sigla === this.coordenadoria){
-                            this.divisoes = allCoordenadorias[i].divisoes;
+                if (this.setor.length > 0){
+                    let allSetores = this.prefeitura.orgaos[this.orgao.toLowerCase()].setores;
+                    for (var i = 0; i < allSetores.length; i++) {
+                        if (allSetores[i].sigla === this.setor){
+                            this.divisoes = allSetores[i].divisoes;
                             return;
                         }
                     }
                 }
-            },
-            assessoria: function(){
-                if(this.assessoria !== '')
-                    this.coordenadoria = '';
             }
         }
     });
