@@ -1,0 +1,113 @@
+<?php
+// Inicia a sessão
+session_start();
+
+// Verifica se o usuário já está logado. Se sim, redireciona à página do Painel
+if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
+    header("location: formulario.php");
+    exit;
+}
+// Inclui arquivo de configuração
+// require_once "config.php";
+
+// Define as variáveis e as inicializa vazias
+$usuario = $senha = "";
+$username_err = $password_err = "";
+ 
+// Processa os dados do formulário ao submeter
+if($_SERVER["REQUEST_METHOD"] == "POST"){ 
+    // Verifica se o e-mail foi preenchido
+    if(empty(trim($_POST["usuario"]))){
+        $username_err = "Digite o login.";
+    } else{
+        $usuario = trim($_POST["usuario"]);
+    }
+    
+    // Verifica se a senha foi preenchida
+    if(empty(trim($_POST["senha"]))){
+        $password_err = "Por favor, digite a senha.";
+    } else{
+        $senha = trim($_POST["senha"]);
+    }
+
+    // Valida login
+    // SCRIPT LDAP
+    $server = "ldap://10.10.65.242";
+    $ID_Usuario=mb_strtolower($_POST['usuario'],'UTF-8');
+    $user = $_POST['usuario']."@rede.sp";
+    $psw = $_POST['senha'];
+    $inicial = $_POST['usuario'];
+    $dn = "DC=rede,DC=sp";
+
+    $search = "samaccountname=".$_POST['usuario'];  
+
+    $ds=ldap_connect($server);
+    $r=ldap_bind($ds, $user , $psw); 
+    $sr=ldap_search($ds, $dn, $search);
+    $data = ldap_get_entries($ds, $sr); 
+
+    // session_start();
+    if($data["count"]==0) {
+        unset ($_SESSION['IDUsuario']);
+        unset ($_SESSION['nomeUsuario']);
+        unset ($_SESSION['emailUsuario']);
+        header('location:login.php?m=erro');
+    }
+    else {
+        for ($i=0; $i<$data["count"]; $i++) {
+            $nomefr = utf8_encode($data[$i]["givenname"][0]) . " " . utf8_encode($data[$i]["sn"][0]);
+            $emailfr = mb_strtolower($data[$i]["mail"][0]);
+
+            $_SESSION['usrData'] = $data[$i];
+            $_SESSION['IDUsuario'] = $inicial;
+            $_SESSION['nomeUsuario'] = $nomefr;
+            $_SESSION['emailUsuario'] = $emailfr;
+            $_SESSION["loggedin"] = true;
+            header('location:formulario.php');
+        }
+    }
+    // SCRIPT LDAP
+}
+?>
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Bens Patrimoniais</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css">
+    <style type="text/css">
+        body{ font: 14px sans-serif; }
+        .wrapper{ width: 350px; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="wrapper" style="margin: 0 auto;">
+        <div style="width: 200px;
+            clip-path: inset(0px 0px 40px 0px);
+            margin: 0 auto -60px;">
+            <img src="img/logo_smdu.png" alt="Cidade de São Paulo" width="200">
+        </div>
+        <center><h3><strong>SMDU / SEL</strong></h3></center>
+        <br>
+        <h2>Cadastro de Bens Patrimoniais</h2>
+        <p>Digite seu login e senha da rede</p>
+        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+            <div class="form-group <?php echo (!empty($username_err)) ? 'has-error' : ''; ?>">
+                <label>Login</label>
+                <input type="text" name="usuario" placeholder="" class="form-control" value="<?php echo $usuario; ?>">
+                <span class="help-block"><?php echo $username_err; ?></span>
+            </div>    
+            <div class="form-group <?php echo (!empty($password_err)) ? 'has-error' : ''; ?>">
+                <label>Senha</label>
+                <input type="password" name="senha" autocomplete="current-password" class="form-control">
+                <span class="help-block"><?php echo $password_err; ?></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" class="btn btn-primary" value="Entrar">                
+            </div>            
+        </form>        
+    </div>
+</body>
+</html>
+
