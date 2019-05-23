@@ -86,59 +86,80 @@ if (!mysqli_set_charset($link, "utf8")) {
                             >
                         </div>
                         <div class="col">
-                            <!-- <input 
-                            class="form-control form-control-sm"
-                            v-model="usuario.orgao"
-                            placeholder="Órgão"
-                            type="combo" 
-                            > -->
                             <select
                             class="form-control form-control-sm"
                             name="orgao"
                             id="orgao"
-                            v-model="usuario.orgao"
+                            v-model="orgao"
                             placeholder="Órgão"
-                            required 
                             >
-                                <option value="undefined" selected disabled>Órgão</option>
-                                <option v-for="orgao in prefeitura.orgaos" :value="orgao.sigla">{{orgao.sigla}}</option>
+                                <option value="" selected disabled>Órgão</option>
+                                <option v-for="orgao in prefeitura.orgaos">{{orgao.sigla}}</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            <select
+                            class="form-control form-control-sm"
+                            name="coordenadoria"
+                            id="coordenadoria"
+                            v-model="coordenadoria"
+                            placeholder="Coordenadoria"
+                            :disabled="!orgao"
+                            >
+                                <option value="" selected>Coordenadoria</option>
+                                <option v-for="coordenadoria in coordenadorias">{{coordenadoria.sigla}}</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            <select
+                            class="form-control form-control-sm"
+                            name="divisao"
+                            id="divisao"
+                            v-model="divisao"
+                            placeholder="Divisão"
+                            :disabled="!coordenadoria"
+                            >
+                                <option value="" selected>Divisão</option>
+                                <option v-for="divisao in divisoes">{{divisao.sigla}}</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            <select
+                            class="form-control form-control-sm"
+                            name="assessoria"
+                            id="assessoria"
+                            v-model="assessoria"
+                            placeholder="Assessoria"
+                            :disabled="!orgao"
+                            >
+                                <option value="" selected>Assessoria</option>
+                                <option v-for="assessoria in assessorias">{{assessoria.sigla}}</option>
                             </select>
                         </div>
                         <div class="col">
                             <input 
                             class="form-control form-control-sm"
-                            v-model="usuario.coordenadoria"
-                            placeholder="Coordenadoria"
-                            >
-                        </div>
-                        <div class="col">
-                            <input 
-                            class="form-control form-control-sm"
-                            v-model="usuario.divisao"
-                            placeholder="Divisão"
-                            >
-                        </div>
-                        <div class="col">
-                            <input 
-                            class="form-control form-control-sm"
-                            v-model="usuario.assessoria"
-                            placeholder="Assessoria"
-                            >
-                        </div>
-                        <div class="col">
-                            <input 
-                            class="form-control form-control-sm"
-                            v-model="usuario.sala"
+                            v-model="sala"
                             placeholder="Sala"
                             >
                         </div>
                         <div class="col">
-                            <input 
+                            <!-- <input 
                             class="form-control form-control-sm"
                             v-model="usuario.andar"
                             type="number" 
                             placeholder="Andar"
+                            > -->
+                            <select
+                            class="form-control form-control-sm"
+                            name="andar"
+                            id="andar"
+                            v-model="andar"
+                            placeholder="Andar"
                             >
+                                <option value="" selected>Andar</option>
+                                <option v-for="andar in andares">{{andar}}</option>
+                            </select>
                         </div>
                     </div>
                 </form>
@@ -274,13 +295,78 @@ if (!mysqli_set_charset($link, "utf8")) {
             usuario: {
                 nome: "<?php echo $_SESSION['nomeUsuario']; ?>",
                 rf: "<?php echo $_SESSION['IDUsuario']; ?>"
-                // secretaria: "<?php echo $_SESSION['usrData']['physicaldeliveryofficename'][0]; ?>"
             },
             prefeitura: {
                 orgaos: {
                     sel: {
                         nome: 'SEL - Secretaria Executiva de Licenciamento',
-                        sigla: 'SEL'
+                        sigla: 'SEL',
+                        assessorias: [
+                            {sigla: 'ASSEC'},
+                            {sigla: 'ATEL'}
+                        ],
+                        coordenadorias: [
+                            {
+                                sigla: 'RESID',
+                                divisoes: [
+                                    {sigla: 'DRPM'},
+                                    {sigla: 'DRGP'}
+                                ]
+                            },
+                            {
+                                sigla: 'COMIN',
+                                divisoes: [
+                                    {sigla: 'DCIMP'},
+                                    {sigla: 'DCIGP'}
+                                ]
+                            },
+                            {
+                                sigla: 'SERVIN',
+                                divisoes: [
+                                    {sigla: 'DSIMP'},
+                                    {sigla: 'DSIGP'}
+                                ]
+                            },
+                            {
+                                sigla: 'PARHIS',
+                                divisoes: [
+                                    {sigla: 'DHIS'},
+                                    {sigla: 'DHMP'},
+                                    {sigla: 'DPS'},
+                                ]
+                            },
+                            {
+                                sigla: 'SEGUR',
+                                divisoes: [
+                                    {sigla: 'DAE'},
+                                    {sigla: 'DACESS'},
+                                    {sigla: 'DLR'},
+                                    {sigla: 'DMIS'}
+                                ]
+                            },
+                            {
+                                sigla: 'CASE',
+                                divisoes: [
+                                    {sigla: 'STEL'},
+                                    {sigla: 'DCAD'},
+                                    {sigla: 'DLE'},
+                                    {sigla: 'DDU'}
+                                ]
+                            },
+                            {
+                                sigla: 'CGPATRI',
+                                divisoes: [
+                                    {sigla: 'Destinação'},
+                                    {sigla: 'Informação'},
+                                    {sigla: 'Engenharia'},
+                                    {sigla: 'Avaliação'}
+                                ]
+                            },
+                            {
+                                sigla: 'GTEC',
+                                divisoes: []
+                            }
+                        ]
                     },
                     smdu: {
                         nome: 'SMDU - Secretaria Municipal de Desenvolvimento Urbano',
@@ -347,7 +433,22 @@ if (!mysqli_set_charset($link, "utf8")) {
                         ]
                     }
                 }
-            }
+            },
+            descritivos: [
+                'Cadeira para escritório operacional',
+                'Mesa retangular de vidro, com estrutura metálica'
+            ],
+            orgaos: [],
+            coordenadorias: [],
+            divisoes: [],
+            assessorias: [],
+            andares: [8,17,18,19,20,21,22],
+            orgao: '',
+            coordenadoria: '',
+            divisao: '',
+            assessoria: '',
+            andar: '',
+            sala: ''
         },
         methods: {
             /**
@@ -368,12 +469,12 @@ if (!mysqli_set_charset($link, "utf8")) {
                     this.novoItem.chapaOutraUnidade = this.apenasNumeros(this.novoItem.chapaOutraUnidade);
                 this.novoItem.nomeServidor = this.usuario.nome;
                 this.novoItem.rf = this.usuario.rf;
-                this.novoItem.orgao = this.usuario.orgao;
-                this.novoItem.coordenadoria = this.usuario.coordenadoria;
-                this.novoItem.divisao = this.usuario.divisao;
-                this.novoItem.assessoria = this.usuario.assessoria;
-                this.novoItem.sala = this.usuario.sala;
-                this.novoItem.andar = this.usuario.andar;
+                this.novoItem.orgao = this.orgao;
+                this.novoItem.coordenadoria = this.coordenadoria;
+                this.novoItem.divisao = this.divisao;
+                this.novoItem.assessoria = this.assessoria;
+                this.novoItem.sala = this.sala;
+                this.novoItem.andar = this.andar;
                 this.itens.push(this.novoItem);
                 this.novoItem = {};                
                 document.getElementById("chapa").focus();
@@ -411,6 +512,38 @@ if (!mysqli_set_charset($link, "utf8")) {
                 xhttp.open("POST", "cadastrar.php", true);
                 xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
                 xhttp.send("insertList="+listaDeBens);
+            }
+        },
+        watch: {
+            orgao: function(){
+                this.coordenadorias = [];
+                this.coordenadoria = '';
+                if (this.orgao.length > 0){
+                    this.coordenadorias = this.prefeitura.orgaos[this.orgao.toLowerCase()].coordenadorias;
+                }
+                this.assessorias = [];
+                this.assessoria = '';
+                if (this.orgao.length > 0)
+                    this.assessorias = this.prefeitura.orgaos[this.orgao.toLowerCase()].assessorias;
+            },
+            coordenadoria: function(){
+                if(this.coordenadoria !== '')
+                    this.assessoria = '';
+                this.divisoes = [];
+                this.divisao = '';
+                if (this.coordenadoria.length > 0){
+                    let allCoordenadorias = this.prefeitura.orgaos[this.orgao.toLowerCase()].coordenadorias;
+                    for (var i = 0; i < allCoordenadorias.length; i++) {
+                        if (allCoordenadorias[i].sigla === this.coordenadoria){
+                            this.divisoes = allCoordenadorias[i].divisoes;
+                            return;
+                        }
+                    }
+                }
+            },
+            assessoria: function(){
+                if(this.assessoria !== '')
+                    this.coordenadoria = '';
             }
         }
     });
