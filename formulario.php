@@ -324,10 +324,32 @@ if (!mysqli_set_charset($link, "utf8")) {
 // echo "<script>const usrData = JSON.parse('".json_encode($_SESSION["usrData"])."');</script>" ?>
 <!-- Vue.js -->
 <script>    
+    const BemPatrimonial = class {
+        constructor(){
+            this.nomeServidor = '';
+            this.rf = '';
+            this.orgao = '';
+            this.setor = '';
+            this.divisao = '';
+            this.sala = '';
+            this.andar = '';
+            this.chapa = '';
+            this.chapaOutraUnidade = '';
+            this.nomeOutraUnidade = '';
+            this.discriminacao = '';
+            this.cor = '';
+            this.comprimento = '';
+            this.profundidade = '';
+            this.altura = '';
+            this.marca = '';
+            this.modelo = '';
+            this.numSerie = '';
+        }
+    };
     var app = new Vue({
         el: '#app',
         data: {
-            novoItem: {},
+            novoItem: new BemPatrimonial,
             itens: [],
             usuario: {
                 nome: "<?php echo $_SESSION['nomeUsuario']; ?>",
@@ -506,11 +528,8 @@ if (!mysqli_set_charset($link, "utf8")) {
                 ADIÇÃO DE ITENS À LISTA
             */
             adicionarItem: function (){
-                // Limpa números de chapa
-                if(this.novoItem.chapa)
-                    this.novoItem.chapa = this.apenasNumeros(this.novoItem.chapa);
-                if(this.novoItem.chapaOutraUnidade)
-                    this.novoItem.chapaOutraUnidade = this.apenasNumeros(this.novoItem.chapaOutraUnidade);
+                console.log(this.novoItem);
+                // Insere dados do servidor
                 this.novoItem.nomeServidor = this.usuario.nome;
                 this.novoItem.rf = this.usuario.rf;
                 this.novoItem.orgao = this.orgao;
@@ -518,8 +537,17 @@ if (!mysqli_set_charset($link, "utf8")) {
                 this.novoItem.divisao = this.divisao;
                 this.novoItem.sala = this.sala;
                 this.novoItem.andar = this.andar;
+
+                // Limpa números de chapa
+                if(this.novoItem.chapa)
+                    this.novoItem.chapa = this.apenasNumeros(this.novoItem.chapa);
+                if(this.novoItem.chapaOutraUnidade)
+                    this.novoItem.chapaOutraUnidade = this.apenasNumeros(this.novoItem.chapaOutraUnidade);
+
+
+                // Insere item à lista de cadastro
                 this.itens.push(this.novoItem);
-                this.novoItem = {};                
+                this.novoItem = new BemPatrimonial;
                 document.getElementById("chapa").focus();
             },
             /** 
@@ -549,7 +577,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                             // Cadastro realizado com sucesso. Atualiza lista
                             let concordancia = parseInt(this.response) > 1 ? " itens cadastrados" : " item cadastrado";
                             window.alert(parseInt(this.response)+concordancia+" com sucesso!");
-                            app.novoItem = {};
+                            app.novoItem = new BemPatrimonial;
                             app.itens = [];
                             // console.log();
                             document.getElementById("chapa").focus();
@@ -563,6 +591,11 @@ if (!mysqli_set_charset($link, "utf8")) {
                 xhttp.open("POST", "cadastrar.php", true);
                 xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
                 xhttp.send("insertList="+listaDeBens);
+            }
+        },
+        computed: {
+            criarNovoItem: function(){
+                this.novoItem = this.itemModel;
             }
         },
         watch: {

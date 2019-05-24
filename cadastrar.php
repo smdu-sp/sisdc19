@@ -6,6 +6,41 @@ $cadastrados = 0;
 $erros = [];
 
 if($_SERVER["REQUEST_METHOD"] == "POST") {
+	$listaDeBens = json_decode($_POST['insertList']);
+	$sql = "INSERT INTO bens_patrimoniais (";
+	// Nomeia colunas, e quantidade de interrogações depois remove última vírgula
+	$colunas = "";
+	$valuesQtde = "";
+	$bindQtde = "";
+	$valores = [];
+
+	foreach ($listaDeBens[0] as $key => $value) {
+		$colunas .= $key.',';
+		$valuesQtde .= '?,';
+		$bindQtde .= "s";
+		array_push($valores, $value);
+	}
+
+	$colunas = rtrim($colunas,',');
+	$valuesQtde = rtrim($valuesQtde,',');
+
+	$sql .= $colunas.') VALUES ('.$valuesQtde.');';
+	if($stmt = mysqli_prepare($link, $sql)){
+		mysqli_stmt_bind_param($stmt, $bindQtde, $valores);
+		foreach ($listaDeBens as $key => $item) {
+			if(mysqli_stmt_execute($stmt)){
+				$cadastrados += 1;
+			}
+			else{
+				array_push($erros, json_encode($item));
+			}
+		}
+		printf("Error: %s.\n", $stmt->error);
+	}
+	echo mysqli_error($link);
+
+	echo count($erros) > 0 ? json_encode($erros) : $cadastrados;
+	return;
 	// Prepara comando
 	$sql = "INSERT INTO bens_patrimoniais (
 		nomeServidor,
