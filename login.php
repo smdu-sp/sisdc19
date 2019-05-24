@@ -51,6 +51,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         unset ($_SESSION['IDUsuario']);
         unset ($_SESSION['nomeUsuario']);
         unset ($_SESSION['emailUsuario']);
+        unset ($_SESSION['setorFiscal']);
+        unset ($_SESSION['divisaoFiscal']);
         header('location:login.php?m=erro');
     }
     else {
@@ -62,6 +64,27 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $_SESSION['IDUsuario'] = $inicial;
             $_SESSION['nomeUsuario'] = $nomefr;
             $_SESSION['emailUsuario'] = $emailfr;
+            $_SESSION['setorFiscal'] = '';
+            $_SESSION['divisaoFiscal'] = '';
+            
+            // Verifica se usuário está cadastrado na lista de fiscais
+            require_once "config.php";
+            if (!mysqli_set_charset($link, "utf8")) {
+                printf("Erro ao definir charset: %s<br>", mysqli_error($link));
+                exit();
+            }
+            $sqlQuery = "SELECT * FROM fiscais WHERE `rf`='".strtolower($inicial)."';";
+            mysqli_query($link, $sqlQuery);
+            $retornoQuery = $link->query($sqlQuery);
+            $servidor = [];
+            if($retornoQuery->num_rows > 0){
+                while ($row = $retornoQuery->fetch_assoc()) {
+                    $_SESSION['setorFiscal'] = $row['setor'];
+                    $_SESSION['divisaoFiscal'] = $row['divisao'];     
+                }
+            }
+            $link->close();
+            
             $_SESSION["loggedin"] = true;
             header('location:formulario.php');
         }

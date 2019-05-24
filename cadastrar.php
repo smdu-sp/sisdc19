@@ -88,8 +88,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 
 		echo count($erros) > 0 ? json_encode($erros) : $cadastrados;
 	}
-	
+	*/
 }
  ?>
-*/
- 

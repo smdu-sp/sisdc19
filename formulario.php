@@ -57,7 +57,11 @@ if (!mysqli_set_charset($link, "utf8")) {
             <h1>Cadastro de Bens Patrimoniais</h1>
         </div>
         <div class="col-3">
-            <button class="btn btn-danger float-right" v-on:click="location.href='logout.php'">Sair do sistema</button>
+            <button class="btn btn-primary float-right" v-on:click="location.href='conferencia.php'">
+                Conferência de bens
+            </button>
+            <br><br>
+            <button class="btn btn-danger btn-sm float-right" v-on:click="location.href='logout.php'">Sair do sistema</button>
         </div>
     </div>
     <br>
@@ -184,17 +188,13 @@ if (!mysqli_set_charset($link, "utf8")) {
                                     class="form-control form-control-sm"
                                     autocomplete="off"
                                     >
-                                <!-- </div> -->
-                                <!-- <div class="col"> -->
-                                    <!-- <label for="nomeOutraUnidade">Nome da unidade</label> -->
-                                    <input v-model="novoItem.nomeOutraUnidade" id="nomeOutraUnidade" aria-label="Nome da unidade" placeholder="Nome da unidade" class="form-control form-control-sm">
-                                <!-- </div> -->
+                                <!-- </div> -->                                
+                                    <input v-model="novoItem.nomeOutraUnidade" id="nomeOutraUnidade" aria-label="Nome da unidade" placeholder="Nome da unidade" class="form-control form-control-sm">                                
                             </div>
                         </div>
                         <br>
                         <!-- DESCRIÇÃO -->
                         <!-- <label for="discriminacao">Discriminação do bem</label> -->
-                        
                         <!-- MARCA/MODELO -->
                         <div class="form-row">                    
                             <div class="col">
@@ -207,10 +207,19 @@ if (!mysqli_set_charset($link, "utf8")) {
                                 placeholder="Discriminação do bem"
                                 @change="atualizaFoto()"
                                 >
-                                    <option value="undefined" selected disabled>Discriminação do bem</option>
+                                    <option value="" selected disabled>Discriminação do bem</option>
                                     <option v-for="descritivo in descritivos">{{descritivo}}</option>
+                                    <option value="Não listado">Discriminação não listada...</option>
                                 </select>
-                            </div>                            
+                            </div>
+                            <div class="col" v-if="novoItem.discriminacao === 'Não listado'">
+                                <input class="form-control form-control-sm" v-model="novoItem.descricaoPersonalizada" placeholder="Escreva aqui a discriminação...">
+                            </div>
+                            <div class="col col-2 input-group input-group-sm">
+                                <!-- <div class="input-group-prepend"><span class="input-group-text">Servível</span></div> -->
+                                <input type="checkbox" class="form-control form-control-sm" id="checkboxServivel" v-model="novoItem.servivel">
+                                <label for="checkboxServivel" :class="'badge form-check-label '+(novoItem.servivel ? 'badge-success' : 'badge-danger')" style="font-size: 1em; margin: auto;">{{ novoItem.servivel ? 'Servível' : 'Inservível' }}</label>
+                            </div>
                         </div>
                         <br>
                         <div class="form-row">
@@ -261,7 +270,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                         </div>
                     </div>
                     <div class="col-3">
-                        <img :src="fotoUrl" :alt="novoItem.discriminacao" class="mw-100">
+                        <img v-if="fotoUrl" :src="fotoUrl" :alt="novoItem.discriminacao" class="mw-100">
                     </div>
                 </div>
                 <br>
@@ -276,20 +285,22 @@ if (!mysqli_set_charset($link, "utf8")) {
             <h2>Bens adicionados</h2>
             <table class="table table-striped">
                 <tr>
+                    <th>Discriminação do bem</th>
                     <th>Nº da chapa</th>
                     <th>Nº chapa outra unidade</th>
-                    <th>Nome da unidade</th>
-                    <th>Discriminação do bem</th>
+                    <th>Nome da unidade</th>                    
+                    <th>Servível</th>
                     <th>Marca</th>
                     <th>Modelo</th>
                     <th>Nº de série</th>
                     <th></th>
                 </tr>
                 <tr v-for="item in itens">
+                    <td>{{(item.discriminacao === 'Não listado' ? item.descricaoPersonalizada : item.discriminacao)+' '+item.cor+(item.altura && item.profundidade && item.comprimento ? ', '+item.comprimento+'x'+item.profundidade+'x'+item.altura+'cm' : '')}}</td>
                     <td>{{item.chapa}}</td>
                     <td>{{item.chapaOutraUnidade}}</td>
-                    <td>{{item.nomeOutraUnidade}}</td>
-                    <td>{{item.discriminacao+' '+item.cor+', '+item.comprimento+'x'+item.profundidade+'x'+item.altura+'cm'}}</td>
+                    <td>{{item.nomeOutraUnidade}}</td>                    
+                    <td>{{item.servivel ? "Sim" : "Não"}}</td>
                     <td>{{item.marca}}</td>
                     <td>{{item.modelo}}</td>
                     <td>{{item.numSerie}}</td>
@@ -337,6 +348,8 @@ if (!mysqli_set_charset($link, "utf8")) {
             this.chapaOutraUnidade = '';
             this.nomeOutraUnidade = '';
             this.discriminacao = '';
+            this.descricaoPersonalizada = '';
+            this.servivel = true;
             this.cor = '';
             this.comprimento = '';
             this.profundidade = '';
@@ -492,8 +505,59 @@ if (!mysqli_set_charset($link, "utf8")) {
                 }
             },
             descritivos: [
-                'Cadeira para escritório operacional',
-                'Mesa retangular de vidro, com estrutura metálica'
+                '01 - Sofá de 3 lugares, em couro sintético',
+                '02 - Rack para ti',
+                '03 - Quadro de cortiça',
+                '04 - Mesa "L", com uma das extremidades arredondada, pés em estrutura metálica',
+                '05 - Mesa retangular, pés em estrutura metálica com rodas',
+                '06 - Estação de trabalho, pés em estrutura metálica',
+                '07 - Mesa de trabalho, pés em estrutura metálica',
+                '08 - Mesa de reunião, pés em estrutura metálica',
+                '09 - Mesa em L “60°”, pés em estrutura metálica',
+                '10 - Mesa de impressora',
+                '11 - Mapoteca vertical, estrutura em aço',
+                '12 - Mapoteca horizontal',
+                '13 - Longarina com assentos estrutura dos pés em aço',
+                '14 - Gaveteiro com rodas, puxadores preto, 03 gavetas',
+                '15 - Frigobar',
+                '16 - Gaveteiro em estrutura metálica, com rodas, 02 gavetas',
+                '17 - Estante em aço, prateleiras',
+                '18 - Estante de aço, prateleiras',
+                '19 - Estação de trabalho pés em estrutura metálica',
+                '20 - Estação de trabalho, pés em estrutura metálica',
+                '21 - Estação de trabalho, pés em estrutura metálica',
+                '22 - Estação de trabalho, pés em estrutura metálica',
+                '23 - Estação de trabalho, pés em madeira',
+                '24 - Estação de trabalho, pés em madeira',
+                '25 - Carrinho para transporte, 4 rodas, estrutura em arame soldado',
+                '26 - Cadeira giratória, sem rodas, apoio de braço acoplado ao assento e encosto',
+                '27 - Cadeira fixa sem apoio de braços',
+                '28 - Cadeira giratória com apoio de braços',
+                '29 - Cadeira fixa, encosto e pés de metal',
+                '30 - Cadeira escolar adulto',
+                '31 - Cadeira fixa sem apoio de braços',
+                '32 - Cadeira giratória com apoio de braços',
+                '33 - Cadeira giratória com apoio de braços',
+                '34 - Cadeira fixa sem apoio de braços',
+                '35 - Cadeira fixa com apoio de braços',
+                '36 - Cadeira fixa com apoio de braços',
+                '37 - Cadeira giratória com apoio de braços',
+                '38 - Cadeira giratória sem apoio de braço, assento alto',
+                '39 - Armário',
+                '40 - Arquivo de aço com gavetas',
+                '41 - Arquivos deslizante com carros',
+                '42 - Mesa em L 90°, pés em madeira',
+                '43 - Armário',
+                '44 - Ar condicionado portátil',
+                '45 - Ar condicionado central',
+                '46 - Aparelho split para ar condicionado',
+                '47 - Mesa de luz, v',
+                '48 - Armário de aço',
+                '49 - Armário com porta de vidro',
+                '50 - Mesa com tampo de vidro',
+                '51 - Mesa de apoio',
+                '52 - Mesa em madeira maciça',
+                '53 - Forno de micro-ondas'
             ],
             fotoUrl: '',
             orgaos: [],
@@ -508,14 +572,18 @@ if (!mysqli_set_charset($link, "utf8")) {
         },
         methods: {
             atualizaFoto: function(){
+                if(this.novoItem.discriminacao === 'Não listado'){
+                    this.fotoUrl = '';
+                    return;
+                }
                 for(i in this.descritivos){
                     // console.log("Descritivo: "+i+", texto: "+this.descritivos[i]);
                     if(this.novoItem.discriminacao === this.descritivos[i]){
                         let num = i++;
-                        let addZero = num < 10 ? "0" : "";
+                        let addZero = num < 9 ? "0" : "";
                         this.fotoUrl = 'img/bens/'+addZero+i+'.jpg';
                     }
-                }                
+                }
             },
             /**
                 LIMPA NÚMEROS
@@ -528,7 +596,21 @@ if (!mysqli_set_charset($link, "utf8")) {
                 ADIÇÃO DE ITENS À LISTA
             */
             adicionarItem: function (){
-                console.log(this.novoItem);
+                // Verifica campos obrigatórios
+                let pendentes = [];
+                if(!this.novoItem.discriminacao)
+                    pendentes.push("discriminação");
+                if(!this.novoItem.cor)
+                    pendentes.push("cor");
+                
+                if(pendentes.length > 0){
+                    let erro = "Por favor, preencha os seguintes campos:";
+                    for(item in pendentes)
+                        erro+="\n"+pendentes[item];
+                    window.alert(erro);
+                    return;
+                }
+
                 // Insere dados do servidor
                 this.novoItem.nomeServidor = this.usuario.nome;
                 this.novoItem.rf = this.usuario.rf;
@@ -548,6 +630,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                 // Insere item à lista de cadastro
                 this.itens.push(this.novoItem);
                 this.novoItem = new BemPatrimonial;
+                this.fotoUrl = '';
                 document.getElementById("chapa").focus();
             },
             /** 
@@ -579,7 +662,6 @@ if (!mysqli_set_charset($link, "utf8")) {
                             window.alert(parseInt(this.response)+concordancia+" com sucesso!");
                             app.novoItem = new BemPatrimonial;
                             app.itens = [];
-                            // console.log();
                             document.getElementById("chapa").focus();
                         }                        
                         else {
