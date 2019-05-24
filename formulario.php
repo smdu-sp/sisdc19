@@ -289,7 +289,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                     <td>{{item.chapa}}</td>
                     <td>{{item.chapaOutraUnidade}}</td>
                     <td>{{item.nomeOutraUnidade}}</td>
-                    <td>{{item.discriminacao}}</td>
+                    <td>{{item.discriminacao+' '+item.cor+', '+item.comprimento+'x'+item.profundidade+'x'+item.altura+'cm'}}</td>
                     <td>{{item.marca}}</td>
                     <td>{{item.modelo}}</td>
                     <td>{{item.numSerie}}</td>

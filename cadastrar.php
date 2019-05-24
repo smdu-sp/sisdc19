@@ -7,41 +7,36 @@ $erros = [];
 
 if($_SERVER["REQUEST_METHOD"] == "POST") {
 	$listaDeBens = json_decode($_POST['insertList']);
-	$sql = "INSERT INTO bens_patrimoniais (";
+	$preSql = "INSERT INTO bens_patrimoniais (";
 	// Nomeia colunas, e quantidade de interrogações depois remove última vírgula
 	$colunas = "";
-	$valuesQtde = "";
-	$bindQtde = "";
-	$valores = [];
-
-	foreach ($listaDeBens[0] as $key => $value) {
-		$colunas .= $key.',';
-		$valuesQtde .= '?,';
-		$bindQtde .= "s";
-		array_push($valores, $value);
+	
+	foreach ($listaDeBens[0] as $key => $item) {
+		$colunas .= $key.',';		
 	}
-
 	$colunas = rtrim($colunas,',');
-	$valuesQtde = rtrim($valuesQtde,',');
+	$preSql .= $colunas.') VALUES (';
 
-	$sql .= $colunas.') VALUES ('.$valuesQtde.');';
-	if($stmt = mysqli_prepare($link, $sql)){
-		mysqli_stmt_bind_param($stmt, $bindQtde, $valores);
-		foreach ($listaDeBens as $key => $item) {
-			if(mysqli_stmt_execute($stmt)){
-				$cadastrados += 1;
-			}
-			else{
-				array_push($erros, json_encode($item));
-			}
+	foreach ($listaDeBens as $itemKey => $item) {
+		$valores = "";
+		foreach ($item as $key => $value) {
+			$valores .= "'".utf8_decode($value)."',";
 		}
-		printf("Error: %s.\n", $stmt->error);
-	}
-	echo mysqli_error($link);
+		$valores = rtrim($valores,',');
+		$sql = $preSql.$valores.');';
+		if(!mysqli_query($link, $sql)){
+			printf("Errormessage: %s\n", mysqli_error($link));
+		}
+		else
+			$cadastrados+=1;
 
-	echo count($erros) > 0 ? json_encode($erros) : $cadastrados;
+	}
+	
+	echo $cadastrados;
 	return;
+	// TODO: Quando houver definição de todas as colunas em definitivo, alternar para script com mysqli_prepare
 	// Prepara comando
+	/*
 	$sql = "INSERT INTO bens_patrimoniais (
 		nomeServidor,
 		rf,
@@ -96,3 +91,5 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 	
 }
  ?>
+*/
+ 
