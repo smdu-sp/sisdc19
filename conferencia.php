@@ -3,6 +3,10 @@
 session_start();
 
 // Verifica se usuário está logado
+if($_SESSION["setorFiscal"] == ''){
+    header('location: formulario.php');
+    exit;
+}
 
 if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     header("location: login.php");
@@ -59,18 +63,18 @@ if (!mysqli_set_charset($link, "utf8")) {
                 <h1>Conferência de Bens Patrimoniais</h1>
             </div>
             <div class="col-3">
-                <button class="btn btn-primary float-right" v-on:click="location.href='formulario.php'">
+                <button class="btn btn-danger btn-sm float-right" @click="location.href='logout.php'">Sair do sistema</button>
+                <br><br>
+                <button class="btn btn-primary float-right" @click="location.href='formulario.php'">
                     Cadastro de bens
                 </button>
-                <br><br>
-                <button class="btn btn-danger btn-sm float-right" v-on:click="location.href='logout.php'">Sair do sistema</button>
             </div>
         </div>
     </div>
     <br>
     <br>
     <!-- BENS ADICIONADOS -->
-    <div id="div-tabela" class="table-responsive">
+    <div id="div-tabela" class="table-responsive" style="resize: both; height: 400px;">
         <h2>Bens registrados em {{fiscal.setor + (fiscal.divisao ? ('/'+fiscal.divisao) : '')}}</h2>
         <table class="table table-striped">
             <tr>
@@ -120,7 +124,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                 <!-- BOTÃO PARA CONFIRMAR ITEM -->
                 <td>
                     <center>                        
-                        <button type="button" class="btn btn-success btn-sm" v-on:click="conferir(item)">
+                        <button type="button" class="btn btn-success btn-sm" @click="conferir(item)">
                             <span :class="item.conferido ? 'oi oi-loop-circular' : 'oi oi-check'"></span>
                         </button>
                     </center>
@@ -128,7 +132,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                 <!-- BOTÃO PARA REMOVER ITEM -->
                 <td>
                     <center>
-                        <button type="button" class="btn btn-danger btn-sm" v-on:click="confirm('***************ATENÇÃO!***************\n\nTem certeza que deseja remover o item do cadastro? (esta ação não pode ser desfeita!)') ? itens.splice(itens.indexOf(remover(item)), 1) : false">
+                        <button type="button" class="btn btn-danger btn-sm" @click="confirm('***************ATENÇÃO!***************\n\nTem certeza que deseja remover o item do cadastro? (esta ação não pode ser desfeita!)') ? itens.splice(itens.indexOf(remover(item)), 1) : false">
                             <span class="oi oi-x"></span>
                         </button>
                     </center>
@@ -138,7 +142,8 @@ if (!mysqli_set_charset($link, "utf8")) {
     </div>
     <br>
     <center>
-        <button class="btn btn-lg btn-info col-5" v-on:click="obterLista()"><span class="oi oi-reload"></span> Atualizar Lista</button>
+        <button class="btn btn-lg btn-info col-5" @click="obterLista()"><span class="oi oi-reload"></span> Atualizar Lista</button>
+        <button class="btn btn-lg btn-warning col-3" @click="exportarCSV()" title="Exportar arquivo CSV (Excel)"><span class="oi oi-spreadsheet"></span> Exportar planilha</button>
     </center>
 </div>
     
@@ -162,32 +167,9 @@ if (!mysqli_set_charset($link, "utf8")) {
         setor: "<?php echo $_SESSION['setorFiscal']; ?>",
         divisao: "<?php echo $_SESSION['divisaoFiscal']; ?>"
     }
-    const BemPatrimonial = class {
-        constructor(){
-            this.nomeServidor = '';
-            this.rf = '';
-            this.orgao = '';
-            this.setor = '';
-            this.divisao = '';
-            this.sala = '';
-            this.andar = '';
-            this.chapa = '';
-            this.chapaOutraUnidade = '';
-            this.nomeOutraUnidade = '';
-            this.discriminacao = '';
-            this.cor = '';
-            this.comprimento = '';
-            this.profundidade = '';
-            this.altura = '';
-            this.marca = '';
-            this.modelo = '';
-            this.numSerie = '';
-        }
-    };
     var app = new Vue({
         el: '#app',
         data: {
-            novoItem: new BemPatrimonial,
             itens: [],
             usuario: {
                 nome: "<?php echo $_SESSION['nomeUsuario']; ?>",
@@ -267,6 +249,12 @@ if (!mysqli_set_charset($link, "utf8")) {
                 return numsStr;
             },
             /**
+                EXPORTA CSV
+            */
+            exportarCSV: function () {
+                window.location = ('exportar-csv.php?setor='+fiscal.setor+'&divisao='+fiscal.divisao);
+            },
+            /**
                 ADIÇÃO DE ITENS À LISTA
             */
             obterLista: function (){
@@ -282,12 +270,10 @@ if (!mysqli_set_charset($link, "utf8")) {
                 console.log("Lista obtida.");
             },
             conferir: function(itemConferido) {
-                itemConferido.conferido = this.usuario.rf;
+                itemConferido.conferido = this.usuario.nome+' - '+this.usuario.rf;
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
-                        // app.itens = JSON.parse(this.response);
-                        // console.log(this.response);
                         console.log(this.response === '1' ? "SUCESSO!" : this.response);
                     }
                 };

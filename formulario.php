@@ -56,12 +56,12 @@ if (!mysqli_set_charset($link, "utf8")) {
         <div class="col">
             <h1>Cadastro de Bens Patrimoniais</h1>
         </div>
-        <div class="col-3">
-            <button class="btn btn-primary float-right" v-on:click="location.href='conferencia.php'">
+        <div class="col-3">            
+            <button class="btn btn-danger btn-sm float-right" @click="location.href='logout.php'">Sair do sistema</button>
+            <br><br>
+            <button class="btn btn-primary float-right" v-if="isFiscal" @click="location.href='conferencia.php'">
                 Conferência de bens
             </button>
-            <br><br>
-            <button class="btn btn-danger btn-sm float-right" v-on:click="location.href='logout.php'">Sair do sistema</button>
         </div>
     </div>
     <br>
@@ -92,8 +92,6 @@ if (!mysqli_set_charset($link, "utf8")) {
                         <div class="col">
                             <select
                             class="form-control form-control-sm"
-                            name="orgao"
-                            id="orgao"
                             v-model="orgao"
                             placeholder="Órgão"
                             >
@@ -273,8 +271,11 @@ if (!mysqli_set_charset($link, "utf8")) {
                         <img v-if="fotoUrl" :src="fotoUrl" :alt="novoItem.discriminacao" class="mw-100">
                     </div>
                 </div>
+                <input type="checkbox" id="manterInfo" v-model="keepInfo">
+                <label for="manterInfo" class="form-check-label" title="Maque essa opção caso precise inserir outro item com as mesmas características">Cadastrar item similar</label>
                 <br>
-                <button class="btn btn-primary" style="cursor: pointer;" v-on:click="adicionarItem()">Adicionar</button>
+                <br>
+                <button class="btn btn-primary float-left" style="cursor: pointer;" v-on:click="adicionarItem()">Adicionar</button>
             </div>
         </div>
         </div>
@@ -324,17 +325,11 @@ if (!mysqli_set_charset($link, "utf8")) {
 <script type="text/javascript" src="js/lodash.min.js"></script>
 <script type="text/javascript" src="js/popper.min.js"></script>
 <script type="text/javascript" src="js/bootstrap.min.js"></script>
-<?php 
 
-// SECRETARIA (full):
-// $_SESSION["usrData"]['description'][0]
-// Secretaria (completo): description
-// Secretaria (sigla): physicaldeliveryofficename
-// Nome (Completo): name
-
-// echo "<script>const usrData = JSON.parse('".json_encode($_SESSION["usrData"])."');</script>" ?>
 <!-- Vue.js -->
-<script>    
+<script>
+    /*
+    /// Construtor de classe não suportado no IE
     const BemPatrimonial = class {
         constructor(){
             this.nomeServidor = '';
@@ -360,10 +355,35 @@ if (!mysqli_set_charset($link, "utf8")) {
             this.conferido = '';
         }
     };
+    */
+    const BemPatrimonial = {
+            nomeServidor: '',
+            rf: '',
+            orgao: '',
+            setor: '',
+            divisao: '',
+            sala: '',
+            andar: '',
+            chapa: '',
+            chapaOutraUnidade: '',
+            nomeOutraUnidade: '',
+            discriminacao: '',
+            descricaoPersonalizada: '',
+            servivel: true,
+            cor: '',
+            comprimento: '',
+            profundidade: '',
+            altura: '',
+            marca: '',
+            modelo: '',
+            numSerie: '',
+            conferido: ''
+    };
+    const isFiscal = <?php echo strlen($_SESSION['setorFiscal']); ?> > 0;
     var app = new Vue({
         el: '#app',
         data: {
-            novoItem: new BemPatrimonial,
+            novoItem: JSON.parse(JSON.stringify(BemPatrimonial)),
             itens: [],
             usuario: {
                 nome: "<?php echo $_SESSION['nomeUsuario']; ?>",
@@ -569,7 +589,8 @@ if (!mysqli_set_charset($link, "utf8")) {
             setor: '',
             divisao: '',
             andar: '',
-            sala: ''
+            sala: '',
+            keepInfo: false
         },
         methods: {
             atualizaFoto: function(){
@@ -578,7 +599,6 @@ if (!mysqli_set_charset($link, "utf8")) {
                     return;
                 }
                 for(i in this.descritivos){
-                    // console.log("Descritivo: "+i+", texto: "+this.descritivos[i]);
                     if(this.novoItem.discriminacao === this.descritivos[i]){
                         let num = i++;
                         let addZero = num < 9 ? "0" : "";
@@ -599,6 +619,14 @@ if (!mysqli_set_charset($link, "utf8")) {
             adicionarItem: function (){
                 // Verifica campos obrigatórios
                 let pendentes = [];
+                if(!this.setor)
+                    pendentes.push("setor");
+                if(this.divisoes && this.divisoes.length > 0 && !this.divisao){
+                    pendentes.push("divisão");
+                }
+                if(!this.sala || !this.andar)
+                    pendentes.push("andar / sala");
+
                 if(!this.novoItem.discriminacao)
                     pendentes.push("discriminação");
                 if(!this.novoItem.cor)
@@ -627,12 +655,23 @@ if (!mysqli_set_charset($link, "utf8")) {
                 if(this.novoItem.chapaOutraUnidade)
                     this.novoItem.chapaOutraUnidade = this.apenasNumeros(this.novoItem.chapaOutraUnidade);
 
-
                 // Insere item à lista de cadastro
-                this.itens.push(this.novoItem);
-                this.novoItem = new BemPatrimonial;
-                this.fotoUrl = '';
+                this.itens.push(JSON.parse(JSON.stringify(this.novoItem)));
+
                 document.getElementById("chapa").focus();
+
+                // let tempItem = this.novoItem;
+                // Limpa formulário se opção "Cadastrar item similar" estiver desmarcada
+                if(this.keepInfo){
+                    app.novoItem.chapa = '';
+                    app.novoItem.chapaOutraUnidade = '';
+                    app.novoItem.numSerie = '';
+                }
+                else {
+                    this.novoItem = BemPatrimonial;
+                    this.fotoUrl = '';
+                }
+                
             },
             /** 
                 CADASTRO DE BENS
@@ -652,8 +691,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                 }
 
                 let listaDeBens = JSON.stringify(this.itens);
-                console.log(listaDeBens);
-
+                
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
@@ -661,7 +699,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                             // Cadastro realizado com sucesso. Atualiza lista
                             let concordancia = parseInt(this.response) > 1 ? " itens cadastrados" : " item cadastrado";
                             window.alert(parseInt(this.response)+concordancia+" com sucesso!");
-                            app.novoItem = new BemPatrimonial;
+                            app.novoItem = BemPatrimonial;
                             app.itens = [];
                             document.getElementById("chapa").focus();
                         }                        

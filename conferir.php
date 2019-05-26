@@ -21,7 +21,7 @@ if (!strcasecmp($_SERVER['REQUEST_METHOD'], 'PUT')) {
 if($_SERVER["REQUEST_METHOD"] == "POST") {
 	$fiscal = json_decode($_POST['fiscal']);
 	$sql = "SELECT * FROM bens_patrimoniais WHERE ";
-	$whereAdd = "`setor`='".$fiscal->setor."'";
+	$whereAdd = $fiscal->setor == "TODOS" ? "1=1" : "`setor`='".$fiscal->setor."'";
 	$whereAdd .= strlen($fiscal->divisao) > 0 ? (" AND `divisao`='".$fiscal->divisao."'") : "";
 	$sql .= $whereAdd.";";
 	mysql_query('SET character_set_results=utf8');
