@@ -357,6 +357,7 @@ if (!mysqli_set_charset($link, "utf8")) {
             this.marca = '';
             this.modelo = '';
             this.numSerie = '';
+            this.conferido = '';
         }
     };
     var app = new Vue({
