@@ -20,7 +20,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 	foreach ($listaDeBens as $itemKey => $item) {
 		$valores = "";
 		foreach ($item as $key => $value) {
-			$valores .= "'".utf8_decode($value)."',";
+			$valores .= "'".str_replace("'", "\'", utf8_decode($value))."',"; // str replace usado para resolver nomes com apóstrofe (encerrava a string prematuramente)
 		}
 		$valores = rtrim($valores,',');
 		$sql = $preSql.$valores.');';

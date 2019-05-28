@@ -93,8 +93,8 @@ if (!mysqli_set_charset($link, "utf8")) {
                 <th>Marca</th>
                 <th>Modelo</th>
                 <th>Nº de série</th>
-                <th>Conferir</th>
-                <th>Excluir</th>
+                <th v-if="fiscal.setor !== 'TODOS'">Conferir</th>
+                <th v-if="fiscal.setor !== 'TODOS'">Excluir</th>
             </tr>
             <tr v-for="item in itens" :class="item.conferido ? 'table-success' : ''">
                 <td>{{itens.indexOf(item)+1}}</td>
@@ -122,7 +122,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                 <td><input class="form-control" v-model="item.modelo"></td>
                 <td><input class="form-control" v-model="item.numSerie"></td>                
                 <!-- BOTÃO PARA CONFIRMAR ITEM -->
-                <td>
+                <td v-if="fiscal.setor !== 'TODOS'">
                     <center>                        
                         <button type="button" class="btn btn-success btn-sm" @click="conferir(item)">
                             <span :class="item.conferido ? 'oi oi-loop-circular' : 'oi oi-check'"></span>
@@ -130,9 +130,9 @@ if (!mysqli_set_charset($link, "utf8")) {
                     </center>
                 </td>
                 <!-- BOTÃO PARA REMOVER ITEM -->
-                <td>
+                <td v-if="fiscal.setor !== 'TODOS'">
                     <center>
-                        <button type="button" class="btn btn-danger btn-sm" @click="confirm('***************ATENÇÃO!***************\n\nTem certeza que deseja remover o item do cadastro? (esta ação não pode ser desfeita!)') ? itens.splice(itens.indexOf(remover(item)), 1) : false">
+                        <button type="button" class="btn btn-danger btn-sm" @click="confirm('***************ATENÇÃO!***************\n\nTem certeza que deseja remover o item do cadastro? (esta ação não pode ser desfeita!)') ? remover(item) : false">
                             <span class="oi oi-x"></span>
                         </button>
                     </center>
@@ -260,7 +260,7 @@ if (!mysqli_set_charset($link, "utf8")) {
             obterLista: function (){
                 // ADD para restringir lista de gabinete de SEL/SMDU
                 fiscal.rf = this.usuario.rf;
-                
+
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
@@ -288,9 +288,11 @@ if (!mysqli_set_charset($link, "utf8")) {
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
-                        console.log(this.response === '1' ? "SUCESSO!" : this.response);
-                        if(this.response === '1')
+                        console.log(this.response === '11' ? "SUCESSO!" : this.response);
+                        if(this.response === '11'){
+                            app.obterLista();
                             return itemRemovido;
+                        }
                         else {
                             window.alert('Erro ao remover item! Contate o desenvolvedor.');
                             return false;
@@ -299,7 +301,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                 };
                 xhttp.open("DELETE", "conferir.php", true);
                 xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-                xhttp.send(itemRemovido.id);                
+                xhttp.send(itemRemovido.id+".-."+this.usuario.rf+".-."+JSON.stringify(itemRemovido));
             }
         },
         mounted: function() {

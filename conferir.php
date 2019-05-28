@@ -17,7 +17,6 @@ if (!strcasecmp($_SERVER['REQUEST_METHOD'], 'PUT')) {
 }
 */
 
-
 if($_SERVER["REQUEST_METHOD"] == "POST") {
 	$fiscal = json_decode($_POST['fiscal']);
 	$sql = "SELECT * FROM bens_patrimoniais WHERE ";
@@ -25,11 +24,12 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 	// ADD para restringir lista de SEL/SMDU
 	if($fiscal->setor == "Gabinete"){
 		if($fiscal->rf == "d515438") // Valberlene
-			$whereAdd .= " AND `orgao`='SMDU'"
+			$whereAdd = "`orgao`='SMDU' AND (`setor`='Gabinete' OR `setor`='ATU' OR `setor`='ASCOM')";
+
 		if($fiscal->rf == "d858506") // Thatiane
-			$whereAdd .= " AND `orgao`='SEL'"
+			$whereAdd .= " AND `orgao`='SEL'";
 	}
-	
+
 	$whereAdd .= strlen($fiscal->divisao) > 0 ? (" AND `divisao`='".$fiscal->divisao."'") : "";
 	$sql .= $whereAdd.";";
 	mysql_query('SET character_set_results=utf8');
@@ -65,12 +65,25 @@ if ($_SERVER["REQUEST_METHOD"] == "PUT") {
 	return;
 }
 if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
-	$itemRemovido = file_get_contents('php://input');
+	$rawInfo = file_get_contents('php://input');
+	$rawInfo = explode(".-.",$rawInfo);
+	$itemRemovido = $rawInfo[0];
+	$usuario = $rawInfo[1];
+	$wholeItem = json_encode($rawInfo[2]);
+
 	$sql = "DELETE FROM bens_patrimoniais WHERE `id`=".$itemRemovido.";";
+
 	if(!mysqli_query($link, $sql))
 		printf("Errormessage: %s\n", mysqli_error($link));
 	else
 		echo 1;
+	
+	$sql = "INSERT INTO log_delete (`rf`,`item`) VALUES ('".$usuario."','".$wholeItem."');";
+	if(!mysqli_query($link, $sql))
+		printf("Errormessage: %s\n", mysqli_error($link));
+	else
+		echo 1;
+
 	return;
 }
 
