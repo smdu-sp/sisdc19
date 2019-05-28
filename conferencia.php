@@ -4,7 +4,7 @@ session_start();
 
 // Verifica se usuário está logado
 if($_SESSION["setorFiscal"] == ''){
-    header('location: formulario.php');
+    header('location: index.php');
     exit;
 }
 
@@ -65,7 +65,7 @@ if (!mysqli_set_charset($link, "utf8")) {
             <div class="col-3">
                 <button class="btn btn-danger btn-sm float-right" @click="location.href='logout.php'">Sair do sistema</button>
                 <br><br>
-                <button class="btn btn-primary float-right" @click="location.href='formulario.php'">
+                <button class="btn btn-primary float-right" @click="location.href='index.php'">
                     Cadastro de bens
                 </button>
             </div>
@@ -258,6 +258,9 @@ if (!mysqli_set_charset($link, "utf8")) {
                 ADIÇÃO DE ITENS À LISTA
             */
             obterLista: function (){
+                // ADD para restringir lista de gabinete de SEL/SMDU
+                fiscal.rf = this.usuario.rf;
+                
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {

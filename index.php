@@ -10,6 +10,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 }
 
 ?>
+
  
 <!DOCTYPE html>
 <html>
@@ -397,7 +398,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                         setores: [                            
                             {sigla: 'Gabinete'},
                             {sigla: 'ASSEC'},
-                            {sigla: 'ATEL'},                            
+                            {sigla: 'ATEL'},
                             {
                                 sigla: 'RESID',
                                 divisoes: [
@@ -488,6 +489,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                                     {sigla: 'DPD'}
                                 ]
                             },
+                            {sigla: 'CEIGEO'},
                             {
                                 sigla: 'CEPEUC',
                                 divisoes: [
@@ -584,7 +586,7 @@ if (!mysqli_set_charset($link, "utf8")) {
             orgaos: [],
             setores: [],
             divisoes: [],
-            andares: [8,17,18,19,20,21,22],
+            andares: [7,8,17,18,19,20,21,22],
             orgao: '',
             setor: '',
             divisao: '',
@@ -621,9 +623,9 @@ if (!mysqli_set_charset($link, "utf8")) {
                 let pendentes = [];
                 if(!this.setor)
                     pendentes.push("setor");
-                if(this.divisoes && this.divisoes.length > 0 && !this.divisao){
-                    pendentes.push("divisão");
-                }
+                // if(this.divisoes && this.divisoes.length > 0 && !this.divisao){
+                //     pendentes.push("divisão");
+                // }
                 if(!this.sala || !this.andar)
                     pendentes.push("andar / sala");
 

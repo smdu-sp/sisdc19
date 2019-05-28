@@ -22,6 +22,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 	$fiscal = json_decode($_POST['fiscal']);
 	$sql = "SELECT * FROM bens_patrimoniais WHERE ";
 	$whereAdd = $fiscal->setor == "TODOS" ? "1=1" : "`setor`='".$fiscal->setor."'";
+	// ADD para restringir lista de SEL/SMDU
+	if($fiscal->setor == "Gabinete"){
+		if($fiscal->rf == "d515438") // Valberlene
+			$whereAdd .= " AND `orgao`='SMDU'"
+		if($fiscal->rf == "d858506") // Thatiane
+			$whereAdd .= " AND `orgao`='SEL'"
+	}
+	
 	$whereAdd .= strlen($fiscal->divisao) > 0 ? (" AND `divisao`='".$fiscal->divisao."'") : "";
 	$sql .= $whereAdd.";";
 	mysql_query('SET character_set_results=utf8');

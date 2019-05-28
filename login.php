@@ -4,7 +4,7 @@ session_start();
 
 // Verifica se o usuário já está logado. Se sim, redireciona à página do Painel
 if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
-    header("location: formulario.php");
+    header("location: index.php");
     exit;
 }
 // Inclui arquivo de configuração
@@ -86,7 +86,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $link->close();
             
             $_SESSION["loggedin"] = true;
-            header('location:formulario.php');
+            header('location:index.php');
         }
     }
     // SCRIPT LDAP
