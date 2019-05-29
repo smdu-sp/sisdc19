@@ -28,6 +28,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 
 		if($fiscal->rf == "d858506") // Thatiane
 			$whereAdd .= " AND `orgao`='SEL'";
+
+		if($fiscal->rf == "d604975") // Maria Isilda
+			$whereAdd .= " AND `orgao`='SMDU'";
 	}
 
 	$whereAdd .= strlen($fiscal->divisao) > 0 ? (" AND `divisao`='".$fiscal->divisao."'") : "";

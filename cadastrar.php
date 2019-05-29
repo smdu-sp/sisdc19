@@ -6,7 +6,8 @@ $cadastrados = 0;
 $erros = [];
 
 if($_SERVER["REQUEST_METHOD"] == "POST") {
-	$listaDeBens = json_decode($_POST['insertList']);
+	$listaDeBens = json_decode(str_replace("CODREPEAMP","&", $_POST['insertList']));
+
 	$preSql = "INSERT INTO bens_patrimoniais (";
 	// Nomeia colunas, e quantidade de interrogações depois remove última vírgula
 	$colunas = "";
@@ -19,8 +20,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 
 	foreach ($listaDeBens as $itemKey => $item) {
 		$valores = "";
+		if($item->discriminacao !== 'Não listado')
+			$item->descricaoPersonalizada = '';
+		
 		foreach ($item as $key => $value) {
-			$valores .= "'".str_replace("'", "\'", utf8_decode($value))."',"; // str replace usado para resolver nomes com apóstrofe (encerrava a string prematuramente)
+			$valores .= "'".str_replace(["'", "&"], ["\'", "\&"], utf8_decode($value))."',"; // str replace usado para resolver nomes com apóstrofe (encerrava a string prematuramente)			
 		}
 		$valores = rtrim($valores,',');
 		$sql = $preSql.$valores.');';
