@@ -67,7 +67,13 @@ if (!mysqli_set_charset($link, "utf8")) {
     </div>
     <br>
     <br>
-    <div class="container">
+    <br>
+    <br>
+    <div class="alert alert-danger" role="alert">
+        <center><h3>Sistema de cadastro bloqueado.</h3></center>
+    </div>
+    <div class="container" v-if="false">
+    <!-- <div class="container"> -->
         <div id="dadosUsuario" class="card bg-light mb-3">
             <div class="card-header">
                 <strong>Dados do servidor</strong>

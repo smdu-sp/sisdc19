@@ -76,7 +76,10 @@ if (!mysqli_set_charset($link, "utf8")) {
     <!-- BENS ADICIONADOS -->
     <div id="div-tabela" class="table-responsive" style="resize: both;">
         <h2>Bens registrados em {{fiscal.setor + (fiscal.divisao ? ('/'+fiscal.divisao) : '')}}</h2>
-        <table class="table table-striped" v-if="fiscal.setor !== 'TODOS'">
+        <div v-if="!sistemaAberto" class="alert alert-warning">
+            <center><h3>Sistema bloqueado para edição e exclusão.</h3></center>
+        </div>
+        <table class="table table-striped" v-if="fiscal.setor !== 'TODOS' && sistemaAberto">
             <tr>
                 <th>#</th>
                 <th>Nome do Servidor</th>
@@ -93,8 +96,8 @@ if (!mysqli_set_charset($link, "utf8")) {
                 <th>Marca</th>
                 <th>Modelo</th>
                 <th>Nº de série</th>
-                <th v-if="fiscal.setor !== 'TODOS'">Conferir/ Corrigir</th>
-                <th v-if="fiscal.setor !== 'TODOS'">Excluir</th>
+                <th v-if="fiscal.setor !== 'TODOS' && sistemaAberto">Conferir/ Corrigir</th>
+                <th v-if="fiscal.setor !== 'TODOS' && sistemaAberto">Excluir</th>
             </tr>
             <tr v-for="item in itens" :class="item.conferido ? 'table-success' : ''">
                 <td>{{itens.indexOf(item)+1}}</td>
@@ -122,7 +125,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                 <td><input class="form-control" v-model="item.modelo"></td>
                 <td><input class="form-control" v-model="item.numSerie"></td>                
                 <!-- BOTÃO PARA CONFIRMAR ITEM -->
-                <td v-if="fiscal.setor !== 'TODOS'">
+                <td v-if="fiscal.setor !== 'TODOS' && sistemaAberto">
                     <center>                        
                         <button type="button" class="btn btn-success btn-sm" @click="conferir(item)">
                             <span :class="item.conferido ? 'oi oi-loop-circular' : 'oi oi-check'"></span>
@@ -130,7 +133,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                     </center>
                 </td>
                 <!-- BOTÃO PARA REMOVER ITEM -->
-                <td v-if="fiscal.setor !== 'TODOS'">
+                <td v-if="fiscal.setor !== 'TODOS' && sistemaAberto">
                     <center>
                         <button type="button" class="btn btn-danger btn-sm" @click="confirm('***************ATENÇÃO!***************\n\nTem certeza que deseja remover o item do cadastro? (esta ação não pode ser desfeita!)') ? remover(item) : false">
                             <span class="oi oi-x"></span>
@@ -139,8 +142,8 @@ if (!mysqli_set_charset($link, "utf8")) {
                 </td>
             </tr>
         </table>
-        <div v-if="fiscal.setor === 'TODOS'" style="vertical-align: middle; margin: 6em auto; text-align: center;">
-            <h4>Para agilizar a consulta, a tabela foi desativada. Clique no botão abaixo para visualizar a planilha:</h4>
+        <div v-if="fiscal.setor === 'TODOS'" class="alert alert-info">
+            <center><h4>Para agilizar a consulta, a tabela foi desativada. Clique no botão abaixo para visualizar a planilha:</h4></center>
         </div>
     </div>
     <br>
@@ -241,7 +244,8 @@ if (!mysqli_set_charset($link, "utf8")) {
             setor: '',
             divisao: '',
             andar: '',
-            sala: ''
+            sala: '',
+            sistemaAberto: false
         },
         methods: {
             /**
