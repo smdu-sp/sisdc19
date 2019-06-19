@@ -74,9 +74,9 @@ if (!mysqli_set_charset($link, "utf8")) {
     <br>
     <br>
     <!-- BENS ADICIONADOS -->
-    <div id="div-tabela" class="table-responsive" style="resize: both; height: 400px;">
+    <div id="div-tabela" class="table-responsive" style="resize: both;">
         <h2>Bens registrados em {{fiscal.setor + (fiscal.divisao ? ('/'+fiscal.divisao) : '')}}</h2>
-        <table class="table table-striped">
+        <table class="table table-striped" v-if="fiscal.setor !== 'TODOS'">
             <tr>
                 <th>#</th>
                 <th>Nome do Servidor</th>
@@ -93,7 +93,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                 <th>Marca</th>
                 <th>Modelo</th>
                 <th>Nº de série</th>
-                <th v-if="fiscal.setor !== 'TODOS'">Conferir</th>
+                <th v-if="fiscal.setor !== 'TODOS'">Conferir/ Corrigir</th>
                 <th v-if="fiscal.setor !== 'TODOS'">Excluir</th>
             </tr>
             <tr v-for="item in itens" :class="item.conferido ? 'table-success' : ''">
@@ -139,11 +139,14 @@ if (!mysqli_set_charset($link, "utf8")) {
                 </td>
             </tr>
         </table>
+        <div v-if="fiscal.setor === 'TODOS'" style="vertical-align: middle; margin: 6em auto; text-align: center;">
+            <h4>Para agilizar a consulta, a tabela foi desativada. Clique no botão abaixo para visualizar a planilha:</h4>
+        </div>
     </div>
     <br>
     <center>
-        <button class="btn btn-lg btn-info col-5" @click="obterLista()"><span class="oi oi-reload"></span> Atualizar Lista</button>
-        <button class="btn btn-lg btn-warning col-3" @click="exportarCSV()" title="Exportar arquivo CSV (Excel)"><span class="oi oi-spreadsheet"></span> Exportar planilha</button>
+        <!-- <button class="btn btn-lg btn-info col-5" @click="obterLista()"><span class="oi oi-reload"></span> Atualizar Lista</button> -->
+        <button class="btn btn-lg btn-warning col-3" @click="exportarCSV()" title="Exportar arquivo CSV (Excel)"><span class="oi oi-spreadsheet"></span> Exportar planilha <span v-if="fiscal.setor === 'TODOS'">geral</span></button>
     </center>
 </div>
     
@@ -252,12 +255,16 @@ if (!mysqli_set_charset($link, "utf8")) {
                 EXPORTA CSV
             */
             exportarCSV: function () {
-                window.location = ('exportar-csv.php?setor='+fiscal.setor+'&divisao='+fiscal.divisao);
+                fiscal.rf = this.usuario.rf;
+                window.location = ('exportar-csv.php?setor='+fiscal.setor+'&divisao='+fiscal.divisao+'&rf='+fiscal.rf);
             },
             /**
                 ADIÇÃO DE ITENS À LISTA
             */
             obterLista: function (){
+                if(fiscal.setor === 'TODOS')
+                    return;
+
                 // ADD para restringir lista de gabinete de SEL/SMDU
                 fiscal.rf = this.usuario.rf;
 

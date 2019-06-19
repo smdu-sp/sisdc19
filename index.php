@@ -272,8 +272,8 @@ if (!mysqli_set_charset($link, "utf8")) {
                         <img v-if="fotoUrl" :src="fotoUrl" :alt="novoItem.discriminacao" class="mw-100">
                     </div>
                 </div>
-                <!-- <input type="checkbox" id="manterInfo" v-model="keepInfo"> -->
-                <!-- <label for="manterInfo" class="form-check-label" title="Maque essa opção caso precise inserir outro item com as mesmas características">Cadastrar item similar</label> -->
+                <input type="checkbox" id="manterInfo" v-model="keepInfo">
+                <label for="manterInfo" class="form-check-label" title="Maque essa opção caso precise inserir outro item com as mesmas características">Cadastrar item similar</label>
                 <br>
                 <br>
                 <button class="btn btn-primary float-left" style="cursor: pointer;" v-on:click="adicionarItem()">Adicionar</button>
@@ -443,7 +443,8 @@ if (!mysqli_set_charset($link, "utf8")) {
                                     {sigla: 'STEL'},
                                     {sigla: 'DCAD'},
                                     {sigla: 'DLE'},
-                                    {sigla: 'DDU'}
+                                    {sigla: 'DDU'},
+                                    {sigla: 'GTEL'}
                                 ]
                             },
                             {
@@ -664,8 +665,8 @@ if (!mysqli_set_charset($link, "utf8")) {
 
                 // let tempItem = this.novoItem;
                 // Limpa formulário se opção "Cadastrar item similar" estiver desmarcada
-                // if(app.keepInfo === true){
-                if(false){
+                if(app.keepInfo === true){
+                // if(false){
                     app.novoItem.chapa = '';
                     app.novoItem.chapaOutraUnidade = '';
                     app.novoItem.numSerie = '';

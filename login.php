@@ -10,6 +10,10 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
 // Inclui arquivo de configuração
 // require_once "config.php";
 
+if(isset($_GET["m"])){
+    echo "<script>window.alert('".$_GET["m"]."');</script>";
+}
+
 // Define as variáveis e as inicializa vazias
 $usuario = $senha = "";
 $username_err = $password_err = "";
@@ -53,7 +57,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         unset ($_SESSION['emailUsuario']);
         unset ($_SESSION['setorFiscal']);
         unset ($_SESSION['divisaoFiscal']);
-        header('location:login.php?m=erro');
+        header('location:login.php?m="Falha no login - Verifique seu usuario e senha."');
     }
     else {
         for ($i=0; $i<$data["count"]; $i++) {
@@ -85,6 +89,13 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             }
             $link->close();
             
+            // Encerra cadastros
+            
+            if($_SESSION['setorFiscal'] == ''){
+                header('location:login.php?m="Período para cadastro de bens encerrado. Acesso restrito a pontos focais."');
+                return;
+            }            
+
             $_SESSION["loggedin"] = true;
             header('location:index.php');
         }

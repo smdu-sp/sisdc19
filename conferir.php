@@ -35,7 +35,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 
 	$whereAdd .= strlen($fiscal->divisao) > 0 ? (" AND `divisao`='".$fiscal->divisao."'") : "";
 	$sql .= $whereAdd.";";
-	mysql_query('SET character_set_results=utf8');
+	mysqli_query($link, 'SET character_set_results=utf8');
 	$link->set_charset("utf8");
 	$retornoQuery = $link->query($sql);
 	$bens = [];

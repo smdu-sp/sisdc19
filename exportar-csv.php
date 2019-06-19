@@ -6,13 +6,30 @@ require_once "config.php";
 
 $setor = $_GET['setor'];
 $divisao = $_GET['divisao'];
+$rf = $_GET['rf'];
 
-$sql = "SELECT * FROM bens_patrimoniais WHERE `setor`='" . $setor;
+// $sql = "SELECT * FROM bens_patrimoniais WHERE `setor`='" . $setor;
+$sql = "SELECT * FROM bens_patrimoniais WHERE ";
+
+$whereAdd = $setor == "TODOS" ? "1=1" : "`setor`='".$setor."'";
+// ADD para restringir lista de SEL/SMDU
+// ADICIONA REGRAS ESPECIFICAS PARA FISCAIS GABINETE
+if($setor == "Gabinete"){
+    if($rf == "d515438") // Valberlene
+        $whereAdd = "`orgao`='SMDU' AND (`setor`='Gabinete' OR `setor`='ATU' OR `setor`='ASCOM')";
+
+    if($rf == "d858506") // Thatiane
+        $whereAdd .= " AND `orgao`='SEL'";
+
+    if($rf == "d604975") // Maria Isilda
+        $whereAdd .= " AND `orgao`='SMDU'";
+}
 
 if ($divisao != ''){
-    $sql .= "' AND `divisao`='".$divisao;
+    $whereAdd .= " AND `divisao`='".$divisao."'";
 };
-$sql .= "';";
+
+$sql .= $whereAdd.";";
 // Se setor for "TODOS", retorna todos os itens do cadastro
 if($setor == "TODOS")
     $sql = "SELECT * FROM bens_patrimoniais;";
