@@ -3,6 +3,7 @@
 session_start();
 
 // Verifica se usuário está logado
+/*
 if($_SESSION["setorFiscal"] == ''){
     header('location: index.php');
     exit;
@@ -12,7 +13,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     header("location: login.php");
     exit;
 }
-
+*/
 ?>
  
 <!DOCTYPE html>
