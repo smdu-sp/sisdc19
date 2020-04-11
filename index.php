@@ -75,8 +75,9 @@ if (!mysqli_set_charset($link, "utf8")) {
 			<div class="form-group">
 				<div class="form-row">
 					<div class="col">
+						<!-- ENTRADA, DATA, RESPONSÁVEL, DOADOR, FORMALIZAÇÃO -->
 						<div class="form-row">
-							<div class="col">
+							<div class="col col-2">
 								<!-- <label for="entrada">Origem de entrada</label> -->
 								<input 
 								class="form-control form-control-sm"
@@ -85,7 +86,7 @@ if (!mysqli_set_charset($link, "utf8")) {
 								placeholder="Entrada"
 								>
 							</div>
-							<div class="input-group input-group-sm col col-4">
+							<div class="input-group input-group-sm col col-3">
 								<div class="input-group-prepend">
 									<span class="input-group-text">Data de entrada</span>
 								</div>								
@@ -96,26 +97,112 @@ if (!mysqli_set_charset($link, "utf8")) {
 									type="date"
 									>
 							</div>
-							<div class="col">
+							<div class="col col-2">
 								<input
 								class="form-control form-control-sm"
 								v-model="novoItem.responsavel_atendimento"
 								placeholder="Responsável"
 								>
 							</div>
-						<br>						
-						</div>						
-						<br>
-						<!-- DOADOR, STATUS, NUMERO SEI, OBSERVAÇÃO -->
-						<div class="form-row">
-							<div class="col">
+							<div class="col col-3">
 								<input 
 								class="form-control form-control-sm"
 								v-model="novoItem.doador"
 								id="doador"
 								placeholder="Doador"
 								>
+							</div>
+							<div class="col col-2">
+								<select id="tipo_formalizacao" v-model="novoItem.tipo_formalizacao" class="form-control form-control-sm">
+									<option disabled selected value="">Tipo de formalização</option>
+									<option>Pessoa física</option>
+									<option>Pessoa jurídica</option>
+									<option>Entidade religiosa</option>
+									<option>Entidade não governamental</option>
+								</select>								
+							</div>
+						<br>						
+						</div>
+						<br>
+						<!-- DESCRIÇÃO, TIPO, QUANTIDADE, VALOR, DESTINO -->
+						<div class="form-row">
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.descricao_item"
+								placeholder="Descrição do Item"
+								>
+							</div>
+							<div class="col col-2">
+								<select id="tipo_item" v-model="novoItem.tipo_item" class="form-control form-control-sm">
+									<option disabled selected value="">Tipo de item</option>
+									<option>Comodato</option>
+									<option>Dinheiro</option>
+									<option>Produto</option>
+									<option>Serviço</option>
+								</select>								
+							</div>
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.quantidade"
+								placeholder="Quantidade"
+								>
+							</div>
+							<div class="col input-group input-group-sm">
+								<div class="input-group-prepend">
+									<span class="input-group-text">R$</span>
+								</div>
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.valor_total"
+								placeholder="Valor total da doação"
+								type="number"
+								>
+							</div>
+							<div class="col col-2">
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.destino"
+								placeholder="Destino da doação"
+								>
+							</div>
+						</div>
+						<br>
+						<!-- CONTATO, PRAZO ENTREGA, ENDEREÇO ENTREGA, REPONSÁVEL RECEBIMENTO -->
+						<div class="form-row">
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.contato"
+								placeholder="Contato"
+								>
+							</div>
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.prazo_periodo"
+								placeholder="Prazo entrega / Período disponibilização"
+								>
+							</div>
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.endereco_entrega"
+								placeholder="Endereço de entrega"
+								>
 							</div>							
+						</div>
+						<br>
+						<!-- STATUS, NUMERO SEI, OBSERVAÇÃO -->
+						<div class="form-row">
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.responsavel_recebimento"
+								placeholder="Responsável pelo recebimento da doação"
+								>
+							</div>
 							<div class="col">
 								<input
 								class="form-control form-control-sm"
@@ -123,7 +210,7 @@ if (!mysqli_set_charset($link, "utf8")) {
 								placeholder="Status"
 								>
 							</div>
-							<div class="col">
+							<div class="col col-2">
 								<input
 								class="form-control form-control-sm"
 								v-model="novoItem.numero_sei"
@@ -180,7 +267,7 @@ if (!mysqli_set_charset($link, "utf8")) {
 		<br>
 		<hr>
 		<!-- ITENS ADICIONADOS -->
-		<div id="div-tabela">
+		<!-- <div id="div-tabela">
 			<h2>Doações adicionadas</h2>
 			<table class="table table-striped">
 				<tr>
@@ -209,7 +296,6 @@ if (!mysqli_set_charset($link, "utf8")) {
 					<td>{{item.relatorio_sei}}</td>
 					<td>{{item.itens_pendentes_sei}}</td>					
 					<td>{{item.monitoramento}}</td>
-					<!-- BOTÃO PARA REMOVER ITEM -->
 					<td>
 						<center>
 							<button title="Remover item" type="button" class="btn btn-danger btn-sm" v-on:click="itens.splice(itens.indexOf(item), 1)">
@@ -221,7 +307,7 @@ if (!mysqli_set_charset($link, "utf8")) {
 			</table>
 			<br>
 			<button class="btn btn-success btn-lg" v-on:click="cadastrarDoacoes()">Enviar</button>
-		</div>
+		</div> -->
 	</div>
 </div>
 	
@@ -237,6 +323,16 @@ if (!mysqli_set_charset($link, "utf8")) {
 			data_entrada: '',
 			responsavel_atendimento: '',
 			doador: '',
+			tipo_formalizacao: '',
+			descricao_item: '',
+			tipo_item: '',
+			quantidade: '',
+			valor_total: '',
+			destino: '',
+			contato: '',
+			prazo_periodo: '',
+			endereco_entrega: '',
+			responsavel_recebimento: '',
 			status: '',
 			numero_sei: '',
 			observacao: '',
@@ -278,7 +374,8 @@ if (!mysqli_set_charset($link, "utf8")) {
 
 				document.getElementById("entrada").focus();
 
-				this.novoItem = DoacaoObj;				
+				this.novoItem = DoacaoObj;
+				this.cadastrarDoacoes(); // Remover caso seja preciso retomar o modo de inclusão em massa
 			},
 			/** 
 				CADASTRO DE Doacoes
