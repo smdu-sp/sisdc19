@@ -103,63 +103,75 @@ if (!mysqli_set_charset($link, "utf8")) {
 								placeholder="Responsável"
 								>
 							</div>
-						<br>
-						<!-- DESCRIÇÃO -->
-						<!-- <label for="discriminacao">Discriminação do bem</label> -->
+						<br>						
 						</div>						
 						<br>
+						<!-- DOADOR, STATUS, NUMERO SEI, OBSERVAÇÃO -->
 						<div class="form-row">
 							<div class="col">
-								<input type="text" class="form-control form-control-sm" v-model="novoItem.cor" placeholder="Cor">
+								<input 
+								class="form-control form-control-sm"
+								v-model="novoItem.doador"
+								id="doador"
+								placeholder="Doador"
+								>
+							</div>							
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.status"
+								placeholder="Status"
+								>
 							</div>
-							<div class="input-group input-group-sm col col-8">
-								<div class="input-group-prepend">
-									<span class="input-group-text">Dimensões (cm)</span>
-								</div>                                
-									<input
-									v-model="novoItem.comprimento"
-									placeholder="Comprimento"
-									class="form-control form-control-sm"
-									autocomplete="off"
-									type="number"
-									>
-									<input
-									v-model="novoItem.profundidade"
-									placeholder="Profundidade"
-									class="form-control form-control-sm"
-									autocomplete="off"
-									>
-									<input
-									v-model="novoItem.altura"
-									placeholder="Altura"
-									class="form-control form-control-sm"
-									autocomplete="off"
-									>
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.numero_sei"
+								placeholder="Número SEI"
+								>
+							</div>
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.observacao"
+								placeholder="Observação"
+								>
 							</div>
 						</div>
 						<br>
+						<!-- COMENTÁRIO SMS, BREVE RELATÓRIO DO PROCESSO SEI, ITENS PENDENTES NO PROCESSO SEI, MONITORAMENTO -->
 						<div class="form-row">
 							<div class="col">
-								<!-- <label for="marca">Marca</label> -->
-								<input type="text" class="form-control form-control-sm" v-model="novoItem.marca" id="marca" placeholder="Marca">
+								<input 
+								class="form-control form-control-sm"
+								v-model="novoItem.comentario_sms"
+								placeholder="Comentário SMS"
+								>
+							</div>							
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.relatorio_sei"
+								placeholder="Breve relatório do processo SEI"
+								>
 							</div>
 							<div class="col">
-								<!-- <label for="modelo">Modelo</label> -->
-								<input type="text" class="form-control form-control-sm" v-model="novoItem.modelo" id="modelo" placeholder="Modelo" title="Modelo">
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.itens_pendentes_sei"
+								placeholder="Itens pendentes no processo SEI"
+								>
 							</div>
-							<div class="col input-group">
-								<!-- <div class="input-group-prepend">
-									<span class="input-group-text">Equipamento elétrico/eletrônico</span>
-								</div> -->
-								<input type="text" class="form-control form-control-sm" v-model="novoItem.numSerie" id="numSerie" placeholder="Nº de série (Equipamento elétrico/eletrônico)" title="Nº de série (Equipamento elétrico/eletrônico)">
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.monitoramento"
+								placeholder="Monitoramento"
+								>
 							</div>
 						</div>
-					</div>
-					<!-- <div class="col-3">
-						<img v-if="fotoUrl" :src="fotoUrl" :alt="novoItem.discriminacao" class="mw-100">
-					</div> -->
+					</div>					
 				</div>
-				<input type="checkbox" id="manterInfo" v-model="keepInfo">				
 				<br>
 				<button class="btn btn-primary float-left" style="cursor: pointer;" v-on:click="adicionarItem()">Adicionar</button>
 			</div>
@@ -200,7 +212,7 @@ if (!mysqli_set_charset($link, "utf8")) {
 					<!-- BOTÃO PARA REMOVER ITEM -->
 					<td>
 						<center>
-							<button type="button" class="btn btn-danger btn-sm" v-on:click="itens.splice(itens.indexOf(item), 1)">
+							<button title="Remover item" type="button" class="btn btn-danger btn-sm" v-on:click="itens.splice(itens.indexOf(item), 1)">
 								<span style="font-size: 2em; line-height: 1">&times;</span>
 							</button>
 						</center>
@@ -257,62 +269,16 @@ if (!mysqli_set_charset($link, "utf8")) {
 				ADIÇÃO DE ITENS À LISTA
 			*/
 			adicionarItem: function (){
-				// Verifica campos obrigatórios
-				let pendentes = [];
-				if(!this.setor)
-					pendentes.push("setor");
-				// if(this.divisoes && this.divisoes.length > 0 && !this.divisao){
-				//     pendentes.push("divisão");
-				// }
-				if(!this.sala || !this.andar)
-					pendentes.push("andar / sala");
-
-				if(!this.novoItem.discriminacao)
-					pendentes.push("discriminação");
-				if(!this.novoItem.cor)
-					pendentes.push("cor");
-				
-				if(pendentes.length > 0){
-					let erro = "Por favor, preencha os seguintes campos:";
-					for(item in pendentes)
-						erro+="\n"+pendentes[item];
-					window.alert(erro);
-					return;
-				}
-
-				// Insere dados do servidor
-				this.novoItem.nomeServidor = this.usuario.nome;
-				this.novoItem.rf = this.usuario.rf;
-				this.novoItem.orgao = this.orgao;
-				this.novoItem.setor = this.setor;
-				this.novoItem.divisao = this.divisao;
-				this.novoItem.sala = this.sala;
-				this.novoItem.andar = this.andar;
-
-				// Limpa números de chapa
-				if(this.novoItem.chapa)
-					this.novoItem.chapa = this.apenasNumeros(this.novoItem.chapa);
-				if(this.novoItem.chapaOutraUnidade)
-					this.novoItem.chapaOutraUnidade = this.apenasNumeros(this.novoItem.chapaOutraUnidade);
+				// Limpa número SEI
+				if(this.novoItem.numero_sei)
+					this.novoItem.numero_sei = this.apenasNumeros(this.novoItem.numero_sei);
 
 				// Insere item à lista de cadastro
 				this.itens.push(JSON.parse(JSON.stringify(this.novoItem)));
 
-				document.getElementById("chapa").focus();
+				document.getElementById("entrada").focus();
 
-				// let tempItem = this.novoItem;
-				// Limpa formulário se opção "Cadastrar item similar" estiver desmarcada
-				if(app.keepInfo === true){
-				// if(false){
-					app.novoItem.chapa = '';
-					app.novoItem.chapaOutraUnidade = '';
-					app.novoItem.numSerie = '';
-				}
-				else {
-					this.novoItem = DoacaoObj;
-					this.fotoUrl = '';
-				}
-				
+				this.novoItem = DoacaoObj;				
 			},
 			/** 
 				CADASTRO DE Doacoes
@@ -330,11 +296,11 @@ if (!mysqli_set_charset($link, "utf8")) {
 					if (this.readyState == 4 && this.status == 200) {
 						if(this.response > 0) {
 							// Cadastro realizado com sucesso. Atualiza lista
-							let concordancia = parseInt(this.response) > 1 ? " itens cadastrados" : " item cadastrado";
+							let concordancia = parseInt(this.response) > 1 ? " doações cadastradas" : " doação cadastrada";
 							window.alert(parseInt(this.response)+concordancia+" com sucesso!");
 							app.novoItem = DoacaoObj;
 							app.itens = [];
-							document.getElementById("chapa").focus();
+							document.getElementById("entrada").focus();
 						}                        
 						else {
 							window.alert("Falha ao cadastrar. Verifique os campos e tente novamente.\nSe o problema persistir, contate o desenvolvedor.");
@@ -363,6 +329,12 @@ input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button { 
   -webkit-appearance: none; 
   margin: 0; 
+}
+#div-tabela {
+	margin-left: 0;
+	position: absolute;
+	left: 10px;
+	max-width: calc(100% - 20px);
 }
 </style>
 

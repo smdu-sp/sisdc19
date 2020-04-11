@@ -24,7 +24,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
         <link rel="stylesheet" href="css/custom.css">
         <link href="css/open-iconic-bootstrap.css" rel="stylesheet">
         <script src="js/vue.js"></script>
-        <title>SICABE - Conferência de Bens Patrimoniais</title>        
+        <title>Doações decorrentes da pandemia do COVID-19</title>        
     </head>
 <body style="margin: 1em">
 
@@ -61,69 +61,55 @@ if (!mysqli_set_charset($link, "utf8")) {
                 </div>            
             </div>
             <div class="col-6">
-                <h1>Conferência de Bens Patrimoniais</h1>
+                <h1>Conferência registros de doações</h1>
             </div>
             <div class="col-3">
                 <button class="btn btn-danger btn-sm float-right" @click="location.href='logout.php'">Sair do sistema</button>
                 <br><br>
                 <button class="btn btn-primary float-right" @click="location.href='index.php'">
-                    Cadastro de bens
+                    Cadastrar nova doação
                 </button>
             </div>
         </div>
     </div>
     <br>
     <br>
-    <!-- BENS ADICIONADOS -->
+    <!-- DOAÇÕES ADICIONADAS -->
     <div id="div-tabela" class="table-responsive" style="resize: both;">
-        <h2>Bens registrados em {{fiscal.setor + (fiscal.divisao ? ('/'+fiscal.divisao) : '')}}</h2>
-        <table class="table table-striped" v-if="fiscal.setor !== 'TODOS'">
+        <h2>Doações cadastradas</h2>
+        <table class="table table-striped">
             <tr>
                 <th>#</th>
-                <th>Nome do Servidor</th>
-                <th>Nº da chapa</th>
-                <th>Nº chapa outra unidade</th>
-                <th>Nome outra unidade</th>
-                <th style="min-width: 300px;">Discriminação do bem</th>
-                <th>Descrição personalizada</th>
-                <th>Servível</th>
-                <th>Cor</th>
-                <th>Comprimento</th>
-                <th>Profundidade</th>
-                <th>Altura</th>
-                <th>Marca</th>
-                <th>Modelo</th>
-                <th>Nº de série</th>
-                <th v-if="fiscal.setor !== 'TODOS'">Conferir/ Corrigir</th>
-                <th v-if="fiscal.setor !== 'TODOS'">Excluir</th>
-            </tr>
+                <th>ENTRADA</th>
+                <th>DATA DE ENTRADA</th>
+                <th>RESPONSÁVEL DO ATENDIMENTO / ANDAMENTO</th>
+                <th>DOADOR</th>
+                <th>STATUS</th>
+                <th>Nº DO SEI</th>                    
+                <th>OBSERVAÇÃO</th>
+                <th>COMENTÁRIO SMS</th>
+                <th>BREVE RELATÓRIO DO PROCESSO SEI</th>
+                <th>ITENS PENDENTES NO PROCESSO SEI</th>
+                <th>MONITORAMENTO</th>
+                <th></th>
+                <th>Conferir/ Corrigir</th>
+                <th>Excluir</th>
+            </tr>            
             <tr v-for="item in itens" :class="item.conferido ? 'table-success' : ''">
                 <td>{{itens.indexOf(item)+1}}</td>
-                <td><input class="form-control" v-model="item.nomeServidor" disabled="true"></td>
-                <td><input class="form-control" v-model="item.chapa" style="max-width: 150px"></td>
-                <td><input class="form-control" v-model="item.chapaOutraUnidade" style="max-width: 150px"></td>
-                <td><input class="form-control" v-model="item.nomeOutraUnidade" style="max-width: 100px"></td>
-                <!-- <td><input class="form-control" v-model="item.discriminacao"></td> -->
-                <td>
-                    <select name="discriminacao" class="form-control" v-model="item.discriminacao" :title="item.discriminacao">
-                        <option v-for="descritivo in descritivos">{{descritivo}}</option>
-                        <option value="Não listado">Discriminação não listada...</option>
-                    </select>
-                </td>
-                <td><input class="form-control" v-model="item.descricaoPersonalizada"></td>
-                <td>                    
-                    <input :id="item.id" type="checkbox" class="form-control" style="width: 30px; margin: auto;" v-model="item.servivel">
-                    <!-- <label :for="item.id" :class="'badge form-check-label '+(item.servivel ? 'badge-success' : 'badge-danger')" style="font-size: 1em; margin: auto;">{{ item.servivel ? 'Servível' : 'Inservível' }}</label>                     -->
-                </td>
-                <td><input class="form-control" v-model="item.cor" :title="item.cor" style="min-width: 50px; max-width: 80px"></td>
-                <td><input class="form-control" v-model="item.comprimento" style="max-width: 70px"></td>
-                <td><input class="form-control" v-model="item.profundidade" style="max-width: 70px"></td>
-                <td><input class="form-control" v-model="item.altura" style="max-width: 70px"></td>
-                <td><input class="form-control" v-model="item.marca" style="max-width: 150px"></td>
-                <td><input class="form-control" v-model="item.modelo"></td>
-                <td><input class="form-control" v-model="item.numSerie"></td>                
+                <td><input class="form-control" v-model="item.entrada" style="max-width=: 100px"></td>
+                <td><input class="form-control" v-model="item.data_entrada" style="max-width=: 100px"></td>
+                <td><input class="form-control" v-model="item.responsavel_atendimento" style="max-width=: 100px"></td>
+                <td><input class="form-control" v-model="item.doador" style="max-width=: 100px"></td>
+                <td><input class="form-control" v-model="item.status" style="max-width=: 100px"></td>
+                <td><input class="form-control" v-model="item.numero_sei" style="max-width=: 100px"></td>
+                <td><input class="form-control" v-model="item.observacao" style="max-width=: 100px"></td>
+                <td><input class="form-control" v-model="item.comentario_sms" style="max-width=: 100px"></td>
+                <td><input class="form-control" v-model="item.relatorio_sei" style="max-width=: 100px"></td>
+                <td><input class="form-control" v-model="item.itens_pendentes_sei" style="max-width=: 100px"></td>
+                <td><input class="form-control" v-model="item.monitoramento" style="max-width=: 100px"></td>
                 <!-- BOTÃO PARA CONFIRMAR ITEM -->
-                <td v-if="fiscal.setor !== 'TODOS'">
+                <td>
                     <center>                        
                         <button type="button" class="btn btn-success btn-sm" @click="conferir(item)">
                             <span :class="item.conferido ? 'oi oi-loop-circular' : 'oi oi-check'"></span>
@@ -140,9 +126,9 @@ if (!mysqli_set_charset($link, "utf8")) {
                 </td>
             </tr>
         </table>
-        <div v-if="fiscal.setor === 'TODOS'" style="vertical-align: middle; margin: 6em auto; text-align: center;">
+        <!-- <div v-if="fiscal.setor === 'TODOS'" style="vertical-align: middle; margin: 6em auto; text-align: center;">
             <h4>Para agilizar a consulta, a tabela foi desativada. Clique no botão abaixo para visualizar a planilha:</h4>
-        </div>
+        </div> -->
     </div>
     <br>
     <center>
