@@ -157,7 +157,7 @@ if (!mysqli_set_charset($link, "utf8")) {
 								class="form-control form-control-sm"
 								v-model="novoItem.valor_total"
 								placeholder="Valor total da doação"
-								type="number"
+								title="Valor total (ex.: 999999,00)"
 								>
 							</div>
 							<div class="col col-2">
@@ -368,6 +368,8 @@ if (!mysqli_set_charset($link, "utf8")) {
 				// Limpa número SEI
 				if(this.novoItem.numero_sei)
 					this.novoItem.numero_sei = this.apenasNumeros(this.novoItem.numero_sei);
+				if(this.novoItem.valor_total)
+					this.novoItem.valor_total = this.apenasNumeros(this.novoItem.valor_total)/100;
 
 				// Insere item à lista de cadastro
 				this.itens.push(JSON.parse(JSON.stringify(this.novoItem)));

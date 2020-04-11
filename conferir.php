@@ -19,32 +19,18 @@ if (!strcasecmp($_SERVER['REQUEST_METHOD'], 'PUT')) {
 
 if($_SERVER["REQUEST_METHOD"] == "POST") {
 	$fiscal = json_decode($_POST['fiscal']);
-	$sql = "SELECT * FROM bens_patrimoniais WHERE ";
-	$whereAdd = $fiscal->setor == "TODOS" ? "1=1" : "`setor`='".$fiscal->setor."'";
-	// ADD para restringir lista de SEL/SMDU
-	if($fiscal->setor == "Gabinete"){
-		if($fiscal->rf == "d515438") // Valberlene
-			$whereAdd = "`orgao`='SMDU' AND (`setor`='Gabinete' OR `setor`='ATU' OR `setor`='ASCOM')";
-
-		if($fiscal->rf == "d858506") // Thatiane
-			$whereAdd .= " AND `orgao`='SEL'";
-
-		if($fiscal->rf == "d604975") // Maria Isilda
-			$whereAdd .= " AND `orgao`='SMDU'";
-	}
-
-	$whereAdd .= strlen($fiscal->divisao) > 0 ? (" AND `divisao`='".$fiscal->divisao."'") : "";
-	$sql .= $whereAdd.";";
+	$sql = "SELECT * FROM doacoes;";
+	
 	mysqli_query($link, 'SET character_set_results=utf8');
 	$link->set_charset("utf8");
 	$retornoQuery = $link->query($sql);
-	$bens = [];
+	$doacoes = [];
 	if($retornoQuery->num_rows > 0){
 	    while ($row = $retornoQuery->fetch_assoc()) {
-	    	array_push($bens, $row);
+	    	array_push($doacoes, $row);
 	    }
 	}
-	echo json_encode($bens);
+	echo json_encode($doacoes);
 	// echo json_last_error();
 	        
 	$link->close();
@@ -53,7 +39,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 if ($_SERVER["REQUEST_METHOD"] == "PUT") {
 	$itemConferido = json_decode(file_get_contents('php://input'));
-	$sql = "UPDATE bens_patrimoniais SET ";
+	$sql = "UPDATE doacoes SET ";
 	foreach ($itemConferido as $key => $value) {
 		$sql .= "`".$key."`='".utf8_decode($value)."',";
 	}
@@ -74,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
 	$usuario = $rawInfo[1];
 	$wholeItem = json_encode($rawInfo[2]);
 
-	$sql = "DELETE FROM bens_patrimoniais WHERE `id`=".$itemRemovido.";";
+	$sql = "DELETE FROM doacoes WHERE `id`=".$itemRemovido.";";
 
 	if(!mysqli_query($link, $sql))
 		printf("Errormessage: %s\n", mysqli_error($link));

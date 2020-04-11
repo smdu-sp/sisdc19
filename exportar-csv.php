@@ -4,38 +4,12 @@ session_start();
 // Inclui arquivo de configuração
 require_once "config.php";
 
-$setor = $_GET['setor'];
-$divisao = $_GET['divisao'];
 $rf = $_GET['rf'];
 
 // $sql = "SELECT * FROM bens_patrimoniais WHERE `setor`='" . $setor;
-$sql = "SELECT * FROM bens_patrimoniais WHERE ";
+$sql = "SELECT * FROM doacoes;";
 
-$whereAdd = $setor == "TODOS" ? "1=1" : "`setor`='".$setor."'";
-// ADD para restringir lista de SEL/SMDU
-// ADICIONA REGRAS ESPECIFICAS PARA FISCAIS GABINETE
-if($setor == "Gabinete"){
-    if($rf == "d515438") // Valberlene
-        $whereAdd = "`orgao`='SMDU' AND (`setor`='Gabinete' OR `setor`='ATU' OR `setor`='ASCOM')";
-
-    if($rf == "d858506") // Thatiane
-        $whereAdd .= " AND `orgao`='SEL'";
-
-    if($rf == "d604975") // Maria Isilda
-        $whereAdd .= " AND `orgao`='SMDU'";
-}
-
-if ($divisao != ''){
-    $whereAdd .= " AND `divisao`='".$divisao."'";
-};
-
-$sql .= $whereAdd.";";
-// Se setor for "TODOS", retorna todos os itens do cadastro
-if($setor == "TODOS")
-    $sql = "SELECT * FROM bens_patrimoniais;";
-
-$divisao = $divisao == '' ? $divisao : ('_' . $divisao);
-$csv  = "bens_cadastrados-" . $setor . $divisao . "-" . date('d-m-Y-his') . '.csv';
+$csv  = "doacoes_covid-" . date('d-m-Y-his') . '.csv';
 // Gerar link inpage
 // $file = fopen($csv, 'w');
 
@@ -44,12 +18,55 @@ $file = fopen('php://output', 'w');
 if (mysqli_character_set_name($link) === 'utf8') {
     fputs( $file, "\xEF\xBB\xBF" ); // Corrige caracteres (charset UTF-8)
 }
+function fixedName($nomeColuna) {
+    return $nomeColuna;
+    switch ($nomeColuna) {
+        case 'id':
+            $nomeColuna = 'ID';
+            break;        
+        case 'entrada':
+            $nomeColuna = 'ENTRADA';
+            break;
+        case 'data_entrada':
+            $nomeColuna = 'DATA DE ENTRADA';
+            break;
+        case 'id_responsavel':
+            break;
+        case 'responsavel_atendimento':
+            $nomeColuna = 'REPONSAVEL DO ATENDIMENTO / ANDAMENTO';
+            break;
+        // "doador"
+        // "tipo_formalizacao"
+        // "descricao_item"
+        // "tipo_item"
+        // "quantidade"
+        // "valor_total"
+        // "destino"
+        // "contato"
+        // "prazo_periodo"
+        // "endereco_entrega"
+        // "responsavel_recebimento"
+        // "status"
+        // "numero_sei"
+        // "observacao"
+        // "comentario_sms"
+        // "relatorio_sei"
+        // "itens_pendentes_sei"
+        // "monitoramento"
+        // "conferido"
+        // "data_inclusao"
+        // "data_alteracao"
+        default:            
+            break;
+    }
+    return $nomeColuna;
+}
 // Monta tabela
 if (!$mysqli_result = mysqli_query($link, $sql))
     printf("Error: %s\n", $link->error);
     // Nomes das colunas
     while ($column = mysqli_fetch_field($mysqli_result)) {        
-        $column_names[] = $column->name;        
+        $column_names[] = fixedName($column->name);        
     }    
 
     header('Content-Type: text/csv;charset=UTF-8');
@@ -64,7 +81,9 @@ if (!$mysqli_result = mysqli_query($link, $sql))
     
     // Get table rows
     while ($row = mysqli_fetch_row($mysqli_result)) {
-        // Write table rows in csv files
+        // Troca ponto por vírgula (linha 10 corresponde ao Valor Total)
+        $row[10] = str_replace('.', ',', $row[10]);
+        // Write table rows in csv files        
         if (!fputcsv($file, $row, ";"))
             die('Can\'t write rows in csv file');
     }

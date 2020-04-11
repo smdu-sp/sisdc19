@@ -74,8 +74,14 @@ if (!mysqli_set_charset($link, "utf8")) {
     </div>
     <br>
     <br>
+    <div>
+        <center>
+            <!-- <button class="btn btn-lg btn-info col-5" @click="obterLista()"><span class="oi oi-reload"></span> Atualizar Lista</button> -->
+            <button class="btn btn-lg btn-warning col-3" @click="exportarCSV()" title="Exportar arquivo CSV (Excel)"><span class="oi oi-spreadsheet"></span> Exportar planilha</button>
+        </center>
+    </div>
     <!-- DOAÇÕES ADICIONADAS -->
-    <div id="div-tabela" class="table-responsive" style="resize: both;">
+    <div id="div-tabela" class="table-responsive" style="resize: both; overflow-x: unset;">
         <h2>Doações cadastradas</h2>
         <table class="table table-striped">
             <tr>
@@ -84,6 +90,16 @@ if (!mysqli_set_charset($link, "utf8")) {
                 <th>DATA DE ENTRADA</th>
                 <th>RESPONSÁVEL DO ATENDIMENTO / ANDAMENTO</th>
                 <th>DOADOR</th>
+                <th>TIPO DE FORMALIZAÇÃO</th>
+                <th>DESCRIÇÃO DO ITEM</th>
+                <th>TIPO DO ITEM</th>
+                <th>QUANTIDADE</th>
+                <th>VALOR TOTAL DA DOAÇÃO</th>
+                <th>DESTINO DA DOAÇÃO</th>
+                <th>CONTATO</th>
+                <th>PRAZO ENTREGA / PERÍODO DISPONIBILIZAÇÃO</th>
+                <th>ENDEREÇO DE ENTREGA</th>
+                <th>RESPONSÁVEL PELO RECEBIMENTO DA DOAÇÃO</th>                
                 <th>STATUS</th>
                 <th>Nº DO SEI</th>                    
                 <th>OBSERVAÇÃO</th>
@@ -91,23 +107,34 @@ if (!mysqli_set_charset($link, "utf8")) {
                 <th>BREVE RELATÓRIO DO PROCESSO SEI</th>
                 <th>ITENS PENDENTES NO PROCESSO SEI</th>
                 <th>MONITORAMENTO</th>
-                <th></th>
                 <th>Conferir/ Corrigir</th>
                 <th>Excluir</th>
             </tr>            
-            <tr v-for="item in itens" :class="item.conferido ? 'table-success' : ''">
+            <!-- <tr v-for="item in itens" :class="item.conferido ? 'table-success' : ''"> -->
+            <tr v-for="item in itens">
                 <td>{{itens.indexOf(item)+1}}</td>
-                <td><input class="form-control" v-model="item.entrada" style="max-width=: 100px"></td>
-                <td><input class="form-control" v-model="item.data_entrada" style="max-width=: 100px"></td>
-                <td><input class="form-control" v-model="item.responsavel_atendimento" style="max-width=: 100px"></td>
-                <td><input class="form-control" v-model="item.doador" style="max-width=: 100px"></td>
-                <td><input class="form-control" v-model="item.status" style="max-width=: 100px"></td>
-                <td><input class="form-control" v-model="item.numero_sei" style="max-width=: 100px"></td>
-                <td><input class="form-control" v-model="item.observacao" style="max-width=: 100px"></td>
-                <td><input class="form-control" v-model="item.comentario_sms" style="max-width=: 100px"></td>
-                <td><input class="form-control" v-model="item.relatorio_sei" style="max-width=: 100px"></td>
-                <td><input class="form-control" v-model="item.itens_pendentes_sei" style="max-width=: 100px"></td>
-                <td><input class="form-control" v-model="item.monitoramento" style="max-width=: 100px"></td>
+                <td><input class="form-control w-100" v-model="item.entrada"></td>
+                <td><input class="form-control" v-model="item.data_entrada" type="date"></td>
+                <td><input class="form-control" v-model="item.responsavel_atendimento"></td>
+                <td><input class="form-control" v-model="item.doador"></td>
+                <td><input class="form-control" v-model="item.tipo_formalizacao"></td>
+                <td><input class="form-control" v-model="item.descricao_item"></td>
+                <td><input class="form-control" v-model="item.tipo_item"></td>
+                <td><input class="form-control" v-model="item.quantidade"></td>
+                <td><input class="form-control" v-model="item.valor_total"></td>
+                <td><input class="form-control" v-model="item.destino"></td>
+                <td><input class="form-control" v-model="item.contato"></td>
+                <td><input class="form-control" v-model="item.prazo_periodo"></td>
+                <td><input class="form-control" v-model="item.endereco_entrega"></td>
+                <td><input class="form-control" v-model="item.responsavel_recebimento"></td>
+                <td><input class="form-control" v-model="item.status"></td>
+                <td><input class="form-control" v-model="item.numero_sei"></td>
+                <!-- <td><input class="form-control" v-model="item.observacao"></td> -->
+                <td><textarea class="form-control" v-model="item.observacao" style="min-width: 200px; min-height: 100px"></textarea></td>
+                <td><input class="form-control" v-model="item.comentario_sms"></td>
+                <td><input class="form-control" v-model="item.relatorio_sei"></td>
+                <td><input class="form-control" v-model="item.itens_pendentes_sei"></td>
+                <td><input class="form-control" v-model="item.monitoramento"></td>
                 <!-- BOTÃO PARA CONFIRMAR ITEM -->
                 <td>
                     <center>                        
@@ -117,7 +144,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                     </center>
                 </td>
                 <!-- BOTÃO PARA REMOVER ITEM -->
-                <td v-if="fiscal.setor !== 'TODOS'">
+                <td>
                     <center>
                         <button type="button" class="btn btn-danger btn-sm" @click="confirm('***************ATENÇÃO!***************\n\nTem certeza que deseja remover o item do cadastro? (esta ação não pode ser desfeita!)') ? remover(item) : false">
                             <span class="oi oi-x"></span>
@@ -129,12 +156,7 @@ if (!mysqli_set_charset($link, "utf8")) {
         <!-- <div v-if="fiscal.setor === 'TODOS'" style="vertical-align: middle; margin: 6em auto; text-align: center;">
             <h4>Para agilizar a consulta, a tabela foi desativada. Clique no botão abaixo para visualizar a planilha:</h4>
         </div> -->
-    </div>
-    <br>
-    <center>
-        <!-- <button class="btn btn-lg btn-info col-5" @click="obterLista()"><span class="oi oi-reload"></span> Atualizar Lista</button> -->
-        <button class="btn btn-lg btn-warning col-3" @click="exportarCSV()" title="Exportar arquivo CSV (Excel)"><span class="oi oi-spreadsheet"></span> Exportar planilha <span v-if="fiscal.setor === 'TODOS'">geral</span></button>
-    </center>
+    </div>    
 </div>
     
 <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
@@ -153,9 +175,7 @@ if (!mysqli_set_charset($link, "utf8")) {
 <!-- Vue.js -->
 <script>
     const fiscal = {
-        nome: "<?php echo $_SESSION['nomeUsuario']; ?>",
-        setor: "<?php echo $_SESSION['setorFiscal']; ?>",
-        divisao: "<?php echo $_SESSION['divisaoFiscal']; ?>"
+        nome: "<?php echo $_SESSION['nomeUsuario']; ?>"
     }
     var app = new Vue({
         el: '#app',
@@ -164,71 +184,7 @@ if (!mysqli_set_charset($link, "utf8")) {
             usuario: {
                 nome: "<?php echo $_SESSION['nomeUsuario']; ?>",
                 rf: "<?php echo $_SESSION['IDUsuario']; ?>"
-            },
-            descritivos: [
-                '01 - Sofá de 3 lugares, em couro sintético',
-                '02 - Rack para ti',
-                '03 - Quadro de cortiça',
-                '04 - Mesa "L", com uma das extremidades arredondada, pés em estrutura metálica',
-                '05 - Mesa retangular, pés em estrutura metálica com rodas',
-                '06 - Estação de trabalho, pés em estrutura metálica',
-                '07 - Mesa de trabalho, pés em estrutura metálica',
-                '08 - Mesa de reunião, pés em estrutura metálica',
-                '09 - Mesa em L “60°”, pés em estrutura metálica',
-                '10 - Mesa de impressora',
-                '11 - Mapoteca vertical, estrutura em aço',
-                '12 - Mapoteca horizontal',
-                '13 - Longarina com assentos estrutura dos pés em aço',
-                '14 - Gaveteiro com rodas, puxadores preto, 03 gavetas',
-                '15 - Frigobar',
-                '16 - Gaveteiro em estrutura metálica, com rodas, 02 gavetas',
-                '17 - Estante em aço, prateleiras',
-                '18 - Estante de aço, prateleiras',
-                '19 - Estação de trabalho pés em estrutura metálica',
-                '20 - Estação de trabalho, pés em estrutura metálica',
-                '21 - Estação de trabalho, pés em estrutura metálica',
-                '22 - Estação de trabalho, pés em estrutura metálica',
-                '23 - Estação de trabalho, pés em madeira',
-                '24 - Estação de trabalho, pés em madeira',
-                '25 - Carrinho para transporte, 4 rodas, estrutura em arame soldado',
-                '26 - Cadeira giratória, sem rodas, apoio de braço acoplado ao assento e encosto',
-                '27 - Cadeira fixa sem apoio de braços',
-                '28 - Cadeira giratória com apoio de braços',
-                '29 - Cadeira fixa, encosto e pés de metal',
-                '30 - Cadeira escolar adulto',
-                '31 - Cadeira fixa sem apoio de braços',
-                '32 - Cadeira giratória com apoio de braços',
-                '33 - Cadeira giratória com apoio de braços',
-                '34 - Cadeira fixa sem apoio de braços',
-                '35 - Cadeira fixa com apoio de braços',
-                '36 - Cadeira fixa com apoio de braços',
-                '37 - Cadeira giratória com apoio de braços',
-                '38 - Cadeira giratória sem apoio de braço, assento alto',
-                '39 - Armário',
-                '40 - Arquivo de aço com gavetas',
-                '41 - Arquivos deslizante com carros',
-                '42 - Mesa em L 90°, pés em madeira',
-                '43 - Armário',
-                '44 - Ar condicionado portátil',
-                '45 - Ar condicionado central',
-                '46 - Aparelho split para ar condicionado',
-                '47 - Mesa de luz, v',
-                '48 - Armário de aço',
-                '49 - Armário com porta de vidro',
-                '50 - Mesa com tampo de vidro',
-                '51 - Mesa de apoio',
-                '52 - Mesa em madeira maciça',
-                '53 - Forno de micro-ondas'
-            ],
-            fotoUrl: '',
-            orgaos: [],
-            setores: [],
-            divisoes: [],
-            orgao: '',
-            setor: '',
-            divisao: '',
-            andar: '',
-            sala: ''
+            }
         },
         methods: {
             /**
@@ -243,14 +199,14 @@ if (!mysqli_set_charset($link, "utf8")) {
             */
             exportarCSV: function () {
                 fiscal.rf = this.usuario.rf;
-                window.location = ('exportar-csv.php?setor='+fiscal.setor+'&divisao='+fiscal.divisao+'&rf='+fiscal.rf);
+                window.location = ('exportar-csv.php?rf='+fiscal.rf);
             },
             /**
                 ADIÇÃO DE ITENS À LISTA
             */
             obterLista: function (){
-                if(fiscal.setor === 'TODOS')
-                    return;
+                // if(fiscal.setor === 'TODOS')
+                //     return;
 
                 // ADD para restringir lista de gabinete de SEL/SMDU
                 fiscal.rf = this.usuario.rf;
@@ -258,7 +214,8 @@ if (!mysqli_set_charset($link, "utf8")) {
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
-                        app.itens = JSON.parse(this.response);                        
+                        app.itens = JSON.parse(this.response);
+                        app.corrigeValores();
                     }
                 };
                 xhttp.open("POST", "conferir.php", true);
@@ -266,12 +223,34 @@ if (!mysqli_set_charset($link, "utf8")) {
                 xhttp.send("fiscal="+JSON.stringify(fiscal));
                 console.log("Lista obtida.");
             },
+            corrigeValores: function() {
+                for (var i = 0; i < app.itens.length; i++) {
+                    // Se o valor contiver centavos, converte ponto em vírgula
+                    app.itens[i].valor_total = app.itens[i].valor_total.toString();
+                    console.warn("FOR... ",i);
+                    console.log(app.itens[i].valor_total);
+                    if (app.itens[i].valor_total.indexOf('.') >= 0) {
+                        app.itens[i].valor_total = app.itens[i].valor_total.replace('.', ',');
+                    }
+                    else if (app.itens[i].valor_total.length > 0 && app.itens[i].valor_total.indexOf(',') < 0) {
+                        app.itens[i].valor_total += ',00';
+                    }
+                }
+            },
             conferir: function(itemConferido) {
+                let adicionarVirgulas = false;
                 itemConferido.conferido = this.usuario.nome+' - '+this.usuario.rf;
+                if(itemConferido.numero_sei.length > 0)
+                    itemConferido.numero_sei = this.apenasNumeros(itemConferido.numero_sei);
+                if(itemConferido.valor_total.length > 0 && itemConferido.valor_total.indexOf(',') < 0) {
+                    itemConferido.valor_total = this.apenasNumeros(itemConferido.valor_total)/100;
+                }
+
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
                         console.log(this.response === '1' ? "SUCESSO!" : this.response);
+                        app.corrigeValores();
                     }
                 };
                 xhttp.open("PUT", "conferir.php", true);
