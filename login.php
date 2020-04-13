@@ -34,14 +34,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $senha = trim($_POST["senha"]);
     }
 
-    // TODO: REMOVER EM PROD
-    // Pula validação LDAP
-    $_SESSION["loggedin"] = true;
-    $_SESSION['nomeUsuario'] = "Renan Moreira Gomes";
-    $_SESSION['IDUsuario'] = "d851026";
-    header('location:index.php');
-    return;
-
     // Valida login
     // SCRIPT LDAP
     $server = "ldap://10.10.65.242";

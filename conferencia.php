@@ -132,8 +132,8 @@ if (!mysqli_set_charset($link, "utf8")) {
                 <!-- <td><input class="form-control" v-model="item.observacao"></td> -->
                 <td><textarea class="form-control" v-model="item.observacao" style="min-width: 200px; min-height: 100px"></textarea></td>
                 <td><input class="form-control" v-model="item.comentario_sms"></td>
-                <td><input class="form-control" v-model="item.relatorio_sei"></td>
-                <td><input class="form-control" v-model="item.itens_pendentes_sei"></td>
+                <td><textarea class="form-control" v-model="item.relatorio_sei" style="min-width: 300px; min-height: 100px"></textarea></td>
+                <td><textarea class="form-control" v-model="item.itens_pendentes_sei" style="min-width: 200px; min-height: 100px"></textarea></td>
                 <td><input class="form-control" v-model="item.monitoramento"></td>
                 <!-- BOTÃO PARA CONFIRMAR ITEM -->
                 <td>
@@ -227,8 +227,8 @@ if (!mysqli_set_charset($link, "utf8")) {
                 for (var i = 0; i < app.itens.length; i++) {
                     // Se o valor contiver centavos, converte ponto em vírgula
                     app.itens[i].valor_total = app.itens[i].valor_total.toString();
-                    console.warn("FOR... ",i);
-                    console.log(app.itens[i].valor_total);
+                    // console.warn("FOR... ",i);
+                    // console.log(app.itens[i].valor_total);
                     if (app.itens[i].valor_total.indexOf('.') >= 0) {
                         app.itens[i].valor_total = app.itens[i].valor_total.replace('.', ',');
                     }
@@ -242,6 +242,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                 itemConferido.conferido = this.usuario.nome+' - '+this.usuario.rf;
                 if(itemConferido.numero_sei.length > 0)
                     itemConferido.numero_sei = this.apenasNumeros(itemConferido.numero_sei);
+                // console.log(itemConferido.valor_total.indexOf(','));
                 if(itemConferido.valor_total.length > 0 && itemConferido.valor_total.indexOf(',') < 0) {
                     itemConferido.valor_total = this.apenasNumeros(itemConferido.valor_total)/100;
                 }
