@@ -53,15 +53,14 @@ if (!mysqli_set_charset($link, "utf8")) {
             <div class="col-3">
                 <div style="
                     width: 90%;
-                    clip-path: inset(0px 0px 20% 0px);
                     margin: 0 auto -30%;
                     max-width: 150px;
                     text-align: center;">
-                    <img src="img/logo_smdu.png" alt="Cidade de São Paulo" style="max-width: 100%; max-height: 50%;">
+                    <img src="img/logo_sp.png" alt="Cidade de São Paulo" style="max-width: 100%; max-height: 50%;">
                 </div>            
             </div>
             <div class="col-6">
-                <h1>Conferência registros de doações</h1>
+                <h1>Conferência de registros de doações</h1>
             </div>
             <div class="col-3">
                 <button class="btn btn-danger btn-sm float-right" @click="location.href='logout.php'">Sair do sistema</button>
@@ -117,9 +116,27 @@ if (!mysqli_set_charset($link, "utf8")) {
                 <td><input class="form-control" v-model="item.data_entrada" type="date"></td>
                 <td><input class="form-control" v-model="item.responsavel_atendimento"></td>
                 <td><input class="form-control" v-model="item.doador"></td>
-                <td><input class="form-control" v-model="item.tipo_formalizacao"></td>
+                <!-- <td><input class="form-control" v-model="item.tipo_formalizacao"></td> -->
+                <td>
+                    <select id="tipo_formalizacao" v-model="item.tipo_formalizacao" class="form-control" style="min-width: 200px">
+                        <!-- <option disabled selected value="">Tipo de formalização</option> -->
+                        <option>Pessoa física</option>
+                        <option>Pessoa jurídica</option>
+                        <option>Entidade religiosa</option>
+                        <option>Entidade não governamental</option>
+                    </select>
+                </td>
                 <td><input class="form-control" v-model="item.descricao_item"></td>
-                <td><input class="form-control" v-model="item.tipo_item"></td>
+                <!-- <td><input class="form-control" v-model="item.tipo_item"></td> -->
+                <td>
+                    <select id="tipo_item" v-model="item.tipo_item" class="form-control" style="min-width: 130px">
+                        <!-- <option disabled selected value="">Tipo de item</option> -->
+                        <option>Comodato</option>
+                        <option>Dinheiro</option>
+                        <option>Produto</option>
+                        <option>Serviço</option>
+                    </select>
+                </td>
                 <td><input class="form-control" v-model="item.quantidade"></td>
                 <td><input class="form-control" v-model="item.valor_total"></td>
                 <td><input class="form-control" v-model="item.destino"></td>
@@ -127,9 +144,20 @@ if (!mysqli_set_charset($link, "utf8")) {
                 <td><input class="form-control" v-model="item.prazo_periodo"></td>
                 <td><input class="form-control" v-model="item.endereco_entrega"></td>
                 <td><input class="form-control" v-model="item.responsavel_recebimento"></td>
-                <td><input class="form-control" v-model="item.status"></td>
+                <!-- <td><input class="form-control" v-model="item.status"></td> -->
+                <td>
+                    <select id="status" v-model="item.status" class="form-control" style="min-width: 200px">
+                        <!-- <option disabled selected value="">Status</option>                                     -->
+                        <option>Contato não iniciado</option>
+                        <option>Contato iniciado</option>
+                        <option>Em processo de formalização</option>
+                        <option>Aguardando entrega</option>
+                        <option>Produto/serviço entregue</option>
+                        <option>Finalizado com termo de recebimento</option>
+                        <option>Encerrado</option>
+                    </select>
+                </td>
                 <td><input class="form-control" v-model="item.numero_sei"></td>
-                <!-- <td><input class="form-control" v-model="item.observacao"></td> -->
                 <td><textarea class="form-control" v-model="item.observacao" style="min-width: 200px; min-height: 100px"></textarea></td>
                 <td><input class="form-control" v-model="item.comentario_sms"></td>
                 <td><textarea class="form-control" v-model="item.relatorio_sei" style="min-width: 300px; min-height: 100px"></textarea></td>
@@ -235,16 +263,39 @@ if (!mysqli_set_charset($link, "utf8")) {
                     else if (app.itens[i].valor_total.length > 0 && app.itens[i].valor_total.indexOf(',') < 0) {
                         app.itens[i].valor_total += ',00';
                     }
+
+                    app.itens[i].valor_total = "R$ " + app.itens[i].valor_total.replace('R$ ', '');
+                }
+            },
+            consertaMoeda: function(valor) {
+                if(valor.indexOf(',') > 0){
+                    if(valor.length - 3 !== valor.indexOf(',')) {
+                        window.alert("Valor total da doação INVÁLIDO. Por favor, verifique se o valor está correto.");
+                        return false;
+                    }
+                    else {
+                        valor = parseFloat(valor.replace(/R/g, '').replace(/\$/g, '').replace(/\./g, "").replace(",", "."));
+                        return valor;
+                    }                    
+                }
+                else {
+                    return parseFloat(valor.replace(/R/g, '').replace(/\$/g, '').replace(/\./g, "").replace(",", "."));
                 }
             },
             conferir: function(itemConferido) {
                 let adicionarVirgulas = false;
                 itemConferido.conferido = this.usuario.nome+' - '+this.usuario.rf;
+                /*
                 if(itemConferido.numero_sei.length > 0)
                     itemConferido.numero_sei = this.apenasNumeros(itemConferido.numero_sei);
+                */
                 // console.log(itemConferido.valor_total.indexOf(','));
-                if(itemConferido.valor_total.length > 0 && itemConferido.valor_total.indexOf(',') < 0) {
-                    itemConferido.valor_total = this.apenasNumeros(itemConferido.valor_total)/100;
+
+                if(itemConferido.valor_total.length > 0) {
+                    itemConferido.valor_total = this.consertaMoeda(itemConferido.valor_total)
+                    console.log("Valor: ", itemConferido.valor_total);
+                    if(!itemConferido.valor_total)
+                        return;
                 }
 
                 var xhttp = new XMLHttpRequest();

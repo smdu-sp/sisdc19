@@ -48,8 +48,13 @@ if ($_SERVER["REQUEST_METHOD"] == "PUT") {
 	if(!mysqli_query($link, $sql)){
 		printf("Errormessage: %s\n", mysqli_error($link));
 	}
-	else
+	else {
+		session_start();
+		$sqlLog = "INSERT INTO `log_geral` (`rf`, `registro`) VALUES ('".strtolower($_SESSION['IDUsuario'])."', 'alteracao_doacao');";
+		if(!mysqli_query($link, $sqlLog))
+		    printf("Errormessage: %s\n", mysqli_error($link));
 		echo 1;
+	}
 	// echo $sql;
 	return;
 }

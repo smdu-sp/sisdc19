@@ -33,7 +33,12 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 			$cadastrados+=1;
 
 	}
-	
+	// LOG de cadastro
+	session_start();
+	$sqlLog = "INSERT INTO `log_geral` (`rf`, `registro`) VALUES ('".strtolower($_SESSION['IDUsuario'])."', 'cadastro_doacao');";
+	if(!mysqli_query($link, $sqlLog))
+	    printf("Errormessage: %s\n", mysqli_error($link));
+
 	echo $cadastrados;
 	return;	
 }

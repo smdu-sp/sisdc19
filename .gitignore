@@ -13,5 +13,6 @@ yarn-error.log
 .bkp
 .env.bkp
 config.php
-
+*.sql
 *.jpg
+*.png

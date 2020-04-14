@@ -84,6 +84,12 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                     $_SESSION['responsavel'] = $row['nome'];
                 }
             }
+            // LOG DE ACESSO
+            if($_SESSION['responsavel'] != ''){
+                $sql = "INSERT INTO `log_geral` (`rf`, `registro`) VALUES ('".strtolower($inicial)."', 'login');";
+                if(!mysqli_query($link, $sql))
+                    printf("Errormessage: %s\n", mysqli_error($link));
+            }
             $link->close();
             
             if($_SESSION['responsavel'] == ''){
@@ -104,8 +110,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>DOAÇÕES DECORRENTES DA PANDEMIA DO COVID-19</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css">
+    <title>Doações decorrentes da pandemia do COVID-19</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
     <style type="text/css">
         body{ font: 14px sans-serif; }
         .wrapper{ width: 350px; padding: 20px; }
@@ -113,12 +119,10 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 </head>
 <body>
     <div class="wrapper" style="margin: 0 auto;">
-        <div style="width: 200px;
-            clip-path: inset(0px 0px 40px 0px);
-            margin: 0 auto -60px;">
-            <img src="img/logo_smdu.png" alt="Cidade de São Paulo" width="200">
+        <div style="width: 200px; margin: 0 auto;">
+            <img src="img/logo_sp.png" alt="Cidade de São Paulo" width="200">
         </div>
-        <center><h3><strong>Gabinete do Prefeito</strong></h3></center>
+        <!-- <center><h3><strong>Gabinete do Prefeito</strong></h3></center> -->
         <br>
         <h2>Doações decorrentes da pandemia do COVID-19</h2>
         <p>Digite seu login e senha da rede</p>

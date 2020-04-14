@@ -47,11 +47,10 @@ if (!mysqli_set_charset($link, "utf8")) {
 		<div class="col-3">
 			<div style="
 				width: 90%;
-				clip-path: inset(0px 0px 20% 0px);
 				margin: 0 auto -30%;
 				max-width: 150px;
 				text-align: center;">
-				<img src="img/logo_smdu.png" alt="Cidade de São Paulo" style="max-width: 100%; max-height: 50%;">
+				<img src="img/logo_sp.png" alt="Cidade de São Paulo" style="max-width: 100%; max-height: 50%;">
 			</div>            
 		</div>
 		<div class="col">
@@ -119,7 +118,7 @@ if (!mysqli_set_charset($link, "utf8")) {
 									<option>Pessoa jurídica</option>
 									<option>Entidade religiosa</option>
 									<option>Entidade não governamental</option>
-								</select>								
+								</select>
 							</div>
 						<br>						
 						</div>
@@ -204,11 +203,21 @@ if (!mysqli_set_charset($link, "utf8")) {
 								>
 							</div>
 							<div class="col">
-								<input
+								<!-- <input
 								class="form-control form-control-sm"
 								v-model="novoItem.status"
 								placeholder="Status"
-								>
+								> -->
+                                <select id="status" v-model="novoItem.status" class="form-control form-control-sm">
+                                    <option disabled selected value="">Status</option>                                    
+                                    <option>Contato não iniciado</option>
+                                    <option>Contato iniciado</option>
+                                    <option>Em processo de formalização</option>
+                                    <option>Aguardando entrega</option>
+                                    <option>Produto/serviço entregue</option>
+                                    <option>Finalizado com termo de recebimento</option>
+                                    <option>Encerrado</option>
+                                </select>
 							</div>
 							<div class="col col-2">
 								<input
