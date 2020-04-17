@@ -17,7 +17,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 	<head>
 		<meta charset="utf-8">
 		<link rel="stylesheet" href="css/bootstrap.min.css">
-		<link rel="stylesheet" href="css/custom.css">
+        <link rel="stylesheet" href="css/custom.css">
 		<script src="js/vue.js"></script>
 		<title>Doações decorrentes da pandemia do COVID-19</title>        
 	</head>
@@ -76,18 +76,9 @@ if (!mysqli_set_charset($link, "utf8")) {
 					<div class="col">
 						<!-- ENTRADA, DATA, RESPONSÁVEL, DOADOR, FORMALIZAÇÃO -->
 						<div class="form-row">
-							<div class="col col-2">
-								<!-- <label for="entrada">Origem de entrada</label> -->
-								<input 
-								class="form-control form-control-sm"
-								v-model="novoItem.entrada"
-								id="entrada"
-								placeholder="Entrada"
-								>
-							</div>
 							<div class="input-group input-group-sm col col-3">
 								<div class="input-group-prepend">
-									<span class="input-group-text">Data de entrada</span>
+									<span class="input-group-text">Data 1º contato</span>
 								</div>								
 								<input
 									class="form-control form-control-sm"
@@ -97,10 +88,18 @@ if (!mysqli_set_charset($link, "utf8")) {
 									>
 							</div>
 							<div class="col col-2">
+								<input 
+								class="form-control form-control-sm"
+								v-model="novoItem.entrada"
+								id="entrada"
+								placeholder="Entrada"
+								>
+							</div>
+							<div class="col col-2">
 								<input
 								class="form-control form-control-sm"
 								v-model="novoItem.responsavel_atendimento"
-								placeholder="Responsável"
+								placeholder="Responsável atendimento"
 								>
 							</div>
 							<div class="col col-3">
@@ -120,96 +119,66 @@ if (!mysqli_set_charset($link, "utf8")) {
 									<option>Entidade não governamental</option>
 								</select>
 							</div>
-						<br>						
 						</div>
 						<br>
-						<!-- DESCRIÇÃO, TIPO, QUANTIDADE, VALOR, DESTINO -->
-						<div class="form-row">
-							<div class="col">
-								<input
-								class="form-control form-control-sm"
-								v-model="novoItem.descricao_item"
-								placeholder="Descrição do Item"
-								>
-							</div>
+                        <!-- CONTATO DOADOR -->
+                        <div class="form-row">
+                            <div class="col">
+                                <input
+                                class="form-control form-control-sm"
+                                v-model="novoItem.contato"
+                                placeholder="Contato"
+                                >
+                            </div>
+                            <div class="col">
+                                <input
+                                class="form-control form-control-sm"
+                                v-model="novoItem.telefone_doador"
+                                placeholder="Telefone Doador (11) 1234-5678"
+                                >
+                            </div>
+                            <div class="col">
+                                <input
+                                class="form-control form-control-sm"
+                                v-model="novoItem.email_doador"
+                                placeholder="E-mail Doador"
+                                >
+                            </div>
+                        </div>
+                        <br>
+						<!-- TIPO, CATEGORIA E DESCRIÇÃO DO ITEM -->
+						<div class="form-row">							
 							<div class="col col-2">
-								<select id="tipo_item" v-model="novoItem.tipo_item" class="form-control form-control-sm">
+								<select
+                                id="tipo_item"
+                                v-model="novoItem.tipo_item"   
+                                @change="atualizaTipos()"
+                                class="form-control form-control-sm">
 									<option disabled selected value="">Tipo de item</option>
-									<option>Comodato</option>
-									<option>Dinheiro</option>
-									<option>Produto</option>
-									<option>Serviço</option>
-								</select>								
+									<option v-for="i in tiposItem">{{i.tipo}}</option>
+								</select>
 							</div>
-							<div class="col">
-								<input
-								class="form-control form-control-sm"
-								v-model="novoItem.quantidade"
-								placeholder="Quantidade"
-								>
-							</div>
-							<div class="col input-group input-group-sm">
-								<div class="input-group-prepend">
-									<span class="input-group-text">R$</span>
-								</div>
-								<input
-								class="form-control form-control-sm"
-								v-model="novoItem.valor_total"
-								placeholder="Valor total da doação"
-								title="Valor total (ex.: 999999,00)"
-								>
-							</div>
-							<div class="col col-2">
-								<input
-								class="form-control form-control-sm"
-								v-model="novoItem.destino"
-								placeholder="Destino da doação"
-								>
-							</div>
-						</div>
+                            <div class="col col-2">
+                                <select class="form-control form-control-sm" v-model="novoItem.categoria_item">
+                                    <option disabled selected value="">Categoria</option>                 
+                                    <option v-if="novoItem.tipo_item" v-for="categoria in categoriasTipoitem">{{categoria}}</option>
+                                    <option>Outros</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <input
+                                class="form-control form-control-sm"
+                                v-model="novoItem.descricao_item"
+                                placeholder="Descrição do Item"
+                                >
+                            </div>
+                        </div>
 						<br>
-						<!-- CONTATO, PRAZO ENTREGA, ENDEREÇO ENTREGA, REPONSÁVEL RECEBIMENTO -->
-						<div class="form-row">
-							<div class="col">
-								<input
-								class="form-control form-control-sm"
-								v-model="novoItem.contato"
-								placeholder="Contato"
-								>
-							</div>
-							<div class="col">
-								<input
-								class="form-control form-control-sm"
-								v-model="novoItem.prazo_periodo"
-								placeholder="Prazo entrega / Período disponibilização"
-								>
-							</div>
-							<div class="col">
-								<input
-								class="form-control form-control-sm"
-								v-model="novoItem.endereco_entrega"
-								placeholder="Endereço de entrega"
-								>
-							</div>							
-						</div>
-						<br>
-						<!-- STATUS, NUMERO SEI, OBSERVAÇÃO -->
-						<div class="form-row">
-							<div class="col">
-								<input
-								class="form-control form-control-sm"
-								v-model="novoItem.responsavel_recebimento"
-								placeholder="Responsável pelo recebimento da doação"
-								>
-							</div>
-							<div class="col">
-								<!-- <input
-								class="form-control form-control-sm"
-								v-model="novoItem.status"
-								placeholder="Status"
-								> -->
+                        <!-- STATUS, DESTINO, RECEBIMENTO -->
+                        <div class="form-row">
+                            <div class="col">
                                 <select id="status" v-model="novoItem.status" class="form-control form-control-sm">
-                                    <option disabled selected value="">Status</option>                                    
+                                    <option disabled selected value="">Status</option>
                                     <option>Contato não iniciado</option>
                                     <option>Contato iniciado</option>
                                     <option>Em processo de formalização</option>
@@ -218,7 +187,93 @@ if (!mysqli_set_charset($link, "utf8")) {
                                     <option>Finalizado com termo de recebimento</option>
                                     <option>Encerrado</option>
                                 </select>
+                            </div>
+                            <div class="col">
+                                <input
+                                class="form-control form-control-sm"
+                                v-model="novoItem.destino"
+                                placeholder="Destino da doação"
+                                >
+                            </div>
+                            <div class="col">
+                                <input
+                                class="form-control form-control-sm"
+                                v-model="novoItem.endereco_entrega"
+                                placeholder="Local de Destinação (Endereço)"
+                                >
+                            </div>
+                            <div class="col">
+                                <input
+                                class="form-control form-control-sm"
+                                v-model="novoItem.responsavel_recebimento"
+                                placeholder="Responsável pelo recebimento da doação"
+                                >
+                            </div>
+                        </div>
+                        <br>
+                        <!-- QUANTIDADE TOTAL DOADA, UNIDADE MEDIDA, VALOR TOTAL, FRACIONADA, QTDE ENTREGAS -->
+                        <div class="form-row">
+                            <div class="col col-2">
+                                <input
+                                class="form-control form-control-sm"
+                                v-model="novoItem.quantidade"
+                                placeholder="Quantidade"
+                                type="number"
+                                >
+                            </div>
+                            <div class="col col-2">
+                                <select v-model="novoItem.unidade_medida" class="form-control form-control-sm">
+                                    <option selected disabled value="">Unidade de medida</option>
+                                    <option v-for="unidade in unidadesDeMedida">{{ unidade }}</option>
+                                </select>
+                            </div>
+                            <div class="col input-group input-group-sm">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">R$</span>
+                                </div>
+                                <input
+                                class="form-control form-control-sm"
+                                v-model="novoItem.valor_total"
+                                placeholder="Valor total da doação"
+                                title="Valor total (ex.: 999999,00)"
+                                >
+                            </div>
+                            <!-- <div class="col"> -->
+                            <div class="input-group input-group-sm col col-3">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text my-0" @click="novoItem.entrada_fracionada = novoItem.entrada_fracionada == 0 ? 1 : 0">Entrada fracionada?</label>
+                                </div>
+                                <div class="form-row customRadio">
+                                    <div class="col">
+                                        <input id="nao_fracionada" type="radio" v-model="novoItem.entrada_fracionada" value="0">
+                                        <label for="nao_fracionada">Não</label>
+                                    </div>
+                                    <div class="col">
+                                        <input id="fracionada" type="radio" v-model="novoItem.entrada_fracionada" value="1">
+                                        <label for="fracionada">Sim</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <!-- QUANTIDADE DE ENTREGAS, DATAS RECEBIMENTO / DISTRIBUIÇÃO -->
+                        <!-- TODO: CRIAR DIV COM INSERÇÃO DINÂMICA DE ITENS -->
+
+
+
+						<!-- PRAZO ENTREGA, ENDEREÇO ENTREGA, REPONSÁVEL RECEBIMENTO -->
+						<div class="form-row">
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.prazo_periodo"
+								placeholder="Prazo entrega / Período disponibilização"
+								>
 							</div>
+						</div>
+						<br>
+						<!-- STATUS, NUMERO SEI, OBSERVAÇÃO -->
+						<div class="form-row">
 							<div class="col col-2">
 								<input
 								class="form-control form-control-sm"
@@ -328,21 +383,26 @@ if (!mysqli_set_charset($link, "utf8")) {
 <!-- Vue.js -->
 <script>	
 	const DoacaoObj = {
-			entrada: '',
 			data_entrada: '',
+			entrada: '',
 			responsavel_atendimento: '',
 			doador: '',
 			tipo_formalizacao: '',
-			descricao_item: '',
-			tipo_item: '',
-			quantidade: '',
-			valor_total: '',
-			destino: '',
 			contato: '',
-			prazo_periodo: '',
+            telefone_doador: '',
+            email_doador: '',
+			tipo_item: '',
+            categoria_item: '',
+			descricao_item: '',
+			status: '',
+			destino: '',
 			endereco_entrega: '',
 			responsavel_recebimento: '',
-			status: '',
+			quantidade: '',
+            unidade_medida: '',
+			valor_total: '',
+            entrada_fracionada: 0,
+			prazo_periodo: '',
 			numero_sei: '',
 			observacao: '',
 			comentario_sms: '',
@@ -359,7 +419,39 @@ if (!mysqli_set_charset($link, "utf8")) {
 			usuario: {
 				nome: "<?php echo $_SESSION['nomeUsuario']; ?>",
 				rf: "<?php echo $_SESSION['IDUsuario']; ?>"
-			},						
+			},
+            categoriasTipoitem: [],
+            tiposItem: [
+                {
+                    tipo: 'Comodato',
+                    categorias: ['Espaço físico']
+                },
+                {
+                    tipo: 'Dinheiro',
+                    categorias: ['Recursos financeiros']
+                },                
+                {
+                    tipo: 'Produto',
+                    categorias: [
+                        'Álcool',
+                        'Alimentos',
+                        'Insumo hospitalar'
+                    ]
+                },
+                {
+                    tipo: 'Serviço',
+                    categorias: ['Hospedagem']
+                }
+            ],
+            unidadesDeMedida: [
+                'Unidades',
+                'Litros',
+                'Quilos',
+                'Caixas',
+                'Horas',
+                'm²',
+                'R$',
+            ],
 			keepInfo: false
 		},
 		methods: {
@@ -388,6 +480,15 @@ if (!mysqli_set_charset($link, "utf8")) {
 				this.novoItem = DoacaoObj;
 				this.cadastrarDoacoes(); // Remover caso seja preciso retomar o modo de inclusão em massa
 			},
+            atualizaTipos: function () {
+                this.novoItem.categoria_item = "";
+                for (var i = 0; i < this.tiposItem.length; i++) {
+                    if(this.tiposItem[i].tipo == this.novoItem.tipo_item){
+                        this.categoriasTipoitem = this.tiposItem[i].categorias;
+                        break;
+                    }
+                }
+            },
 			/** 
 				CADASTRO DE Doacoes
 			*/
@@ -443,6 +544,17 @@ input[type=number]::-webkit-outer-spin-button {
 	position: absolute;
 	left: 10px;
 	max-width: calc(100% - 20px);
+}
+.customRadio {
+    margin-left: 5px;
+    max-height: 30px;
+}
+.customRadio input {
+    position: absolute;
+    margin: auto 25%;
+}
+.customRadio label {
+    line-height: 0.5em;
 }
 </style>
 
