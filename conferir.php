@@ -27,6 +27,26 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 	$doacoes = [];
 	if($retornoQuery->num_rows > 0){
 	    while ($row = $retornoQuery->fetch_assoc()) {
+	    	// BUSCA RECEBIMENTOS E DISTRIBUICOES DE CADA DOAÇÃO
+	    	$sqlDistri = "SELECT * FROM `distribuicoes` WHERE `id_doacao`=".$row['id'].";";
+	    	$distribuicoes = [];
+	    	$queryInterna = $link->query($sqlDistri);
+	    	if ($queryInterna->num_rows > 0) {
+	    		while ($distri = $queryInterna->fetch_assoc()) {
+	    			array_push($distribuicoes, $distri);
+	    		}
+	    	}
+	    	$sqlReceb = "SELECT * FROM `recebimentos` WHERE `id_doacao`=".$row['id'].";";
+	    	$recebimentos = [];
+	    	$queryInterna = $link->query($sqlReceb);
+	    	if ($queryInterna->num_rows > 0) {
+	    		while ($receb = $queryInterna->fetch_assoc()) {
+	    			array_push($recebimentos, $receb);
+	    		}
+	    	}
+	    	$row['distribuicoes'] = $distribuicoes;
+	    	$row['recebimentos'] = $recebimentos;
+	    	
 	    	array_push($doacoes, $row);
 	    }
 	}

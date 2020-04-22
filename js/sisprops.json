@@ -1,0 +1,42 @@
+const sisprops = {
+	"tiposItem": [
+		{
+			"tipo": "Comodato",
+			"categorias": ["Espaço físico"]
+		},
+		{
+			"tipo": "Dinheiro",
+			"categorias": ["Recursos financeiros"]
+		},                
+		{
+			"tipo": "Produto",
+			"categorias": [
+				"Álcool",
+				"Alimentos",
+				"Insumo hospitalar"
+			]
+		},
+		{
+			"tipo": "Serviço",
+			"categorias": ["Hospedagem"]
+		}
+	],
+	"unidadesDeMedida": [
+		"Unidades",
+		"Litros",
+		"Quilos",
+		"Caixas",
+		"Horas",
+		"m²",
+		"R$",
+	],
+	"statuses": [
+		"Contato não iniciado",
+		"Contato iniciado",
+		"Em processo de formalização",
+		"Aguardando entrega",
+		"Produto/serviço entregue",
+		"Finalizado com termo de recebimento",
+		"Encerrado"
+	]
+}

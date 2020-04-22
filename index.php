@@ -180,13 +180,14 @@ if (!mysqli_set_charset($link, "utf8")) {
 						<div class="col">
 							<select id="status" v-model="novoItem.status" class="form-control form-control-sm">
 								<option disabled selected value="">Status</option>
-								<option>Contato não iniciado</option>
+								<option v-for="status in statuses">{{status}}</option>
+								<!-- <option>Contato não iniciado</option>
 								<option>Contato iniciado</option>
 								<option>Em processo de formalização</option>
 								<option>Aguardando entrega</option>
 								<option>Produto/serviço entregue</option>
 								<option>Finalizado com termo de recebimento</option>
-								<option>Encerrado</option>
+								<option>Encerrado</option> -->
 							</select>
 						</div>
 						<div class="col">
@@ -385,9 +386,10 @@ if (!mysqli_set_charset($link, "utf8")) {
 <script type="text/javascript" src="js/lodash.min.js"></script>
 <script type="text/javascript" src="js/popper.min.js"></script>
 <script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/sisprops.json"></script>
 
 <!-- Vue.js -->
-<script>	
+<script>
 	const DoacaoObj = {
 			data_entrada: '',
 			entrada: '',
@@ -420,7 +422,7 @@ if (!mysqli_set_charset($link, "utf8")) {
 			itens_pendentes_sei: '',
 			monitoramento: ''
 	};
-	
+
 	var app = new Vue({
 		el: '#app',
 		data: {
@@ -431,38 +433,10 @@ if (!mysqli_set_charset($link, "utf8")) {
 				rf: "<?php echo $_SESSION['IDUsuario']; ?>"
 			},
 			categoriasTipoitem: [],
-			tiposItem: [
-				{
-					tipo: 'Comodato',
-					categorias: ['Espaço físico']
-				},
-				{
-					tipo: 'Dinheiro',
-					categorias: ['Recursos financeiros']
-				},                
-				{
-					tipo: 'Produto',
-					categorias: [
-					'Álcool',
-					'Alimentos',
-					'Insumo hospitalar'
-					]
-				},
-				{
-					tipo: 'Serviço',
-					categorias: ['Hospedagem']
-				}
-			],
-			unidadesDeMedida: [
-				'Unidades',
-				'Litros',
-				'Quilos',
-				'Caixas',
-				'Horas',
-				'm²',
-				'R$',
-			],
-			keepInfo: false
+			keepInfo: false,
+			statuses: sisprops.statuses,
+			tiposItem: sisprops.tiposItem,
+			unidadesDeMedida: sisprops.unidadesDeMedida
 		},
 		methods: {
 			/**
@@ -540,7 +514,7 @@ if (!mysqli_set_charset($link, "utf8")) {
 				}
 				this.novoItem.saldo_residual = residual;
 
-				let aDistribuir = residual;
+				let aDistribuir = this.novoItem.quantidade - residual;
 				for (var i = 0; i < this.novoItem.distribuicoes.length; i++) {
 					if(!isNaN(parseFloat(this.novoItem.distribuicoes[i].qtde_distribuicao))){
 						aDistribuir -= parseFloat(this.novoItem.distribuicoes[i].qtde_distribuicao);

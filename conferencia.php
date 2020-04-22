@@ -85,38 +85,42 @@ if (!mysqli_set_charset($link, "utf8")) {
         <table class="table table-striped">
             <tr>
                 <th>#</th>
-                <th>ENTRADA</th>
-                <th>DATA DE ENTRADA</th>
-                <th>RESPONSÁVEL DO ATENDIMENTO / ANDAMENTO</th>
+                <th>DATA 1º CONTATO</th>
+                <th>ENTRADA DOAÇÃO</th>
+                <th>RESPONSÁVEL ATENDIMENTO</th>
                 <th>DOADOR</th>
                 <th>TIPO DE FORMALIZAÇÃO</th>
+                <th>CONTATO DOADOR</th>
+                <th>TELEFONE DOADOR</th>
+                <th>E-MAIL DOADOR</th>
+                <th>TIPO DE ITEM</th>
+                <th>CATEGORIA ITEM</th>
                 <th>DESCRIÇÃO DO ITEM</th>
-                <th>TIPO DO ITEM</th>
-                <th>QUANTIDADE</th>
-                <th>VALOR TOTAL DA DOAÇÃO</th>
-                <th>DESTINO DA DOAÇÃO</th>
-                <th>CONTATO</th>
-                <th>PRAZO ENTREGA / PERÍODO DISPONIBILIZAÇÃO</th>
-                <th>ENDEREÇO DE ENTREGA</th>
-                <th>RESPONSÁVEL PELO RECEBIMENTO DA DOAÇÃO</th>                
                 <th>STATUS</th>
+                <th>DESTINO DA DOAÇÃO</th>
+                <th>LOCAL DE DESTINAÇÃO (ENDEREÇO)</th>
+                <th>RESPONSÁVEL PELO RECEBIMENTO</th>
+                <th>QUANTIDADE</th>
+                <th>UNIDADE</th>
+                <th>VALOR TOTAL DA DOAÇÃO</th>
+                <th>ENTRADA FRACIONADA</th>
+                <th>ENTREGA</th>
+                <th>DISTRIBUIÇÃO</th>
+                <th>VALIDADE DOAÇÃO</th>
                 <th>Nº DO SEI</th>                    
-                <th>OBSERVAÇÃO</th>
-                <th>COMENTÁRIO SMS</th>
-                <th>BREVE RELATÓRIO DO PROCESSO SEI</th>
+                <th>RELATÓRIO DO PROCESSO SEI</th>
                 <th>ITENS PENDENTES NO PROCESSO SEI</th>
-                <th>MONITORAMENTO</th>
-                <th>Conferir/ Corrigir</th>
+                <th>OBSERVAÇÃO</th>
+                <th>Conferir/Corrigir</th>
                 <th>Excluir</th>
             </tr>            
             <!-- <tr v-for="item in itens" :class="item.conferido ? 'table-success' : ''"> -->
             <tr v-for="item in itens">
                 <td>{{itens.indexOf(item)+1}}</td>
-                <td><input class="form-control w-100" v-model="item.entrada"></td>
                 <td><input class="form-control" v-model="item.data_entrada" type="date"></td>
+                <td><input class="form-control w-100" v-model="item.entrada"></td>
                 <td><input class="form-control" v-model="item.responsavel_atendimento"></td>
                 <td><input class="form-control" v-model="item.doador"></td>
-                <!-- <td><input class="form-control" v-model="item.tipo_formalizacao"></td> -->
                 <td>
                     <select id="tipo_formalizacao" v-model="item.tipo_formalizacao" class="form-control" style="min-width: 200px">
                         <!-- <option disabled selected value="">Tipo de formalização</option> -->
@@ -126,43 +130,123 @@ if (!mysqli_set_charset($link, "utf8")) {
                         <option>Entidade não governamental</option>
                     </select>
                 </td>
-                <td><input class="form-control" v-model="item.descricao_item"></td>
-                <!-- <td><input class="form-control" v-model="item.tipo_item"></td> -->
+                <td><input class="form-control" v-model="item.contato"></td>
+                <td><input class="form-control" v-model="item.telefone_doador"></td>
+                <td><input class="form-control" v-model="item.email_doador"></td>
                 <td>
-                    <select id="tipo_item" v-model="item.tipo_item" class="form-control" style="min-width: 130px">
-                        <!-- <option disabled selected value="">Tipo de item</option> -->
-                        <option>Comodato</option>
-                        <option>Dinheiro</option>
-                        <option>Produto</option>
-                        <option>Serviço</option>
+                    <select
+                        id="tipo_item"
+                        v-model="item.tipo_item"   
+                        class="form-control"
+                        style="min-width: 130px">
+                        <option disabled selected value="">Tipo de item</option>
+                        <option v-for="i in tiposItem">{{i.tipo}}</option>
                     </select>
                 </td>
-                <td><input class="form-control" v-model="item.quantidade"></td>
-                <td><input class="form-control" v-model="item.valor_total"></td>
-                <td><input class="form-control" v-model="item.destino"></td>
-                <td><input class="form-control" v-model="item.contato"></td>
-                <td><input class="form-control" v-model="item.prazo_periodo"></td>
-                <td><input class="form-control" v-model="item.endereco_entrega"></td>
-                <td><input class="form-control" v-model="item.responsavel_recebimento"></td>
-                <!-- <td><input class="form-control" v-model="item.status"></td> -->
+                <td>
+                    <select class="form-control" v-model="item.categoria_item">
+                        <option disabled selected value="">Categoria</option>                 
+                        <option v-if="item.tipo_item == categoria.tipo" v-for="categoria in categoriasTipoitem">{{categoria.nome}}</option>
+                        <option>Outros</option>
+                    </select>
+                </td>
+                <td><input class="form-control" v-model="item.descricao_item"></td>
                 <td>
                     <select id="status" v-model="item.status" class="form-control" style="min-width: 200px">
-                        <!-- <option disabled selected value="">Status</option>                                     -->
-                        <option>Contato não iniciado</option>
-                        <option>Contato iniciado</option>
-                        <option>Em processo de formalização</option>
-                        <option>Aguardando entrega</option>
-                        <option>Produto/serviço entregue</option>
-                        <option>Finalizado com termo de recebimento</option>
-                        <option>Encerrado</option>
+                        <option disabled value="">Status</option>                                    
+                        <option v-for="status in statuses">{{status}}</option>
                     </select>
                 </td>
+                <td><input class="form-control" v-model="item.destino"></td>
+                <td><input class="form-control" v-model="item.endereco_entrega"></td>
+                <td><input class="form-control" v-model="item.responsavel_recebimento"></td>
+                <td><input class="form-control" v-model="item.quantidade" placeholder="Quantidade" title="Quantidade" @keyup="corrigeNumberType(item, 'quantidade')"></td>
+                <td>
+                    <select v-model="item.unidade_medida" class="form-control" title="Unidade de medida" style="min-width: 100px">
+                        <option selected disabled value="">Unidade de medida</option>
+                        <option v-for="unidade in unidadesDeMedida">{{ unidade }}</option>
+                    </select>
+                </td>
+                <td><input class="form-control" v-model="item.valor_total"></td>
+                <td>
+                    <div class="form-row customRadio">
+                        <div class="col">
+                            <input id="nao_fracionada" type="radio" v-model="item.entrada_fracionada" value="0">
+                            <label for="nao_fracionada">Não</label>
+                        </div>
+                        <div class="col">
+                            <input id="fracionada" type="radio" v-model="item.entrada_fracionada" value="1">
+                            <label for="fracionada">Sim</label>
+                        </div>
+                    </div>                    
+                </td>
+                <td>
+                    <div v-for="(entrega, index) in item.recebimentos" class="form-row my-1 lista-interna">
+                        <span class="badge badge-light">{{ index+1 }}</span>
+                        <div class="input-group input-group-sm col">                            
+                            <span class="badge badge-light" style="font-size: 11px">Data de recebimento</span>
+                            <input class="form-control form-control-sm"
+                            v-model="entrega.data_recebimento"
+                            type="date" 
+                            >
+                        </div>
+                        <div class="input-group input-group-sm col">
+                            <span class="badge badge-light" style="font-size: 11px">Quantidade</span>
+                            <input class="form-control form-control-sm"
+                            v-model="entrega.qtde_recebida"
+                            placeholder="Qtde recebida" title="Qtde recebida"
+                            @keyup.prevent="corrigeNumberType(entrega, 'qtde_recebida')"
+                            @change="calculaSaldos(item)"
+                            >
+                        </div>
+                        <div class="input-group input-group-sm col">
+                            <button type="button" title="Remover entrega" class="btn btn-danger btn-sm" @click="confirm('Tem certeza que deseja remover a entrega?') ? item.recebimentos.splice(index, 1) : false, calculaSaldos(item)">
+                                <span class="oi oi-x"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <br>
+                    <button class="btn btn-primary float-left" @click="item.recebimentos.push({data_recebimento:'',qtde_recebida:''})">Adicionar entrega</button>
+                    <div class="float-right" v-if="item.quantidade && (item.saldo_residual === 0 || item.saldo_residual > 0)">
+                        <span>Saldo residual: {{ item.saldo_residual }}</span>
+                    </div>
+                </td>
+                <td>
+                    <div v-for="(distribuicao, index) in item.distribuicoes" class="form-row my-1 lista-interna">                        
+                        <span class="badge badge-light">{{ index+1 }}</span>
+                        <div class="input-group input-group-sm col">
+                            <span class="badge badge-light" style="font-size: 11px">Data de distribuição</span>
+                            <input class="form-control form-control-sm"
+                            v-model="distribuicao.data_distribuicao"
+                            type="date" 
+                            >
+                        </div>
+                        <div class="col">
+                            <span class="badge badge-light" style="font-size: 11px">Quantidade</span>
+                            <input class="form-control form-control-sm"
+                            v-model="distribuicao.qtde_distribuicao"
+                            placeholder="Qtde distribuição" title="Qtde distribuição"
+                            @keyup.prevent="corrigeNumberType(distribuicao, 'qtde_distribuicao')"
+                            @change="calculaSaldos(item)"
+                            >
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-danger btn-sm" @click="confirm('Tem certeza que deseja remover a distribuição?') ? item.distribuicoes.splice(index, 1) : false, calculaSaldos(item)">
+                                <span class="oi oi-x"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <br>
+                    <button class="btn btn-primary" @click="item.distribuicoes.push({data_distribuicao: '',qtde_distribuicao:''})">Adicionar distribuição</button>
+                    <div class="float-right" v-if="item.saldo_a_distribuir">
+                        <span>Saldo a distribuir: {{ item.saldo_a_distribuir }}</span>
+                    </div>
+                </td>
+                <td><input class="form-control" v-model="item.validade_doacao" placeholder="Validade Doação" title="Validade Doação"></td>
                 <td><input class="form-control" v-model="item.numero_sei"></td>
-                <td><textarea class="form-control" v-model="item.observacao" style="min-width: 200px; min-height: 100px"></textarea></td>
-                <td><input class="form-control" v-model="item.comentario_sms"></td>
-                <td><textarea class="form-control" v-model="item.relatorio_sei" style="min-width: 300px; min-height: 100px"></textarea></td>
-                <td><textarea class="form-control" v-model="item.itens_pendentes_sei" style="min-width: 200px; min-height: 100px"></textarea></td>
-                <td><input class="form-control" v-model="item.monitoramento"></td>
+                <td><textarea class="form-control" v-model="item.relatorio_sei"></textarea></td>
+                <td><textarea class="form-control" v-model="item.itens_pendentes_sei"></textarea></td>
+                <td><textarea class="form-control" v-model="item.observacao"></textarea></td>
                 <!-- BOTÃO PARA CONFIRMAR ITEM -->
                 <td>
                     <center>                        
@@ -180,10 +264,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                     </center>
                 </td>
             </tr>
-        </table>
-        <!-- <div v-if="fiscal.setor === 'TODOS'" style="vertical-align: middle; margin: 6em auto; text-align: center;">
-            <h4>Para agilizar a consulta, a tabela foi desativada. Clique no botão abaixo para visualizar a planilha:</h4>
-        </div> -->
+        </table>        
     </div>    
 </div>
     
@@ -191,15 +272,8 @@ if (!mysqli_set_charset($link, "utf8")) {
 <script type="text/javascript" src="js/lodash.min.js"></script>
 <script type="text/javascript" src="js/popper.min.js"></script>
 <script type="text/javascript" src="js/bootstrap.min.js"></script>
-<?php 
+<script type="text/javascript" src="js/sisprops.json"></script>
 
-// SECRETARIA (full):
-// $_SESSION["usrData"]['description'][0]
-// Secretaria (completo): description
-// Secretaria (sigla): physicaldeliveryofficename
-// Nome (Completo): name
-
-// echo "<script>const usrData = JSON.parse('".json_encode($_SESSION["usrData"])."');</script>" ?>
 <!-- Vue.js -->
 <script>
     const fiscal = {
@@ -212,7 +286,11 @@ if (!mysqli_set_charset($link, "utf8")) {
             usuario: {
                 nome: "<?php echo $_SESSION['nomeUsuario']; ?>",
                 rf: "<?php echo $_SESSION['IDUsuario']; ?>"
-            }
+            },
+            categoriasTipoitem: [],
+            statuses: sisprops.statuses,
+            tiposItem: sisprops.tiposItem,
+            unidadesDeMedida: sisprops.unidadesDeMedida
         },
         methods: {
             /**
@@ -251,12 +329,29 @@ if (!mysqli_set_charset($link, "utf8")) {
                 xhttp.send("fiscal="+JSON.stringify(fiscal));
                 console.log("Lista obtida.");
             },
+            calculaSaldos: function(item) {
+                let residual = item.quantidade;
+                for (var i = 0; i < item.recebimentos.length; i++) {
+                    if(!isNaN(parseFloat(item.recebimentos[i].qtde_recebida)))
+                        residual -= parseFloat(item.recebimentos[i].qtde_recebida);
+                }
+                item.saldo_residual = residual;
+
+                let aDistribuir = item.quantidade - residual;
+                for (var i = 0; i < item.distribuicoes.length; i++) {
+                    if(!isNaN(parseFloat(item.distribuicoes[i].qtde_distribuicao))){
+                        aDistribuir -= parseFloat(item.distribuicoes[i].qtde_distribuicao);
+                    }
+                    else {
+                        aDistribuir = 0;
+                    }
+                }
+                item.saldo_a_distribuir = aDistribuir;
+            },
             corrigeValores: function() {
                 for (var i = 0; i < app.itens.length; i++) {
                     // Se o valor contiver centavos, converte ponto em vírgula
                     app.itens[i].valor_total = app.itens[i].valor_total.toString();
-                    // console.warn("FOR... ",i);
-                    // console.log(app.itens[i].valor_total);
                     if (app.itens[i].valor_total.indexOf('.') >= 0) {
                         app.itens[i].valor_total = app.itens[i].valor_total.replace('.', ',');
                     }
@@ -266,6 +361,22 @@ if (!mysqli_set_charset($link, "utf8")) {
 
                     app.itens[i].valor_total = "R$ " + app.itens[i].valor_total.replace('R$ ', '');
                 }
+            },
+            corrigeNumberType: function(objeto, prop) {
+                // Verifica se número colado está no padrão brasileiro de pontuação e corrige de acordo
+                let numero = objeto[prop].toString().replace(/[^0-9.,]/g,'');
+                if(numero.match(/\,00/g) && numero.match(/\,00/g).length == 1) {
+                    numero = numero.replace(",00", '').replace(/\./g, '');
+                }
+                if (numero.match(/\./g) && numero.match(/\./g).length > 1) {
+                    numero = numero.replace(/\./g, '');
+                }
+                if (numero.match(/\,/g) && numero.match(/\,/g).length > 1) {
+                    numero = numero.replace(/\,/g, '')
+                }
+                numero = numero.replace(',','.');
+
+                objeto[prop] = numero;
             },
             consertaMoeda: function(valor) {
                 if(valor.indexOf(',') > 0){
@@ -331,6 +442,11 @@ if (!mysqli_set_charset($link, "utf8")) {
         },
         mounted: function() {
             this.obterLista();
+            for (var i = 0; i < this.tiposItem.length; i++) {
+                for (var j = 0; j < this.tiposItem[i].categorias.length; j++) {
+                    this.categoriasTipoitem.push({nome: this.tiposItem[i].categorias[j], tipo: this.tiposItem[i].tipo});
+                }
+            }
         }
     });
 </script>
@@ -342,6 +458,10 @@ input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button { 
   -webkit-appearance: none; 
   margin: 0; 
+}
+textarea {
+    min-width: 300px;
+    min-height: 100px
 }
 #div-tabela table tbody tr td input {
     width: max-content;
@@ -357,6 +477,14 @@ input[type=number]::-webkit-outer-spin-button {
   border-left: solid 1px currentColor;
   -webkit-transform: rotate(-45deg);
           transform: rotate(-45deg);
+}
+.lista-interna {
+    min-width: 420px;
+    border: 1px solid white;
+}
+.lista-interna button {
+    position: absolute;
+    top: 25%;
 }
 </style>
 
