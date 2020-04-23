@@ -46,7 +46,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 	    	}
 	    	$row['distribuicoes'] = $distribuicoes;
 	    	$row['recebimentos'] = $recebimentos;
-	    	
+
 	    	array_push($doacoes, $row);
 	    }
 	}
@@ -60,9 +60,53 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 if ($_SERVER["REQUEST_METHOD"] == "PUT") {
 	$itemConferido = json_decode(file_get_contents('php://input'));
 	$sql = "UPDATE doacoes SET ";
+	$distribuicoes = [];
+	$recebimentos = [];
 	foreach ($itemConferido as $key => $value) {
-		$sql .= "`".$key."`='".utf8_decode($value)."',";
+		// INSERE TODOS OS CAMPOS, MENOS OS DE DISTRIBUIÇÃO E RECEBIMENTO
+		if ($key === 'recebimentos') {
+			foreach ($value as $vKey => $vValue) {
+				array_push($recebimentos, $vValue);					
+			}
+		}
+		else if ($key === 'distribuicoes') {
+			foreach ($value as $vKey => $vValue) {
+				array_push($distribuicoes, $vValue);
+			}
+		}
+		else {
+			$sql .= "`".$key."`='".utf8_decode($value)."',";			
+		}		
 	}
+	// ATUALIZA, ADICIONA OU REMOVE DISTRIBUIÇÕES E RECEBIMENTOS DA DOAÇÃO
+	// DISTRIBUIÇÕES
+	foreach ($distribuicoes as $key => $distribuicao) {
+		$sqlLista = '';
+		if(property_exists($distribuicao, 'id') && $distribuicao->id > 0) {
+			$sqlLista = "UPDATE `distribuicoes` SET `data_distribuicao`='".$distribuicao->data_distribuicao."', `qtde_distribuicao`='".$distribuicao->qtde_distribuicao."' WHERE id=".$distribuicao->id.";";
+		}
+		else {
+			$sqlLista = "INSERT INTO `distribuicoes` (`id_doacao`, `data_distribuicao`, `qtde_distribuicao`) VALUES ('".$itemConferido->id."', '".$distribuicao->data_distribuicao."', '".$distribuicao->qtde_distribuicao."');";
+		}
+		if (!mysqli_query($link, $sqlLista)) {
+			printf("Errormessage: %s\n", mysqli_error($link));
+		}
+	}
+	// RECEBIMENTOS
+	foreach ($recebimentos as $key => $recebimento) {
+		$sqlLista = '';
+		if(property_exists($recebimento, 'id') && $recebimento->id > 0) {
+			$sqlLista = "UPDATE `recebimentos` SET `data_recebimento`='".$recebimento->data_recebimento."', `qtde_recebida`='".$recebimento->qtde_recebida."' WHERE id=".$recebimento->id.";";
+		}
+		else {
+			$sqlLista = "INSERT INTO `recebimentos` (`id_doacao`, `data_recebimento`, `qtde_recebida`) VALUES ('".$itemConferido->id."', '".$recebimento->data_recebimento."', '".$recebimento->qtde_recebida."');";
+		}
+		if (!mysqli_query($link, $sqlLista)) {
+			printf("Errormessage: %s\n", mysqli_error($link));
+		}
+	}
+	// DISTRIBUIÇÕES E RECIMENTOS END
+
 	$sql = rtrim($sql,',');
 	$sql .= " WHERE id=".$itemConferido->id.";";
 	if(!mysqli_query($link, $sql)){
@@ -84,6 +128,36 @@ if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
 	$itemRemovido = $rawInfo[0];
 	$usuario = $rawInfo[1];
 	$wholeItem = json_encode($rawInfo[2]);
+	// REMOVE ENTREGA OU DISTRIBUIÇÃO
+	$itemObj = json_decode($rawInfo[2]);
+	if (property_exists($itemObj, 'id_doacao')) {
+		// SE OBJETO POSSUI PROP id_doacao, É UMA ENTREGA OU DISTRIBUICAO. REMOVE DA RESPECTIVA TABELA
+		$tabela = '';
+		if (property_exists($itemObj, 'data_recebimento')) {
+			$tabela = "recebimentos";
+		}
+		else if (property_exists($itemObj, 'data_distribuicao')) {
+			$tabela = "distribuicoes";
+		}
+		else {
+			printf("Tipo de item não identificado. Esperado tipo DISTRIBUICAO ou RECEBIMENTO.\n");
+			return;
+		}
+		$sqlLista = "DELETE FROM `$tabela` WHERE `id`='$itemRemovido';";
+
+		if(!mysqli_query($link, $sqlLista))
+			printf("Errormessage: %s\n", mysqli_error($link));
+		else
+			echo 1;
+
+		$sql = "INSERT INTO log_delete (`rf`,`item`) VALUES ('".$usuario."','".$wholeItem."');";
+		if(!mysqli_query($link, $sql))
+			printf("Errormessage: %s\n", mysqli_error($link));
+		else
+			echo 1;
+
+		return;
+	}
 
 	$sql = "DELETE FROM doacoes WHERE `id`=".$itemRemovido.";";
 

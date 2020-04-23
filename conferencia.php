@@ -200,7 +200,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                             >
                         </div>
                         <div class="input-group input-group-sm col">
-                            <button type="button" title="Remover entrega" class="btn btn-danger btn-sm" @click="confirm('Tem certeza que deseja remover a entrega?') ? item.recebimentos.splice(index, 1) : false, calculaSaldos(item)">
+                            <button type="button" title="Remover entrega" class="btn btn-danger btn-sm" @click="confirm('***************ATENÇÃO!***************\n\nTem certeza que deseja remover a entrega? (esta ação não pode ser desfeita!)') ? removeEntregaDist(entrega, item.recebimentos, index, item) : false">
                                 <span class="oi oi-x"></span>
                             </button>
                         </div>
@@ -231,7 +231,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                             >
                         </div>
                         <div class="col">
-                            <button type="button" class="btn btn-danger btn-sm" @click="confirm('Tem certeza que deseja remover a distribuição?') ? item.distribuicoes.splice(index, 1) : false, calculaSaldos(item)">
+                            <button type="button" class="btn btn-danger btn-sm" @click="confirm('Tem certeza que deseja remover a distribuição?') ? removeEntregaDist(distribuicao, item.distribuicoes, index, item) : false">
                                 <span class="oi oi-x"></span>
                             </button>
                         </div>
@@ -322,6 +322,10 @@ if (!mysqli_set_charset($link, "utf8")) {
                     if (this.readyState == 4 && this.status == 200) {
                         app.itens = JSON.parse(this.response);
                         app.corrigeValores();
+                        for (var i = 0; i < app.itens.length; i++) {
+                            if(app.itens[i].recebimentos.length > 0)
+                                app.calculaSaldos(app.itens[i]);
+                        }
                     }
                 };
                 xhttp.open("POST", "conferir.php", true);
@@ -338,6 +342,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                 item.saldo_residual = residual;
 
                 let aDistribuir = item.quantidade - residual;
+                console.log(`PUMBA A DISTRIBUIR: ${aDistribuir}`);
                 for (var i = 0; i < item.distribuicoes.length; i++) {
                     if(!isNaN(parseFloat(item.distribuicoes[i].qtde_distribuicao))){
                         aDistribuir -= parseFloat(item.distribuicoes[i].qtde_distribuicao);
@@ -413,6 +418,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                 xhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
                         console.log(this.response === '1' ? "SUCESSO!" : this.response);
+                        app.obterLista();
                         app.corrigeValores();
                     }
                 };
@@ -438,6 +444,13 @@ if (!mysqli_set_charset($link, "utf8")) {
                 xhttp.open("DELETE", "conferir.php", true);
                 xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
                 xhttp.send(itemRemovido.id+".-."+this.usuario.rf+".-."+JSON.stringify(itemRemovido));
+            },
+            removeEntregaDist: function(itemRemovido, arrayPai, indice, item) {
+                if (itemRemovido.id && itemRemovido.id > 0) {
+                    this.remover(itemRemovido);
+                }
+                arrayPai.splice(indice, 1);
+                this.calculaSaldos(item);
             }
         },
         mounted: function() {

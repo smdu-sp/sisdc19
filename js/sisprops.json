@@ -35,6 +35,7 @@ const sisprops = {
 		"Contato iniciado",
 		"Em processo de formalização",
 		"Aguardando entrega",
+		"Recebimento parcial",
 		"Produto/serviço entregue",
 		"Finalizado com termo de recebimento",
 		"Encerrado"
