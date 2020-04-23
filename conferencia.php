@@ -111,18 +111,18 @@ if (!mysqli_set_charset($link, "utf8")) {
                 <th>RELATÓRIO DO PROCESSO SEI</th>
                 <th>ITENS PENDENTES NO PROCESSO SEI</th>
                 <th>OBSERVAÇÃO</th>
-                <th>Conferir/Corrigir</th>
+                <th>Conferir/Atualizar</th>
                 <th>Excluir</th>
             </tr>            
             <!-- <tr v-for="item in itens" :class="item.conferido ? 'table-success' : ''"> -->
             <tr v-for="item in itens">
                 <td>{{itens.indexOf(item)+1}}</td>
-                <td><input class="form-control" v-model="item.data_entrada" type="date"></td>
-                <td><input class="form-control w-100" v-model="item.entrada"></td>
-                <td><input class="form-control" v-model="item.responsavel_atendimento"></td>
-                <td><input class="form-control" v-model="item.doador"></td>
+                <td><input class="form-control" v-model="item.data_entrada" placeholder="Data de entrada" title="Data de entrada" type="date"></td>
+                <td><input class="form-control w-100" v-model="item.entrada" placeholder="Entrada" title="Entrada"></td>
+                <td><input class="form-control" v-model="item.responsavel_atendimento" placeholder="Responsável atendimento" title="Responsável atendimento"></td>
+                <td><input class="form-control" v-model="item.doador" placeholder="Doador" title="Doador"></td>
                 <td>
-                    <select id="tipo_formalizacao" v-model="item.tipo_formalizacao" class="form-control" style="min-width: 200px">
+                    <select id="tipo_formalizacao" v-model="item.tipo_formalizacao" class="form-control" title="Tipo de Formalização" style="min-width: 200px">
                         <!-- <option disabled selected value="">Tipo de formalização</option> -->
                         <option>Pessoa física</option>
                         <option>Pessoa jurídica</option>
@@ -130,36 +130,38 @@ if (!mysqli_set_charset($link, "utf8")) {
                         <option>Entidade não governamental</option>
                     </select>
                 </td>
-                <td><input class="form-control" v-model="item.contato"></td>
-                <td><input class="form-control" v-model="item.telefone_doador"></td>
-                <td><input class="form-control" v-model="item.email_doador"></td>
+                <td><input class="form-control" v-model="item.contato" placeholder="Contato" title="Contato"></td>
+                <td><input class="form-control" v-model="item.telefone_doador" placeholder="Telefone Doador (11) 1234-5678" title="Telefone Doador (11) 1234-5678"></td>
+                <td><input class="form-control" v-model="item.email_doador" placeholder="E-mail Doador" title="E-mail Doador"></td>
                 <td>
                     <select
                         id="tipo_item"
                         v-model="item.tipo_item"   
                         class="form-control"
-                        style="min-width: 130px">
+                        style="min-width: 130px"
+                        title="Tipo de item"
+                        >
                         <option disabled selected value="">Tipo de item</option>
                         <option v-for="i in tiposItem">{{i.tipo}}</option>
                     </select>
                 </td>
                 <td>
-                    <select class="form-control" v-model="item.categoria_item">
+                    <select class="form-control" v-model="item.categoria_item" title="Categoria do item">
                         <option disabled selected value="">Categoria</option>                 
                         <option v-if="item.tipo_item == categoria.tipo" v-for="categoria in categoriasTipoitem">{{categoria.nome}}</option>
                         <option>Outros</option>
                     </select>
                 </td>
-                <td><input class="form-control" v-model="item.descricao_item"></td>
+                <td><input class="form-control" v-model="item.descricao_item" placeholder="Descrição do Item" title="Descrição do Item"></td>
                 <td>
-                    <select id="status" v-model="item.status" class="form-control" style="min-width: 200px">
-                        <option disabled value="">Status</option>                                    
+                    <select id="status" v-model="item.status" class="form-control" style="min-width: 200px" title="Status">
+                        <option disabled :value="null">Status</option>                                    
                         <option v-for="status in statuses">{{status}}</option>
                     </select>
                 </td>
-                <td><input class="form-control" v-model="item.destino"></td>
-                <td><input class="form-control" v-model="item.endereco_entrega"></td>
-                <td><input class="form-control" v-model="item.responsavel_recebimento"></td>
+                <td><input class="form-control" v-model="item.destino" placeholder="Destino da doação" title="Destino da doação"></td>
+                <td><input class="form-control" v-model="item.endereco_entrega" placeholder="Local de Destinação (Endereço)" title="Local de Destinação (Endereço)"></td>
+                <td><input class="form-control" v-model="item.responsavel_recebimento" placeholder="Responsável pelo recebimento da doação" title="Responsável pelo recebimento da doação"></td>
                 <td><input class="form-control" v-model="item.quantidade" placeholder="Quantidade" title="Quantidade" @keyup="corrigeNumberType(item, 'quantidade')"></td>
                 <td>
                     <select v-model="item.unidade_medida" class="form-control" title="Unidade de medida" style="min-width: 100px">
@@ -167,15 +169,15 @@ if (!mysqli_set_charset($link, "utf8")) {
                         <option v-for="unidade in unidadesDeMedida">{{ unidade }}</option>
                     </select>
                 </td>
-                <td><input class="form-control" v-model="item.valor_total"></td>
+                <td><input class="form-control" v-model="item.valor_total" title="Valor total"></td>
                 <td>
                     <div class="form-row customRadio">
                         <div class="col">
-                            <input id="nao_fracionada" type="radio" v-model="item.entrada_fracionada" value="0">
+                            <input id="nao_fracionada" type="radio" v-model="item.entrada_fracionada" value="0" title="Entrada fracionada">
                             <label for="nao_fracionada">Não</label>
                         </div>
                         <div class="col">
-                            <input id="fracionada" type="radio" v-model="item.entrada_fracionada" value="1">
+                            <input id="fracionada" type="radio" v-model="item.entrada_fracionada" value="1" title="Entrada fracionada">
                             <label for="fracionada">Sim</label>
                         </div>
                     </div>                    
@@ -243,14 +245,14 @@ if (!mysqli_set_charset($link, "utf8")) {
                     </div>
                 </td>
                 <td><input class="form-control" v-model="item.validade_doacao" placeholder="Validade Doação" title="Validade Doação"></td>
-                <td><input class="form-control" v-model="item.numero_sei"></td>
-                <td><textarea class="form-control" v-model="item.relatorio_sei"></textarea></td>
-                <td><textarea class="form-control" v-model="item.itens_pendentes_sei"></textarea></td>
-                <td><textarea class="form-control" v-model="item.observacao"></textarea></td>
+                <td><input class="form-control" v-model="item.numero_sei" placeholder="Número SEI" title="Número SEI"></td>
+                <td><textarea class="form-control" v-model="item.relatorio_sei" placeholder="Relatório do processo SEI" title="Relatório do processo SEI"></textarea></td>
+                <td><textarea class="form-control" v-model="item.itens_pendentes_sei" placeholder="Itens pendentes no processo SEI" title="Itens pendentes no processo SEI"></textarea></td>
+                <td><textarea class="form-control" v-model="item.observacao" placeholder="Observação" title="Observação"></textarea></td>
                 <!-- BOTÃO PARA CONFIRMAR ITEM -->
                 <td>
                     <center>                        
-                        <button type="button" class="btn btn-success btn-sm" @click="conferir(item)">
+                        <button type="button" class="btn btn-success btn-sm" @click="conferir(item)" title="Conferir/Atualizar">
                             <span :class="item.conferido ? 'oi oi-loop-circular' : 'oi oi-check'"></span>
                         </button>
                     </center>
@@ -258,7 +260,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                 <!-- BOTÃO PARA REMOVER ITEM -->
                 <td>
                     <center>
-                        <button type="button" class="btn btn-danger btn-sm" @click="confirm('***************ATENÇÃO!***************\n\nTem certeza que deseja remover o item do cadastro? (esta ação não pode ser desfeita!)') ? remover(item) : false">
+                        <button type="button" class="btn btn-danger btn-sm" @click="confirm('***************ATENÇÃO!***************\n\nTem certeza que deseja remover o item do cadastro? (esta ação não pode ser desfeita!)') ? remover(item) : false" title="Remover item">
                             <span class="oi oi-x"></span>
                         </button>
                     </center>
@@ -342,7 +344,6 @@ if (!mysqli_set_charset($link, "utf8")) {
                 item.saldo_residual = residual;
 
                 let aDistribuir = item.quantidade - residual;
-                console.log(`PUMBA A DISTRIBUIR: ${aDistribuir}`);
                 for (var i = 0; i < item.distribuicoes.length; i++) {
                     if(!isNaN(parseFloat(item.distribuicoes[i].qtde_distribuicao))){
                         aDistribuir -= parseFloat(item.distribuicoes[i].qtde_distribuicao);

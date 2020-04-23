@@ -13,12 +13,28 @@ const sisprops = {
 			"categorias": [
 				"Álcool",
 				"Alimentos",
-				"Insumo hospitalar"
+				"Combustível",
+				"Eletrodomésticos",
+				"EPI's",
+				"Insumo hospitalar",
+				"Produtos de Higiene",
+				"Produtos de Limpeza",
+				"Produtos Hospitalares",
+				"Utensílios"
 			]
 		},
 		{
 			"tipo": "Serviço",
-			"categorias": ["Hospedagem"]
+			"categorias": [
+				"Comunicação",
+				"Consultoria",
+				"Delivery",
+				"Hospedagem",
+				"Logística",
+				"Mão de Obra",
+				"TI",
+				"Transporte"
+			]
 		}
 	],
 	"unidadesDeMedida": [
@@ -31,13 +47,14 @@ const sisprops = {
 		"R$",
 	],
 	"statuses": [
-		"Contato não iniciado",
-		"Contato iniciado",
-		"Em processo de formalização",
-		"Aguardando entrega",
-		"Recebimento parcial",
-		"Produto/serviço entregue",
-		"Finalizado com termo de recebimento",
-		"Encerrado"
+		"Contato Não Iniciado",
+		"Contato Iniciado",
+		"Em Negociação",
+		"Em Formalização",
+		"Formalizado",
+		"Entregue mas não formalizado",
+		"Entrega Parcial",
+		"Encerrado com Termo de Recebimento",
+		"Desistência"
 	]
 }

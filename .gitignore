@@ -16,3 +16,5 @@ config.php
 *.sql
 *.jpg
 *.png
+*.bkp
+*.sql
