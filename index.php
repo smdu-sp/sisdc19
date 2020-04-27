@@ -408,11 +408,9 @@ if (!mysqli_set_charset($link, "utf8")) {
 		validade_doacao: '',
 		status: '',
 		numero_sei: '',
-		observacao: '',
-		comentario_sms: '',
 		relatorio_sei: '',
 		itens_pendentes_sei: '',
-		monitoramento: ''
+		observacao: ''
 	};
 
 	var app = new Vue({
@@ -446,6 +444,13 @@ if (!mysqli_set_charset($link, "utf8")) {
 				if(this.novoItem.valor_total)
 					this.novoItem.valor_total = this.apenasNumeros(this.novoItem.valor_total)/100;
 
+				// Remove itens virtuais
+				for (var i = 0; i < this.novoItem.itens_doacao.length; i++) {					
+					delete this.novoItem.itens_doacao[i].saldo_residual;
+					delete this.novoItem.itens_doacao[i].saldo_a_distribuir;
+				}
+				console.log(this.novoItem);
+
 				// Insere item à lista de cadastro
 				this.itens.push(JSON.parse(JSON.stringify(this.novoItem)));
 
@@ -455,7 +460,8 @@ if (!mysqli_set_charset($link, "utf8")) {
 				this.cadastrarDoacoes(); // Remover caso seja preciso retomar o modo de inclusão em massa
 			},
 			atualizaTipos: function () {
-				this.novoItem.categoria_item = "";
+				// this.novoItem.categoria_item = "";
+				// TODO: CRIAR FOR PARA PERCORRER TODOS OS ITENS
 				for (var i = 0; i < this.tiposItem.length; i++) {
 					if(this.tiposItem[i].tipo == this.novoItem.tipo_item){
 						this.categoriasTipoitem = this.tiposItem[i].categorias;
