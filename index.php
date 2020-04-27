@@ -28,19 +28,11 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 // Inclui arquivo de configuração
 require_once "config.php";
 
-// Declaração de variáveis
-
 /* Muda o charset para UTF-8 */
 if (!mysqli_set_charset($link, "utf8")) {
 	printf("Erro ao definir charset: %s<br>", mysqli_error($link));
 	exit();
 }
-
-// Query padrao
-// $sqlQuery = "SELECT * FROM Doacoes_patrimoniais;";
-// $retornoQuery = $link->query($sqlQuery);
-
-// $link->close();
 
 ?>
 <div class="container" id="app">    
@@ -147,114 +139,77 @@ if (!mysqli_set_charset($link, "utf8")) {
 							</div>
 						</div>
 						<br>
+
+						<!-- ITEM(NS) -->
 						<!-- TIPO, CATEGORIA E DESCRIÇÃO DO ITEM -->
-						<div class="form-row">							
+						<div class="my-2">
+							<span class="mr-4"><strong>Itens</strong></span>
+							<button class="btn btn-primary btn-sm" @click="novoItem.itens_doacao.push(JSON.parse(JSON.stringify(ItemDoacaoObj)))">Adicionar item</button>
+						</div>
+						<div class="form-row item-borda" v-for="(itemDoacao, index) in novoItem.itens_doacao"><div class="col">
+						<div class="form-row">
 							<div class="col col-2">
 								<select
 								id="tipo_item"
-								v-model="novoItem.tipo_item"   
+								v-model="itemDoacao.tipo_item"   
 								@change="atualizaTipos()"
 								class="form-control form-control-sm">
 								<option disabled selected value="">Tipo de item</option>
 								<option v-for="i in tiposItem">{{i.tipo}}</option>
-							</select>
-						</div>
-						<div class="col col-2">
-							<select class="form-control form-control-sm" v-model="novoItem.categoria_item">
-								<option disabled selected value="">Categoria</option>                 
-								<option v-if="novoItem.tipo_item" v-for="categoria in categoriasTipoitem">{{categoria}}</option>
-								<option>Outros</option>
-							</select>
-						</div>
-						<div class="col">
-							<input
-							class="form-control form-control-sm"
-							v-model="novoItem.descricao_item"
-							placeholder="Descrição do Item" title="Descrição do Item"
-							>
-						</div>
-					</div>
-					<br>
-					<!-- STATUS, DESTINO, RECEBIMENTO -->
-					<div class="form-row">
-						<div class="col">
-							<select id="status" v-model="novoItem.status" class="form-control form-control-sm">
-								<option disabled selected value="">Status</option>
-								<option v-for="status in statuses">{{status}}</option>
-								<!-- <option>Contato não iniciado</option>
-								<option>Contato iniciado</option>
-								<option>Em processo de formalização</option>
-								<option>Aguardando entrega</option>
-								<option>Produto/serviço entregue</option>
-								<option>Finalizado com termo de recebimento</option>
-								<option>Encerrado</option> -->
-							</select>
-						</div>
-						<div class="col">
-							<input
-							class="form-control form-control-sm"
-							v-model="novoItem.destino"
-							placeholder="Destino da doação" title="Destino da doação"
-							>
-						</div>
-						<div class="col">
-							<input
-							class="form-control form-control-sm"
-							v-model="novoItem.endereco_entrega"
-							placeholder="Local de Destinação (Endereço)" title="Local de Destinação (Endereço)"
-							>
-						</div>
-						<div class="col">
-							<input
-							class="form-control form-control-sm"
-							v-model="novoItem.responsavel_recebimento"
-							placeholder="Responsável pelo recebimento da doação" title="Responsável pelo recebimento da doação"
-							>
-						</div>
-					</div>
-					<br>
-					<!-- QUANTIDADE TOTAL DOADA, UNIDADE MEDIDA, VALOR TOTAL, FRACIONADA, QTDE ENTREGAS -->
-					<div class="form-row">
-						<div class="col col-2">
-							<input
-							class="form-control form-control-sm"
-							v-model="novoItem.quantidade"
-							placeholder="Quantidade" title="Quantidade"
-							@keyup.prevent="corrigeNumberType(novoItem, 'quantidade')"
-							>
-						</div>
-						<div class="col col-2">
-							<select v-model="novoItem.unidade_medida" class="form-control form-control-sm">
-								<option selected disabled value="">Unidade de medida</option>
-								<option v-for="unidade in unidadesDeMedida">{{ unidade }}</option>
-							</select>
-						</div>
-						<div class="col input-group input-group-sm">
-							<div class="input-group-prepend">
-								<span class="input-group-text">R$</span>
+								</select>
 							</div>
-							<input
-							class="form-control form-control-sm"
-							v-model="novoItem.valor_total"
-							placeholder="Valor total da doação" title="Valor total da doação"
-							title="Valor total (ex.: 999999,00)"
-							>
+							<div class="col col-2">
+								<select class="form-control form-control-sm" v-model="itemDoacao.categoria_item">
+									<option disabled selected value="">Categoria</option>                 
+									<option v-if="itemDoacao.tipo_item" v-for="categoria in categoriasTipoitem">{{categoria}}</option>
+									<option>Outros</option>
+								</select>
+							</div>
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="itemDoacao.descricao_item"
+								placeholder="Descrição do Item" title="Descrição do Item"
+								>
+							</div>
+							<div class="col col-2">
+								<input
+								class="form-control form-control-sm"
+								v-model="itemDoacao.quantidade"
+								placeholder="Quantidade" title="Quantidade"
+								@keyup.prevent="corrigeNumberType(itemDoacao, 'quantidade')"
+								>
+							</div>
+							<div class="col col-2">
+								<select v-model="itemDoacao.unidade_medida" title="Unidade de medida" class="form-control form-control-sm">
+									<option selected disabled value="">Unidade de medida</option>
+									<option v-for="unidade in unidadesDeMedida">{{ unidade }}</option>
+								</select>
+							</div>
 						</div>
-						<!-- <div class="col"> -->
-							<div class="input-group input-group-sm col col-3">
-								<div class="input-group-prepend">
-									<label class="input-group-text my-0" @click="novoItem.entrada_fracionada = novoItem.entrada_fracionada == 0 ? 1 : 0">Entrada fracionada?</label>
-								</div>
-								<div class="form-row customRadio">
-									<div class="col">
-										<input id="nao_fracionada" type="radio" v-model="novoItem.entrada_fracionada" value="0">
-										<label for="nao_fracionada">Não</label>
-									</div>
-									<div class="col">
-										<input id="fracionada" type="radio" v-model="novoItem.entrada_fracionada" value="1">
-										<label for="fracionada">Sim</label>
-									</div>
-								</div>
+						<br>
+						<!-- DESTINO, ENDEREÇO, RESPONSÁVEL RECEBIMENTO -->
+						<div class="form-row">
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="itemDoacao.destino"
+								placeholder="Destino da doação" title="Destino da doação"
+								>
+							</div>
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="itemDoacao.endereco_entrega"
+								placeholder="Local de Destinação (Endereço)" title="Local de Destinação (Endereço)"
+								>
+							</div>
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="itemDoacao.responsavel_recebimento"
+								placeholder="Responsável pelo recebimento da doação" title="Responsável pelo recebimento da doação"
+								>
 							</div>
 						</div>
 						<br>
@@ -264,7 +219,7 @@ if (!mysqli_set_charset($link, "utf8")) {
 							<div class="alert alert-light w-50" role="alert">
 								<strong>Entrega</strong>
 								<hr>
-								<div v-for="(entrega, index) in novoItem.entregas" class="form-row my-1">
+								<div v-for="(entrega, index) in itemDoacao.entregas" class="form-row my-1">
 									<span class="badge badge-light">{{ index+1 }}</span>
 									<div class="input-group input-group-sm col">
 										<div class="input-group-prepend">
@@ -280,26 +235,26 @@ if (!mysqli_set_charset($link, "utf8")) {
 										v-model="entrega.qtde_recebida"
 										placeholder="Qtde recebida" title="Qtde recebida"
 										@keyup.prevent="corrigeNumberType(entrega, 'qtde_recebida')"
-										@change="calculaSaldos"
+										@change="calculaSaldos(itemDoacao)"
 										>
 									</div>
 									<div class="col col-1">
-										<button type="button" class="btn btn-danger btn-sm" @click="confirm('Tem certeza que deseja remover a entrega?') ? novoItem.entregas.splice(index, 1) : false">
+										<button type="button" class="btn btn-danger btn-sm" @click="confirm('Tem certeza que deseja remover a entrega?') ? itemDoacao.entregas.splice(index, 1) : false">
 										    <span class="oi oi-x"></span>
 										</button>
 									</div>
 								</div>
 								<br>
-								<button class="btn btn-primary float-left" @click="novoItem.entregas.push({data_recebimento:'',qtde_recebida:''})">Adicionar entrega</button>
-								<div class="float-right" v-if="novoItem.quantidade">
-									<span>Saldo residual: {{ novoItem.saldo_residual }}</span>
+								<button class="btn btn-primary float-left" @click="itemDoacao.entregas.push({data_recebimento:'',qtde_recebida:''})">Adicionar entrega</button>
+								<div class="float-right" v-if="itemDoacao.quantidade">
+									<span>Saldo residual: {{ itemDoacao.saldo_residual }}</span>
 								</div>
 							</div>
 							<!-- DISTRIBUIÇÃO -->
 							<div class="alert alert-light w-50" role="alert">
 								<strong>Distribuição</strong>
 								<hr>
-								<div v-for="(distribuicao, index) in novoItem.distribuicoes" class="form-row my-1">
+								<div v-for="(distribuicao, index) in itemDoacao.distribuicoes" class="form-row my-1">
 									<span class="badge badge-light">{{ index+1 }}</span>
 									<div class="input-group input-group-sm col">
 										<div class="input-group-prepend">
@@ -315,31 +270,66 @@ if (!mysqli_set_charset($link, "utf8")) {
 										v-model="distribuicao.qtde_distribuicao"
 										placeholder="Qtde distribuição" title="Qtde distribuição"
 										@keyup.prevent="corrigeNumberType(distribuicao, 'qtde_distribuicao')"
-										@change="calculaSaldos"
+										@change="calculaSaldos(itemDoacao)"
 										>
 									</div>
 									<div class="col col-1">
-										<button type="button" class="btn btn-danger btn-sm" @click="confirm('Tem certeza que deseja remover a distribuição?') ? novoItem.distribuicoes.splice(index, 1) : false">
+										<button type="button" class="btn btn-danger btn-sm" @click="confirm('Tem certeza que deseja remover a distribuição?') ? itemDoacao.distribuicoes.splice(index, 1) : false">
 										    <span class="oi oi-x"></span>
 										</button>
 									</div>
 								</div>
 								<br>
-								<button class="btn btn-primary" @click="novoItem.distribuicoes.push({data_distribuicao: '',qtde_distribuicao:''})">Adicionar distribuição</button>
-								<div class="float-right" v-if="novoItem.saldo_a_distribuir">
-									<span>Saldo a distribuir: {{ novoItem.saldo_a_distribuir }}</span>
+								<button class="btn btn-primary" @click="itemDoacao.distribuicoes.push({data_distribuicao: '',qtde_distribuicao:''})">Adicionar distribuição</button>
+								<div class="float-right" v-if="itemDoacao.saldo_a_distribuir">
+									<span>Saldo a distribuir: {{ itemDoacao.saldo_a_distribuir }}</span>
 								</div>
 							</div>
 						</div>
-												
-						<!-- VALIDADE, NUMERO SEI -->
+						<br>
+					</div>
+					<!-- Botão de Remoção de item_doacao -->
+					<div class="col col-1">						
+						<button v-if="novoItem.itens_doacao.length > 1" type="button" class="btn btn-danger btn-sm absolute-center" @click="confirm('Tem certeza que deseja remover o item?') ? novoItem.itens_doacao.splice(index, 1) : false">
+						    <span class="oi oi-x"></span>
+						</button>
+					</div>
+				</div>
+
+					<hr>
+					<br>												
+						<!-- VALOR, VALIDADE, NUMERO SEI -->
 						<div class="form-row">
+							<div class="col input-group input-group-sm">
+								<div class="input-group-prepend">
+									<span class="input-group-text">R$</span>
+								</div>
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.valor_total"
+								placeholder="Valor total da doação" title="Valor total da doação"
+								title="Valor total (ex.: 999999,00)"
+								>
+							</div>
 							<div class="col">
 								<input
 								class="form-control form-control-sm"
 								v-model="novoItem.validade_doacao"
 								placeholder="Validade Doação" title="Validade Doação"
 								>
+							</div>
+							<div class="col">
+								<select id="status" v-model="novoItem.status" class="form-control form-control-sm">
+									<option disabled selected value="">Status</option>
+									<option v-for="status in statuses">{{status}}</option>
+									<!-- <option>Contato não iniciado</option>
+									<option>Contato iniciado</option>
+									<option>Em processo de formalização</option>
+									<option>Aguardando entrega</option>
+									<option>Produto/serviço entregue</option>
+									<option>Finalizado com termo de recebimento</option>
+									<option>Encerrado</option> -->
+								</select>
 							</div>
 							<div class="col col-3">
 								<input
@@ -390,37 +380,39 @@ if (!mysqli_set_charset($link, "utf8")) {
 
 <!-- Vue.js -->
 <script>
+	const ItemDoacaoObj = {
+		tipo_item: '',
+		categoria_item: '',
+		descricao_item: '',
+		destino: '',
+		endereco_entrega: '',
+		responsavel_recebimento: '',
+		quantidade: '',
+		unidade_medida: '',
+		entregas: [],
+		distribuicoes: [],
+		saldo_residual: 0,
+		saldo_a_distribuir: 0
+	};
 	const DoacaoObj = {
-			data_entrada: '',
-			entrada: '',
-			responsavel_atendimento: '',
-			doador: '',
-			tipo_formalizacao: '',
-			contato: '',
-      telefone_doador: '',
-      email_doador: '',
-			tipo_item: '',
-      categoria_item: '',
-			descricao_item: '',
-			status: '',
-			destino: '',
-			endereco_entrega: '',
-			responsavel_recebimento: '',
-			quantidade: '',
-      unidade_medida: '',
-			valor_total: '',
-      entrada_fracionada: 0,
-      entregas: [],
-      saldo_residual: 0,
-      distribuicoes: [],
-      saldo_a_distribuir: 0,
-			prazo_periodo: '',
-			numero_sei: '',
-			observacao: '',
-			comentario_sms: '',
-			relatorio_sei: '',
-			itens_pendentes_sei: '',
-			monitoramento: ''
+		data_entrada: '',
+		entrada: '',
+		responsavel_atendimento: '',
+		doador: '',
+		tipo_formalizacao: '',
+		contato: '',
+    telefone_doador: '',
+    email_doador: '',
+    itens_doacao: [ItemDoacaoObj],
+		valor_total: '',
+		validade_doacao: '',
+		status: '',
+		numero_sei: '',
+		observacao: '',
+		comentario_sms: '',
+		relatorio_sei: '',
+		itens_pendentes_sei: '',
+		monitoramento: ''
 	};
 
 	var app = new Vue({
@@ -450,9 +442,7 @@ if (!mysqli_set_charset($link, "utf8")) {
 				ADIÇÃO DE ITENS À LISTA
 			*/
 			adicionarItem: function (){
-				// Limpa número SEI
-				if(this.novoItem.numero_sei)
-					this.novoItem.numero_sei = this.apenasNumeros(this.novoItem.numero_sei);
+				// Limpa valor
 				if(this.novoItem.valor_total)
 					this.novoItem.valor_total = this.apenasNumeros(this.novoItem.valor_total)/100;
 
@@ -506,24 +496,24 @@ if (!mysqli_set_charset($link, "utf8")) {
 				console.log(listaDeDoacoes.replace(/&/g,'CODREPEAMP',true));
 				xhttp.send("insertList="+listaDeDoacoes.replace('&','CODREPEAMP'));
 			},
-			calculaSaldos: function() {
-				let residual = this.novoItem.quantidade;
-				for (var i = 0; i < this.novoItem.entregas.length; i++) {
-					if(!isNaN(parseFloat(this.novoItem.entregas[i].qtde_recebida)))
-						residual -= parseFloat(this.novoItem.entregas[i].qtde_recebida);
+			calculaSaldos: function(item) {
+				let residual = item.quantidade;
+				for (var i = 0; i < item.entregas.length; i++) {
+					if(!isNaN(parseFloat(item.entregas[i].qtde_recebida)))
+						residual -= parseFloat(item.entregas[i].qtde_recebida);
 				}
-				this.novoItem.saldo_residual = residual;
-
-				let aDistribuir = this.novoItem.quantidade - residual;
-				for (var i = 0; i < this.novoItem.distribuicoes.length; i++) {
-					if(!isNaN(parseFloat(this.novoItem.distribuicoes[i].qtde_distribuicao))){
-						aDistribuir -= parseFloat(this.novoItem.distribuicoes[i].qtde_distribuicao);
+				item.saldo_residual = residual;
+				
+				let aDistribuir = item.quantidade - residual;
+				for (var i = 0; i < item.distribuicoes.length; i++) {
+					if(!isNaN(parseFloat(item.distribuicoes[i].qtde_distribuicao))){
+						aDistribuir -= parseFloat(item.distribuicoes[i].qtde_distribuicao);
 					}
 					else {
 						aDistribuir = 0;
 					}
 				}
-				this.novoItem.saldo_a_distribuir = aDistribuir;
+				item.saldo_a_distribuir = aDistribuir;
 			},
 			corrigeNumberType: function(objeto, prop) {
 				// Verifica se número colado está no padrão brasileiro de pontuação e corrige de acordo
@@ -546,9 +536,6 @@ if (!mysqli_set_charset($link, "utf8")) {
 			criarNovoItem: function(){
 				this.novoItem = this.itemModel;
 			}
-		},
-		watch: {
-			'novoItem.quantidade': 'calculaSaldos'
 		}
 	});
 </script>
@@ -566,6 +553,18 @@ input[type=number]::-webkit-outer-spin-button {
 	position: absolute;
 	left: 10px;
 	max-width: calc(100% - 20px);
+}
+.absolute-center {
+	position: absolute;
+  left: calc(50% - 16px);
+  top: calc(50% - 16px);
+}
+.item-borda {
+	border: 1px solid #dddddd;
+	border-radius: 5px;
+	padding: 1em 0 1em 1em;
+	margin: 5px 0;
+	background-color: rgba(0,0,0,0.02);
 }
 .customRadio {
     margin-left: 5px;
