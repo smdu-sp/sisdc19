@@ -93,21 +93,23 @@ if (!mysqli_set_charset($link, "utf8")) {
                 <th>CONTATO DOADOR</th>
                 <th>TELEFONE DOADOR</th>
                 <th>E-MAIL DOADOR</th>
+                <!-- ITENS -->
+                <th>ITENS</th>
                 <th>TIPO DE ITEM</th>
                 <th>CATEGORIA ITEM</th>
                 <th>DESCRIÇÃO DO ITEM</th>
-                <th>STATUS</th>
+                <th>QUANTIDADE</th>
+                <th>UNIDADE</th>
                 <th>DESTINO DA DOAÇÃO</th>
                 <th>LOCAL DE DESTINAÇÃO (ENDEREÇO)</th>
                 <th>RESPONSÁVEL PELO RECEBIMENTO</th>
-                <th>QUANTIDADE</th>
-                <th>UNIDADE</th>
-                <th>VALOR TOTAL DA DOAÇÃO</th>
-                <th>ENTRADA FRACIONADA</th>
                 <th>ENTREGA</th>
                 <th>DISTRIBUIÇÃO</th>
+                <!-- FIM ITENS -->
+                <th>VALOR TOTAL DA DOAÇÃO</th>
                 <th>VALIDADE DOAÇÃO</th>
-                <th>Nº DO SEI</th>                    
+                <th>STATUS</th>
+                <th>Nº DO SEI</th>
                 <th>RELATÓRIO DO PROCESSO SEI</th>
                 <th>ITENS PENDENTES NO PROCESSO SEI</th>
                 <th>OBSERVAÇÃO</th>
@@ -133,118 +135,134 @@ if (!mysqli_set_charset($link, "utf8")) {
                 <td><input class="form-control" v-model="item.contato" placeholder="Contato" title="Contato"></td>
                 <td><input class="form-control" v-model="item.telefone_doador" placeholder="Telefone Doador (11) 1234-5678" title="Telefone Doador (11) 1234-5678"></td>
                 <td><input class="form-control" v-model="item.email_doador" placeholder="E-mail Doador" title="E-mail Doador"></td>
+
+                <!-- DOACAO_ITENS  -->
                 <td>
-                    <select
-                        id="tipo_item"
-                        v-model="item.tipo_item"   
-                        class="form-control"
-                        style="min-width: 130px"
-                        title="Tipo de item"
-                        >
-                        <option disabled selected value="">Tipo de item</option>
-                        <option v-for="i in tiposItem">{{i.tipo}}</option>
-                    </select>
+                    <!-- ADICIONAR OU REMOVER DOACAO_ITEM -->
+                    <div class="doacao-item" v-for="(doacao_item, item_index) in item.doacao_itens">                        
+                        <button class="btn btn-danger" v-if="item.doacao_itens.length > 1" @click="removeDoacaoItem(item_index, itens.indexOf(item))">X</button>
+                    </div>
+                    <br>
+                    <button class="btn btn-outline-secondary bt-adiciona-item" 
+                    @click="adicionaDoacaoItem(item)">Adicionar item</button>
                 </td>
                 <td>
-                    <select class="form-control" v-model="item.categoria_item" title="Categoria do item">
-                        <option disabled selected value="">Categoria</option>                 
-                        <option v-if="item.tipo_item == categoria.tipo" v-for="categoria in categoriasTipoitem">{{categoria.nome}}</option>
-                        <option>Outros</option>
-                    </select>
+                    <!-- TIPO DE ITEM -->
+                    <div class="doacao-item" v-for="doacao_item in item.doacao_itens">
+                        <select
+                            v-model="doacao_item.tipo_item"   
+                            class="form-control"
+                            style="min-width: 130px"
+                            title="Tipo de item"
+                            >
+                            <option disabled selected value="">Tipo de item</option>
+                            <option v-for="i in tiposItem">{{i.tipo}}</option>
+                        </select>
+                    </div>
                 </td>
-                <td><input class="form-control" v-model="item.descricao_item" placeholder="Descrição do Item" title="Descrição do Item"></td>
+                <td>
+                    <!-- CATEGORIA -->
+                    <div class="doacao-item" v-for="doacao_item in item.doacao_itens">
+                        <select class="form-control" v-model="doacao_item.categoria_item" title="Categoria do item">
+                            <option disabled selected value="">Categoria</option>                 
+                            <option v-if="doacao_item.tipo_item == categoria.tipo" v-for="categoria in categoriasTipoitem">{{categoria.nome}}</option>
+                            <option>Outros</option>
+                        </select>
+                    </div>
+                </td>
+                <td><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.descricao_item" placeholder="Descrição do Item" title="Descrição do Item"></div></td>
+                <td><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.quantidade" placeholder="Quantidade" title="Quantidade" @keyup="corrigeNumberType(doacao_item, 'quantidade')"></div></td>
+                <td>
+                    <div class="doacao-item" v-for="doacao_item in item.doacao_itens">
+                        <select v-model="doacao_item.unidade_medida" class="form-control" title="Unidade de medida" style="min-width: 100px">
+                            <option selected disabled value="">Unidade de medida</option>
+                            <option v-for="unidade in unidadesDeMedida">{{ unidade }}</option>
+                        </select>
+                    </div>
+                </td>
+                <td><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.destino" placeholder="Destino da doação" title="Destino da doação"></div></td>
+                <td><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.endereco_entrega" placeholder="Local de Destinação (Endereço)" title="Local de Destinação (Endereço)"></div></td>
+                <td><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.responsavel_recebimento" placeholder="Responsável pelo recebimento da doação" title="Responsável pelo recebimento da doação"></div></td>
+                <!-- AQUI PUMBA -->
+                
+                <!-- ENTREGAS -->
+                <td>
+                    <div class="doacao-item" v-for="doacao_item in item.doacao_itens">
+                        <div v-for="(entrega, index) in doacao_item.recebimentos" class="form-row my-1 lista-interna">
+                            <span class="badge badge-light">{{ index+1 }}</span>
+                            <div class="input-group input-group-sm col">                            
+                                <span class="badge badge-light" style="font-size: 11px">Data de recebimento</span>
+                                <input class="form-control form-control-sm"
+                                v-model="entrega.data_recebimento"
+                                type="date" 
+                                >
+                            </div>
+                            <div class="input-group input-group-sm col">
+                                <span class="badge badge-light" style="font-size: 11px">Quantidade</span>
+                                <input class="form-control form-control-sm"
+                                v-model="entrega.qtde_recebida"
+                                placeholder="Qtde recebida" title="Qtde recebida"
+                                @keyup.prevent="corrigeNumberType(entrega, 'qtde_recebida')"
+                                @change="calculaSaldos(doacao_item)"
+                                >
+                            </div>
+                            <div class="input-group input-group-sm col">
+                                <button type="button" title="Remover entrega" class="btn btn-danger btn-sm" @click="confirm('***************ATENÇÃO!***************\n\nTem certeza que deseja remover a entrega? (esta ação não pode ser desfeita!)') ? removeEntregaDist(entrega, doacao_item.recebimentos, index, doacao_item) : false">
+                                    <span class="oi oi-x"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <br>
+                        <button class="btn btn-primary float-left" @click="doacao_item.recebimentos.push({data_recebimento:'',qtde_recebida:''})">Adicionar entrega</button>
+                        <div class="float-right" v-if="doacao_item.quantidade && (doacao_item.saldo_residual === 0 || doacao_item.saldo_residual > 0)">
+                            <span>Saldo residual: {{ doacao_item.saldo_residual }}</span>
+                        </div>
+                    </div>
+                </td>
+                <!-- DISTRIBUIÇÕES -->
+                <td>
+                    <div class="doacao-item" v-for="doacao_item in item.doacao_itens">
+                        <div v-for="(distribuicao, index) in doacao_item.distribuicoes" class="form-row my-1 lista-interna">                        
+                            <span class="badge badge-light">{{ index+1 }}</span>
+                            <div class="input-group input-group-sm col">
+                                <span class="badge badge-light" style="font-size: 11px">Data de distribuição</span>
+                                <input class="form-control form-control-sm"
+                                v-model="distribuicao.data_distribuicao"
+                                type="date" 
+                                >
+                            </div>
+                            <div class="col">
+                                <span class="badge badge-light" style="font-size: 11px">Quantidade</span>
+                                <input class="form-control form-control-sm"
+                                v-model="distribuicao.qtde_distribuicao"
+                                placeholder="Qtde distribuição" title="Qtde distribuição"
+                                @keyup.prevent="corrigeNumberType(distribuicao, 'qtde_distribuicao')"
+                                @change="calculaSaldos(doacao_item)"
+                                >
+                            </div>
+                            <div class="col">
+                                <button type="button" class="btn btn-danger btn-sm" @click="confirm('Tem certeza que deseja remover a distribuição?') ? removeEntregaDist(distribuicao, doacao_item.distribuicoes, index, doacao_item) : false">
+                                    <span class="oi oi-x"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <br>
+                        <button class="btn btn-primary" @click="doacao_item.distribuicoes.push({data_distribuicao: '',qtde_distribuicao:''})">Adicionar distribuição</button>
+                        <div class="float-right" v-if="doacao_item.saldo_a_distribuir">
+                            <span>Saldo a distribuir: {{ doacao_item.saldo_a_distribuir }}</span>
+                        </div>
+                    </div>
+                </td>
+                <!-- FIM DOACAO_ITENS -->
+
+                <td><input class="form-control" v-model="item.valor_total" title="Valor total"></td>
+                <td><input class="form-control" v-model="item.validade_doacao" placeholder="Validade Doação" title="Validade Doação"></td>
                 <td>
                     <select id="status" v-model="item.status" class="form-control" style="min-width: 200px" title="Status">
                         <option disabled :value="null">Status</option>                                    
                         <option v-for="status in statuses">{{status}}</option>
                     </select>
                 </td>
-                <td><input class="form-control" v-model="item.destino" placeholder="Destino da doação" title="Destino da doação"></td>
-                <td><input class="form-control" v-model="item.endereco_entrega" placeholder="Local de Destinação (Endereço)" title="Local de Destinação (Endereço)"></td>
-                <td><input class="form-control" v-model="item.responsavel_recebimento" placeholder="Responsável pelo recebimento da doação" title="Responsável pelo recebimento da doação"></td>
-                <td><input class="form-control" v-model="item.quantidade" placeholder="Quantidade" title="Quantidade" @keyup="corrigeNumberType(item, 'quantidade')"></td>
-                <td>
-                    <select v-model="item.unidade_medida" class="form-control" title="Unidade de medida" style="min-width: 100px">
-                        <option selected disabled value="">Unidade de medida</option>
-                        <option v-for="unidade in unidadesDeMedida">{{ unidade }}</option>
-                    </select>
-                </td>
-                <td><input class="form-control" v-model="item.valor_total" title="Valor total"></td>
-                <td>
-                    <div class="form-row customRadio">
-                        <div class="col">
-                            <input id="nao_fracionada" type="radio" v-model="item.entrada_fracionada" value="0" title="Entrada fracionada">
-                            <label for="nao_fracionada">Não</label>
-                        </div>
-                        <div class="col">
-                            <input id="fracionada" type="radio" v-model="item.entrada_fracionada" value="1" title="Entrada fracionada">
-                            <label for="fracionada">Sim</label>
-                        </div>
-                    </div>                    
-                </td>
-                <td>
-                    <div v-for="(entrega, index) in item.recebimentos" class="form-row my-1 lista-interna">
-                        <span class="badge badge-light">{{ index+1 }}</span>
-                        <div class="input-group input-group-sm col">                            
-                            <span class="badge badge-light" style="font-size: 11px">Data de recebimento</span>
-                            <input class="form-control form-control-sm"
-                            v-model="entrega.data_recebimento"
-                            type="date" 
-                            >
-                        </div>
-                        <div class="input-group input-group-sm col">
-                            <span class="badge badge-light" style="font-size: 11px">Quantidade</span>
-                            <input class="form-control form-control-sm"
-                            v-model="entrega.qtde_recebida"
-                            placeholder="Qtde recebida" title="Qtde recebida"
-                            @keyup.prevent="corrigeNumberType(entrega, 'qtde_recebida')"
-                            @change="calculaSaldos(item)"
-                            >
-                        </div>
-                        <div class="input-group input-group-sm col">
-                            <button type="button" title="Remover entrega" class="btn btn-danger btn-sm" @click="confirm('***************ATENÇÃO!***************\n\nTem certeza que deseja remover a entrega? (esta ação não pode ser desfeita!)') ? removeEntregaDist(entrega, item.recebimentos, index, item) : false">
-                                <span class="oi oi-x"></span>
-                            </button>
-                        </div>
-                    </div>
-                    <br>
-                    <button class="btn btn-primary float-left" @click="item.recebimentos.push({data_recebimento:'',qtde_recebida:''})">Adicionar entrega</button>
-                    <div class="float-right" v-if="item.quantidade && (item.saldo_residual === 0 || item.saldo_residual > 0)">
-                        <span>Saldo residual: {{ item.saldo_residual }}</span>
-                    </div>
-                </td>
-                <td>
-                    <div v-for="(distribuicao, index) in item.distribuicoes" class="form-row my-1 lista-interna">                        
-                        <span class="badge badge-light">{{ index+1 }}</span>
-                        <div class="input-group input-group-sm col">
-                            <span class="badge badge-light" style="font-size: 11px">Data de distribuição</span>
-                            <input class="form-control form-control-sm"
-                            v-model="distribuicao.data_distribuicao"
-                            type="date" 
-                            >
-                        </div>
-                        <div class="col">
-                            <span class="badge badge-light" style="font-size: 11px">Quantidade</span>
-                            <input class="form-control form-control-sm"
-                            v-model="distribuicao.qtde_distribuicao"
-                            placeholder="Qtde distribuição" title="Qtde distribuição"
-                            @keyup.prevent="corrigeNumberType(distribuicao, 'qtde_distribuicao')"
-                            @change="calculaSaldos(item)"
-                            >
-                        </div>
-                        <div class="col">
-                            <button type="button" class="btn btn-danger btn-sm" @click="confirm('Tem certeza que deseja remover a distribuição?') ? removeEntregaDist(distribuicao, item.distribuicoes, index, item) : false">
-                                <span class="oi oi-x"></span>
-                            </button>
-                        </div>
-                    </div>
-                    <br>
-                    <button class="btn btn-primary" @click="item.distribuicoes.push({data_distribuicao: '',qtde_distribuicao:''})">Adicionar distribuição</button>
-                    <div class="float-right" v-if="item.saldo_a_distribuir">
-                        <span>Saldo a distribuir: {{ item.saldo_a_distribuir }}</span>
-                    </div>
-                </td>
-                <td><input class="form-control" v-model="item.validade_doacao" placeholder="Validade Doação" title="Validade Doação"></td>
                 <td><input class="form-control" v-model="item.numero_sei" placeholder="Número SEI" title="Número SEI"></td>
                 <td><textarea class="form-control" v-model="item.relatorio_sei" placeholder="Relatório do processo SEI" title="Relatório do processo SEI"></textarea></td>
                 <td><textarea class="form-control" v-model="item.itens_pendentes_sei" placeholder="Itens pendentes no processo SEI" title="Itens pendentes no processo SEI"></textarea></td>
@@ -281,6 +299,18 @@ if (!mysqli_set_charset($link, "utf8")) {
     const fiscal = {
         nome: "<?php echo $_SESSION['nomeUsuario']; ?>"
     }
+    const ItemDoacaoObj = {
+        tipo_item: '',
+        categoria_item: '',
+        descricao_item: '',
+        destino: '',
+        endereco_entrega: '',
+        responsavel_recebimento: '',
+        quantidade: '',
+        unidade_medida: '',
+        entregas: [],
+        distribuicoes: []
+    }
     var app = new Vue({
         el: '#app',
         data: {
@@ -295,23 +325,33 @@ if (!mysqli_set_charset($link, "utf8")) {
             unidadesDeMedida: sisprops.unidadesDeMedida
         },
         methods: {
-            /**
-                LIMPA NÚMEROS
-            */
+            /** ADICIONA ITEM À DOAÇÃO */
+            adicionaDoacaoItem: function (doacao) {
+                console.log(doacao);
+                doacao.doacao_itens.push(JSON.parse(JSON.stringify(ItemDoacaoObj)));
+            },
+            /** REMOVE ITEM DA DOAÇÃO */
+            removeDoacaoItem: function (indiceItem, indiceDoacao) {
+                let itemDoacao = this.itens[indiceDoacao].doacao_itens[indiceItem];
+                if (itemDoacao.id > 0) {
+                    // DOACAO_ITEM JÁ EXISTE NO BANCO
+                    this.remover(itemDoacao);
+                }
+                else {
+                    this.itens[indiceDoacao].doacao_itens.splice(indiceItem, 1);
+                }
+            },
+            /** LIMPA NÚMEROS */
             apenasNumeros: function (string){
                 var numsStr = string.replace(/[^0-9]/g,'');
                 return numsStr;
             },
-            /**
-                EXPORTA CSV
-            */
+            /** EXPORTA CSV */
             exportarCSV: function () {
                 fiscal.rf = this.usuario.rf;
                 window.location = ('exportar-csv.php?rf='+fiscal.rf);
             },
-            /**
-                ADIÇÃO DE ITENS À LISTA
-            */
+            /** ADIÇÃO DE ITENS À LISTA */
             obterLista: function (){
                 // if(fiscal.setor === 'TODOS')
                 //     return;
@@ -325,8 +365,12 @@ if (!mysqli_set_charset($link, "utf8")) {
                         app.itens = JSON.parse(this.response);
                         app.corrigeValores();
                         for (var i = 0; i < app.itens.length; i++) {
-                            if(app.itens[i].recebimentos.length > 0)
-                                app.calculaSaldos(app.itens[i]);
+                            // Percorre doacao_itens
+                            var doacaoItens = app.itens[i].doacao_itens;
+                            for (var i = 0; i < doacaoItens.length; i++) {
+                                if(doacaoItens[i].recebimentos.length > 0)
+                                    app.calculaSaldos(doacaoItens[i]);
+                            }
                         }
                     }
                 };
@@ -480,6 +524,11 @@ textarea {
 #div-tabela table tbody tr td input {
     width: max-content;
 }
+.bt-adiciona-item {
+    position: absolute;
+    width: 350px;
+    margin-top: -35px;
+}
 .check.icon {
   color: #000;
   position: absolute;
@@ -491,6 +540,10 @@ textarea {
   border-left: solid 1px currentColor;
   -webkit-transform: rotate(-45deg);
           transform: rotate(-45deg);
+}
+.doacao-item {
+    height: 60px;
+    min-width: 40px;
 }
 .lista-interna {
     min-width: 420px;
