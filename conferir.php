@@ -75,7 +75,8 @@ if ($_SERVER["REQUEST_METHOD"] == "PUT") {
 			}
 		}
 		else if ($doacaoKey !== 'data_alteracao') {
-			$sqlDoacao .= "`".$doacaoKey."`='".utf8_decode($doacaoValue)."',";			
+			// $sqlDoacao .= "`".$doacaoKey."`='".utf8_decode($doacaoValue)."',";			
+			$sqlDoacao .= "`".$doacaoKey."`='".$doacaoValue."',";
 		}		
 	}
 

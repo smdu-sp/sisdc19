@@ -255,7 +255,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                 </td>
                 <!-- FIM DOACAO_ITENS -->
 
-                <td><input class="form-control" v-model="item.valor_total" title="Valor total"></td>
+                <td><input class="form-control" v-model="item.valor_total" title="Valor total"><div class="valor_mask">{{corrigeValor(item.valor_total)}}</div></td>
                 <td><input class="form-control" v-model="item.validade_doacao" placeholder="Validade Doação" title="Validade Doação"></td>
                 <td>
                     <select id="status" v-model="item.status" class="form-control" style="min-width: 200px" title="Status">
@@ -315,6 +315,7 @@ if (!mysqli_set_charset($link, "utf8")) {
         el: '#app',
         data: {
             itens: [],
+            hItens: [],
             usuario: {
                 nome: "<?php echo $_SESSION['nomeUsuario']; ?>",
                 rf: "<?php echo $_SESSION['IDUsuario']; ?>"
@@ -362,8 +363,10 @@ if (!mysqli_set_charset($link, "utf8")) {
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
+
                         app.itens = JSON.parse(this.response);
-                        app.corrigeValores();
+                        // app.corrigeValores();
+                        /*
                         for (var i = 0; i < app.itens.length; i++) {
                             // Percorre doacao_itens
                             var doacaoItens = app.itens[i].doacao_itens;
@@ -372,6 +375,8 @@ if (!mysqli_set_charset($link, "utf8")) {
                                     app.calculaSaldos(doacaoItens[i]);
                             }
                         }
+                        */
+                        
                     }
                 };
                 xhttp.open("POST", "conferir.php", true);
@@ -398,7 +403,21 @@ if (!mysqli_set_charset($link, "utf8")) {
                 }
                 item.saldo_a_distribuir = aDistribuir;
             },
+            corrigeValor: function(valor) {
+                valor = valor.toString();
+                // Se o valor contiver centavos, converte ponto em vírgula
+                if (valor.indexOf('.') >= 0) {
+                    valor = valor.replace('.', ',');
+                }
+                else if (valor.length > 0 && valor.indexOf(',') < 0) {
+                    valor += ',00';
+                }
+
+                valor = "R$ " + valor.replace('R$ ', '');
+                return valor;
+            },
             corrigeValores: function() {
+                // TODO: OTIMIZAR FUNÇÃO PARA TRABALHAR DE FORMA ASSINCRONA
                 for (var i = 0; i < app.itens.length; i++) {
                     // Se o valor contiver centavos, converte ponto em vírgula
                     app.itens[i].valor_total = app.itens[i].valor_total.toString();
@@ -464,7 +483,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                     if (this.readyState == 4 && this.status == 200) {
                         console.log(this.response === '1' ? "SUCESSO!" : this.response);
                         app.obterLista();
-                        app.corrigeValores();
+                        // app.corrigeValores();
                     }
                 };
                 xhttp.open("PUT", "conferir.php", true);

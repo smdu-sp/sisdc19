@@ -34,6 +34,18 @@ if (!mysqli_set_charset($link, "utf8")) {
 	exit();
 }
 
+// Obtém lista de responsaveis_atendimento (gestores)
+$sql = "SELECT `rf`, `nome` FROM responsaveis WHERE `nome` != 'Renan';";
+$retorno = $link->query($sql);
+$responsaveis = "[";
+if ($retorno->num_rows > 0) {
+	while ($row = $retorno->fetch_assoc()) {
+		$responsaveis .= "'".$row['nome']."',";
+	}
+}
+$responsaveis = rtrim($responsaveis, ',');
+$responsaveis .= "]";
+
 ?>
 <div class="container" id="app">    
 	<div class="page-header row">
@@ -89,11 +101,15 @@ if (!mysqli_set_charset($link, "utf8")) {
 								>
 							</div>
 							<div class="col col-2">
-								<input
+								<!-- <input
 								class="form-control form-control-sm"
 								v-model="novoItem.responsavel_atendimento"
 								placeholder="Responsável atendimento" title="Responsável atendimento"
-								>
+								> -->
+								<select class="form-control form-control-sm" v-model="novoItem.responsavel_atendimento" title="Gestor">
+									<option disabled selected value="">Gestor</option>
+									<option v-for="responsavel in responsaveis_atendimento">{{ responsavel }}</option>
+								</select>
 							</div>
 							<div class="col col-3">
 								<input 
@@ -423,6 +439,7 @@ if (!mysqli_set_charset($link, "utf8")) {
 				rf: "<?php echo $_SESSION['IDUsuario']; ?>"
 			},
 			categoriasTipoitem: [],
+			responsaveis_atendimento: <?php echo $responsaveis; ?>,
 			keepInfo: false,
 			statuses: sisprops.statuses,
 			tiposItem: sisprops.tiposItem,
