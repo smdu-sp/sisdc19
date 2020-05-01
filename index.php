@@ -35,7 +35,7 @@ if (!mysqli_set_charset($link, "utf8")) {
 }
 
 // Obtém lista de responsaveis_atendimento (gestores)
-$sql = "SELECT `rf`, `nome` FROM responsaveis WHERE `nome` != 'Renan';";
+$sql = "SELECT `rf`, `nome` FROM responsaveis WHERE `nome` != 'Renan' ORDER BY `nome`;";
 $retorno = $link->query($sql);
 $responsaveis = "[";
 if ($retorno->num_rows > 0) {

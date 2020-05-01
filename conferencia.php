@@ -40,11 +40,29 @@ if (!mysqli_set_charset($link, "utf8")) {
     exit();
 }
 
-// Query padrao
-// $sqlQuery = "SELECT * FROM bens_patrimoniais;";
-// $retornoQuery = $link->query($sqlQuery);
-
-// $link->close();
+// Obtém lista de responsaveis_atendimento (gestores)
+$sql = "SELECT `rf`, `nome`, `nivel_acesso` FROM responsaveis WHERE `nivel_acesso` != 'admin' ORDER BY `nome`;";
+$retorno = $link->query($sql);
+$nivel_acesso = "";
+$editaResps = "[]"; // Quais responsaveis podem ter seus itens editados pelo usuario
+$usrRespName = "";
+$responsaveis = "[";
+if ($retorno->num_rows > 0) {
+    while ($row = $retorno->fetch_assoc()) {
+        $responsaveis .= "'".$row['nome']."',";
+        if ($row['rf'] === $_SESSION['IDUsuario']) {
+            $nivel_acesso = $row['nivel_acesso'];
+            $usrRespName = $row['nome'];
+        }
+    }
+}
+if (strpos($nivel_acesso, '.-.') !== false) {
+    $editaResps = explode('.-.', $nivel_acesso)[1];
+    $nivel_acesso = explode('.-.', $nivel_acesso)[0];
+}
+$responsaveis = rtrim($responsaveis, ',');
+$responsaveis .= "]";
+$link->close();
 
 ?>
 <div id="app">
@@ -82,6 +100,10 @@ if (!mysqli_set_charset($link, "utf8")) {
     <!-- DOAÇÕES ADICIONADAS -->
     <div id="div-tabela" class="table-responsive" style="resize: both; overflow-x: unset;">
         <h2>Doações cadastradas</h2>
+        <div id="bt_mostrar_todas">
+            <input id="mostrarTodas" type="checkbox" name="mostrarTodas" v-model="mostrarTodas">
+            <label for="mostrarTodas">Mostrar todas</label>
+        </div>
         <table class="table table-striped">
             <tr>
                 <th>#</th>
@@ -117,14 +139,19 @@ if (!mysqli_set_charset($link, "utf8")) {
                 <th>Excluir</th>
             </tr>            
             <!-- <tr v-for="item in itens" :class="item.conferido ? 'table-success' : ''"> -->
-            <tr v-for="item in itens">
+            <tr v-for="item in itens" v-if="!item.blocked || mostrarTodas">
                 <td>{{itens.indexOf(item)+1}}</td>
-                <td><input class="form-control" v-model="item.data_entrada" placeholder="Data de entrada" title="Data de entrada" type="date"></td>
-                <td><input class="form-control w-100" v-model="item.entrada" placeholder="Entrada" title="Entrada"></td>
-                <td><input class="form-control" v-model="item.responsavel_atendimento" placeholder="Responsável atendimento" title="Responsável atendimento"></td>
-                <td><input class="form-control" v-model="item.doador" placeholder="Doador" title="Doador"></td>
+                <td><input class="form-control" v-model="item.data_entrada" placeholder="Data de entrada" title="Data de entrada" type="date" :disabled="item.blocked"></td>
+                <td><input class="form-control w-100" v-model="item.entrada" placeholder="Entrada" title="Entrada" :disabled="item.blocked"></td>
+                <!-- <td><input class="form-control" v-model="item.responsavel_atendimento" placeholder="Responsável atendimento" title="Responsável atendimento"></td> -->
                 <td>
-                    <select id="tipo_formalizacao" v-model="item.tipo_formalizacao" class="form-control" title="Tipo de Formalização" style="min-width: 200px">
+                    <select class="form-control" v-model="item.responsavel_atendimento" title="Gestor / Responsável Atendimento" :disabled="nivelAcesso !== 'total'">
+                        <option v-for="gestor in responsaveis_atendimento">{{gestor}}</option>
+                    </select>
+                </td>
+                <td><input class="form-control" v-model="item.doador" placeholder="Doador" title="Doador" :disabled="item.blocked"></td>
+                <td>
+                    <select v-model="item.tipo_formalizacao" class="form-control" title="Tipo de Formalização" style="min-width: 200px" :disabled="item.blocked">
                         <!-- <option disabled selected value="">Tipo de formalização</option> -->
                         <option>Pessoa física</option>
                         <option>Pessoa jurídica</option>
@@ -132,19 +159,19 @@ if (!mysqli_set_charset($link, "utf8")) {
                         <option>Entidade não governamental</option>
                     </select>
                 </td>
-                <td><input class="form-control" v-model="item.contato" placeholder="Contato" title="Contato"></td>
-                <td><input class="form-control" v-model="item.telefone_doador" placeholder="Telefone Doador (11) 1234-5678" title="Telefone Doador (11) 1234-5678"></td>
-                <td><input class="form-control" v-model="item.email_doador" placeholder="E-mail Doador" title="E-mail Doador"></td>
-
+                <td><input class="form-control" v-model="item.contato" placeholder="Contato" title="Contato" :disabled="item.blocked"></td>
+                <td><input class="form-control" v-model="item.telefone_doador" placeholder="Telefone Doador (11) 1234-5678" title="Telefone Doador (11) 1234-5678" :disabled="item.blocked"></td>
+                <td><input class="form-control" v-model="item.email_doador" placeholder="E-mail Doador" title="E-mail Doador" :disabled="item.blocked"></td>
+ 
                 <!-- DOACAO_ITENS  -->
                 <td>
                     <!-- ADICIONAR OU REMOVER DOACAO_ITEM -->
                     <div class="doacao-item" v-for="(doacao_item, item_index) in item.doacao_itens">                        
-                        <button class="btn btn-danger" v-if="item.doacao_itens.length > 1" @click="removeDoacaoItem(item_index, itens.indexOf(item))">X</button>
+                        <button class="btn btn-danger" v-if="item.doacao_itens.length > 1" @click="removeDoacaoItem(item_index, itens.indexOf(item))" :disabled="item.blocked">X</button>
                     </div>
                     <br>
                     <button class="btn btn-outline-secondary bt-adiciona-item" 
-                    @click="adicionaDoacaoItem(item)">Adicionar item</button>
+                    @click="adicionaDoacaoItem(item)" :disabled="item.blocked">Adicionar item</button>
                 </td>
                 <td>
                     <!-- TIPO DE ITEM -->
@@ -154,6 +181,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                             class="form-control"
                             style="min-width: 130px"
                             title="Tipo de item"
+                            :disabled="item.blocked"
                             >
                             <option disabled selected value="">Tipo de item</option>
                             <option v-for="i in tiposItem">{{i.tipo}}</option>
@@ -163,27 +191,26 @@ if (!mysqli_set_charset($link, "utf8")) {
                 <td>
                     <!-- CATEGORIA -->
                     <div class="doacao-item" v-for="doacao_item in item.doacao_itens">
-                        <select class="form-control" v-model="doacao_item.categoria_item" title="Categoria do item">
+                        <select class="form-control" v-model="doacao_item.categoria_item" title="Categoria do item" :disabled="item.blocked">
                             <option disabled selected value="">Categoria</option>                 
                             <option v-if="doacao_item.tipo_item == categoria.tipo" v-for="categoria in categoriasTipoitem">{{categoria.nome}}</option>
                             <option>Outros</option>
                         </select>
                     </div>
                 </td>
-                <td><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.descricao_item" placeholder="Descrição do Item" title="Descrição do Item"></div></td>
-                <td><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.quantidade" placeholder="Quantidade" title="Quantidade" @keyup="corrigeNumberType(doacao_item, 'quantidade')"></div></td>
+                <td><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.descricao_item" placeholder="Descrição do Item" title="Descrição do Item" :disabled="item.blocked"></div></td>
+                <td><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.quantidade" placeholder="Quantidade" title="Quantidade" @keyup="corrigeNumberType(doacao_item, 'quantidade')" :disabled="item.blocked"></div></td>
                 <td>
                     <div class="doacao-item" v-for="doacao_item in item.doacao_itens">
-                        <select v-model="doacao_item.unidade_medida" class="form-control" title="Unidade de medida" style="min-width: 100px">
+                        <select v-model="doacao_item.unidade_medida" class="form-control" title="Unidade de medida" style="min-width: 100px" :disabled="item.blocked">
                             <option selected disabled value="">Unidade de medida</option>
                             <option v-for="unidade in unidadesDeMedida">{{ unidade }}</option>
                         </select>
                     </div>
                 </td>
-                <td><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.destino" placeholder="Destino da doação" title="Destino da doação"></div></td>
-                <td><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.endereco_entrega" placeholder="Local de Destinação (Endereço)" title="Local de Destinação (Endereço)"></div></td>
-                <td><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.responsavel_recebimento" placeholder="Responsável pelo recebimento da doação" title="Responsável pelo recebimento da doação"></div></td>
-                <!-- AQUI PUMBA -->
+                <td><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.destino" placeholder="Destino da doação" title="Destino da doação" :disabled="item.blocked"></div></td>
+                <td><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.endereco_entrega" placeholder="Local de Destinação (Endereço)" title="Local de Destinação (Endereço)" :disabled="item.blocked"></div></td>
+                <td><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.responsavel_recebimento" placeholder="Responsável pelo recebimento da doação" title="Responsável pelo recebimento da doação" :disabled="item.blocked"></div></td>
                 
                 <!-- ENTREGAS -->
                 <td>
@@ -195,7 +222,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                                 <input class="form-control form-control-sm"
                                 v-model="entrega.data_recebimento"
                                 type="date" 
-                                >
+                                 :disabled="item.blocked">
                             </div>
                             <div class="input-group input-group-sm col">
                                 <span class="badge badge-light" style="font-size: 11px">Quantidade</span>
@@ -204,16 +231,16 @@ if (!mysqli_set_charset($link, "utf8")) {
                                 placeholder="Qtde recebida" title="Qtde recebida"
                                 @keyup.prevent="corrigeNumberType(entrega, 'qtde_recebida')"
                                 @change="calculaSaldos(doacao_item)"
-                                >
+                                 :disabled="item.blocked">
                             </div>
                             <div class="input-group input-group-sm col">
-                                <button type="button" title="Remover entrega" class="btn btn-danger btn-sm" @click="confirm('***************ATENÇÃO!***************\n\nTem certeza que deseja remover a entrega? (esta ação não pode ser desfeita!)') ? removeEntregaDist(entrega, doacao_item.recebimentos, index, doacao_item) : false">
+                                <button type="button" title="Remover entrega" class="btn btn-danger btn-sm" @click="confirm('***************ATENÇÃO!***************\n\nTem certeza que deseja remover a entrega? (esta ação não pode ser desfeita!)') ? removeEntregaDist(entrega, doacao_item.recebimentos, index, doacao_item) : false" :disabled="item.blocked">
                                     <span class="oi oi-x"></span>
                                 </button>
                             </div>
                         </div>
                         <br>
-                        <button class="btn btn-primary float-left" @click="doacao_item.recebimentos.push({data_recebimento:'',qtde_recebida:''})">Adicionar entrega</button>
+                        <button class="btn btn-primary float-left" @click="doacao_item.recebimentos.push({data_recebimento:'',qtde_recebida:''})" :disabled="item.blocked">Adicionar entrega</button>
                         <div class="float-right" v-if="doacao_item.quantidade && (doacao_item.saldo_residual === 0 || doacao_item.saldo_residual > 0)">
                             <span>Saldo residual: {{ doacao_item.saldo_residual }}</span>
                         </div>
@@ -229,7 +256,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                                 <input class="form-control form-control-sm"
                                 v-model="distribuicao.data_distribuicao"
                                 type="date" 
-                                >
+                                 :disabled="item.blocked">
                             </div>
                             <div class="col">
                                 <span class="badge badge-light" style="font-size: 11px">Quantidade</span>
@@ -238,16 +265,16 @@ if (!mysqli_set_charset($link, "utf8")) {
                                 placeholder="Qtde distribuição" title="Qtde distribuição"
                                 @keyup.prevent="corrigeNumberType(distribuicao, 'qtde_distribuicao')"
                                 @change="calculaSaldos(doacao_item)"
-                                >
+                                 :disabled="item.blocked">
                             </div>
                             <div class="col">
-                                <button type="button" class="btn btn-danger btn-sm" @click="confirm('Tem certeza que deseja remover a distribuição?') ? removeEntregaDist(distribuicao, doacao_item.distribuicoes, index, doacao_item) : false">
+                                <button type="button" class="btn btn-danger btn-sm" @click="confirm('Tem certeza que deseja remover a distribuição?') ? removeEntregaDist(distribuicao, doacao_item.distribuicoes, index, doacao_item) : false" :disabled="item.blocked">
                                     <span class="oi oi-x"></span>
                                 </button>
                             </div>
                         </div>
                         <br>
-                        <button class="btn btn-primary" @click="doacao_item.distribuicoes.push({data_distribuicao: '',qtde_distribuicao:''})">Adicionar distribuição</button>
+                        <button class="btn btn-primary" @click="doacao_item.distribuicoes.push({data_distribuicao: '',qtde_distribuicao:''})" :disabled="item.blocked">Adicionar distribuição</button>
                         <div class="float-right" v-if="doacao_item.saldo_a_distribuir">
                             <span>Saldo a distribuir: {{ doacao_item.saldo_a_distribuir }}</span>
                         </div>
@@ -255,22 +282,22 @@ if (!mysqli_set_charset($link, "utf8")) {
                 </td>
                 <!-- FIM DOACAO_ITENS -->
 
-                <td><input class="form-control" v-model="item.valor_total" title="Valor total"><div class="valor_mask">{{corrigeValor(item.valor_total)}}</div></td>
-                <td><input class="form-control" v-model="item.validade_doacao" placeholder="Validade Doação" title="Validade Doação"></td>
+                <td><input class="form-control" v-model="item.valor_total" title="Valor total" :disabled="item.blocked"><div class="valor_mask">{{corrigeValor(item.valor_total)}}</div></td>
+                <td><input class="form-control" v-model="item.validade_doacao" placeholder="Validade Doação" title="Validade Doação" :disabled="item.blocked"></td>
                 <td>
-                    <select id="status" v-model="item.status" class="form-control" style="min-width: 200px" title="Status">
+                    <select id="status" v-model="item.status" class="form-control" style="min-width: 200px" title="Status" :disabled="item.blocked">
                         <option disabled :value="null">Status</option>                                    
                         <option v-for="status in statuses">{{status}}</option>
                     </select>
                 </td>
-                <td><input class="form-control" v-model="item.numero_sei" placeholder="Número SEI" title="Número SEI"></td>
-                <td><textarea class="form-control" v-model="item.relatorio_sei" placeholder="Relatório do processo SEI" title="Relatório do processo SEI"></textarea></td>
-                <td><textarea class="form-control" v-model="item.itens_pendentes_sei" placeholder="Itens pendentes no processo SEI" title="Itens pendentes no processo SEI"></textarea></td>
-                <td><textarea class="form-control" v-model="item.observacao" placeholder="Observação" title="Observação"></textarea></td>
+                <td><input class="form-control" v-model="item.numero_sei" placeholder="Número SEI" title="Número SEI" :disabled="item.blocked"></td>
+                <td><textarea class="form-control" v-model="item.relatorio_sei" placeholder="Relatório do processo SEI" title="Relatório do processo SEI" :disabled="item.blocked"></textarea></td>
+                <td><textarea class="form-control" v-model="item.itens_pendentes_sei" placeholder="Itens pendentes no processo SEI" title="Itens pendentes no processo SEI" :disabled="item.blocked"></textarea></td>
+                <td><textarea class="form-control" v-model="item.observacao" placeholder="Observação" title="Observação" :disabled="item.blocked"></textarea></td>
                 <!-- BOTÃO PARA CONFIRMAR ITEM -->
                 <td>
                     <center>                        
-                        <button type="button" class="btn btn-success btn-sm" @click="conferir(item)" title="Conferir/Atualizar">
+                        <button type="button" class="btn btn-success btn-sm" @click="conferir(item)" title="Conferir/Atualizar" :disabled="item.blocked">
                             <span :class="item.conferido ? 'oi oi-loop-circular' : 'oi oi-check'"></span>
                         </button>
                     </center>
@@ -278,7 +305,7 @@ if (!mysqli_set_charset($link, "utf8")) {
                 <!-- BOTÃO PARA REMOVER ITEM -->
                 <td>
                     <center>
-                        <button type="button" class="btn btn-danger btn-sm" @click="confirm('***************ATENÇÃO!***************\n\nTem certeza que deseja remover o item do cadastro? (esta ação não pode ser desfeita!)') ? remover(item) : false" title="Remover item">
+                        <button type="button" class="btn btn-danger btn-sm" @click="confirm('***************ATENÇÃO!***************\n\nTem certeza que deseja remover o item do cadastro? (esta ação não pode ser desfeita!)') ? remover(item) : false" title="Remover item" :disabled="item.blocked">
                             <span class="oi oi-x"></span>
                         </button>
                     </center>
@@ -317,13 +344,17 @@ if (!mysqli_set_charset($link, "utf8")) {
             itens: [],
             hItens: [],
             usuario: {
-                nome: "<?php echo $_SESSION['nomeUsuario']; ?>",
-                rf: "<?php echo $_SESSION['IDUsuario']; ?>"
+                nome: "<?=$_SESSION['nomeUsuario'];?>",
+                rf: "<?=$_SESSION['IDUsuario'];?>"
             },
             categoriasTipoitem: [],
+            editaResps: <?=$editaResps;?>,
+            nivelAcesso: "<?=$nivel_acesso;?>",
+            responsaveis_atendimento: <?=$responsaveis;?>,
             statuses: sisprops.statuses,
             tiposItem: sisprops.tiposItem,
-            unidadesDeMedida: sisprops.unidadesDeMedida
+            unidadesDeMedida: sisprops.unidadesDeMedida,
+            mostrarTodas: true
         },
         methods: {
             /** ADICIONA ITEM À DOAÇÃO */
@@ -347,6 +378,20 @@ if (!mysqli_set_charset($link, "utf8")) {
                 var numsStr = string.replace(/[^0-9]/g,'');
                 return numsStr;
             },
+            /** VERIFICA SE DOAÇÃO ESTÁ BLOQUEADA PARA EDIÇÃO **/
+            isBlocked: function (responsavel){
+                if(this.nivelAcesso === 'total' || this.nivelAcesso === 'admin'){
+                    return false;
+                }
+
+                for (var i = 0; i < this.editaResps.length; i++) {
+                    if (this.editaResps[i] === responsavel){
+                        return false;
+                    }
+                }
+
+                return true;
+            },
             /** EXPORTA CSV */
             exportarCSV: function () {
                 fiscal.rf = this.usuario.rf;
@@ -365,6 +410,9 @@ if (!mysqli_set_charset($link, "utf8")) {
                     if (this.readyState == 4 && this.status == 200) {
 
                         app.itens = JSON.parse(this.response);
+                        for (var i = app.itens.length - 1; i >= 0; i--) {
+                            app.itens[i].blocked = app.isBlocked(app.itens[i].responsavel_atendimento);
+                        }
                         // app.corrigeValores();
                         /*
                         for (var i = 0; i < app.itens.length; i++) {
@@ -464,6 +512,11 @@ if (!mysqli_set_charset($link, "utf8")) {
             },
             conferir: function(itemConferido) {
                 let adicionarVirgulas = false;
+                // remove propriedades virtuais
+                delete itemConferido.blocked; 
+                delete itemConferido.saldo_residual;
+                delete itemConferido.saldo_a_distribuir;
+
                 itemConferido.conferido = this.usuario.nome+' - '+this.usuario.rf;
                 /*
                 if(itemConferido.numero_sei.length > 0)
@@ -518,6 +571,9 @@ if (!mysqli_set_charset($link, "utf8")) {
             }
         },
         mounted: function() {
+            // Especifica nome de usuário conforme tabela de responsáveis
+            this.editaResps.push('<?=$usrRespName?>');
+            // Obtem lista de doações
             this.obterLista();
             for (var i = 0; i < this.tiposItem.length; i++) {
                 for (var j = 0; j < this.tiposItem[i].categorias.length; j++) {
