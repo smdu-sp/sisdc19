@@ -18,3 +18,4 @@ config.php
 *.png
 *.bkp
 *.sql
+/google-api-php-client-2.4.1

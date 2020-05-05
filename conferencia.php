@@ -42,6 +42,8 @@ if (!mysqli_set_charset($link, "utf8")) {
 
 // Obtém lista de responsaveis_atendimento (gestores)
 $sql = "SELECT `rf`, `nome`, `nivel_acesso` FROM responsaveis WHERE `nivel_acesso` != 'admin' ORDER BY `nome`;";
+// TODO: substituir pela linha acima
+// $sql = "SELECT `rf`, `nome`, `nivel_acesso` FROM responsaveis WHERE 1 ORDER BY `nome`;";
 $retorno = $link->query($sql);
 $nivel_acesso = "";
 $editaResps = "[]"; // Quais responsaveis podem ter seus itens editados pelo usuario
@@ -104,6 +106,7 @@ $link->close();
             <input id="mostrarTodas" type="checkbox" name="mostrarTodas" v-model="mostrarTodas">
             <label for="mostrarTodas">Mostrar todas</label>
         </div>
+        <div id="soma-total"><p>Soma total:</p>{{ somaTotal() }}</div>
         <table class="table table-striped">
             <tr>
                 <th>#</th>
@@ -282,7 +285,8 @@ $link->close();
                 </td>
                 <!-- FIM DOACAO_ITENS -->
 
-                <td><input class="form-control" v-model="item.valor_total" title="Valor total" :disabled="item.blocked"><div class="valor_mask">{{corrigeValor(item.valor_total)}}</div></td>
+                <!-- <td><input class="form-control" v-model="item.valor_total" title="Valor total" :disabled="item.blocked"><div class="valor_mask">{{corrigeValor(item.valor_total)}}</div></td> -->
+                <td><input class="form-control" v-model="item.valor_total" v-on:change="atualizaValor(item)" title="Valor total" :disabled="usuario.rf !== 'd746958'"><div class="valor_mask">{{corrigeValor(item.valor_total)}}</div></td>
                 <td><input class="form-control" v-model="item.validade_doacao" placeholder="Validade Doação" title="Validade Doação" :disabled="item.blocked"></td>
                 <td>
                     <select id="status" v-model="item.status" class="form-control" style="min-width: 200px" title="Status" :disabled="item.blocked">
@@ -290,7 +294,7 @@ $link->close();
                         <option v-for="status in statuses">{{status}}</option>
                     </select>
                 </td>
-                <td><input class="form-control" v-model="item.numero_sei" placeholder="Número SEI" title="Número SEI" :disabled="item.blocked"></td>
+                <td><input class="form-control" v-model="item.numero_sei" placeholder="Número SEI" title="Número SEI" :disabled="item.blocked" style="min-width: 200px"></td>
                 <td><textarea class="form-control" v-model="item.relatorio_sei" placeholder="Relatório do processo SEI" title="Relatório do processo SEI" :disabled="item.blocked"></textarea></td>
                 <td><textarea class="form-control" v-model="item.itens_pendentes_sei" placeholder="Itens pendentes no processo SEI" title="Itens pendentes no processo SEI" :disabled="item.blocked"></textarea></td>
                 <td><textarea class="form-control" v-model="item.observacao" placeholder="Observação" title="Observação" :disabled="item.blocked"></textarea></td>
@@ -568,6 +572,18 @@ $link->close();
                 }
                 arrayPai.splice(indice, 1);
                 this.calculaSaldos(item);
+            },
+            somaTotal: function() {
+                let somaValor = 0;
+                for (var i = 0; i < this.itens.length; i++) {
+                    somaValor += parseFloat(this.itens[i].valor_total);
+                }
+                return somaValor.toLocaleString("pt-BR",{style:'currency', currency:'BRL', minimumFractionDigits: '2', maximumFractionDigits: '2'});
+            },
+            atualizaValor: function(item) {
+                console.log("CONFERIR...");
+                console.log(item);
+                this.conferir(item);
             }
         },
         mounted: function() {
@@ -627,6 +643,23 @@ textarea {
 .lista-interna button {
     position: absolute;
     top: 25%;
+}
+#soma-total {
+    border: 1px solid gray;
+    width: 10em;
+    font-size: 1.5em;
+    color: #05b757;
+    padding: 0.3em 1em;
+    position: fixed;
+    background-color: rgba(243, 245, 245, 0.9);
+    border-radius: 10px;
+    top: 30px;
+    right: 30px;
+    box-shadow: 3px 3px rgba(0,0,0,0.3);
+    z-index: 3;
+}
+#soma-total p {
+    color: black;
 }
 </style>
 
