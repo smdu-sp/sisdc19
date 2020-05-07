@@ -164,9 +164,13 @@ if ($_SERVER["REQUEST_METHOD"] == "PUT") {
 	}
 	else {
 		session_start();
-		$sqlLog = "INSERT INTO `log_geral` (`rf`, `registro`) VALUES ('".strtolower($_SESSION['IDUsuario'])."', 'alteracao_doacao');";
-		if(!mysqli_query($link, $sqlLog))
-		    printf("Errormessage: %s\n", mysqli_error($link));
+		$sqlLog = "INSERT INTO `log_geral` (`rf`, `registro`) VALUES ('".strtolower($_SESSION['IDUsuario'])." - ".$_SESSION['nomeUsuario']."', 'alteracao_doacao');";
+		if(!mysqli_query($link, $sqlLog)) {
+	    printf("Errormessage: %s\n", mysqli_error($link));
+	  }
+	  else {
+	  	updtGS();
+	  }
 		echo 1;
 	}
 	// echo $sql;
@@ -185,8 +189,10 @@ if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
 		$sql = "INSERT INTO log_delete (`rf`,`item`) VALUES ('".$usuario."','".$wholeItem."');";
 		if(!mysqli_query($link, $sql))
 			printf("Errormessage: %s\n", mysqli_error($link));
-		else
+		else {
+			updtGS();
 			echo 1;
+		}
 	}
 
 	if (property_exists($itemObj, 'id_item')) {
@@ -241,4 +247,8 @@ if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
 	return;
 }
 
- ?>
+function updtGS() {
+	global $dbTables;
+	require_once "gsheets.php";
+}
+?>

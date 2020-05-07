@@ -123,6 +123,13 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 	    printf("Errormessage: %s\n", mysqli_error($link));
 
 	echo $cadastrados;
+	updtGS();
 	return;	
 }
+
+function updtGS() {
+	global $dbTables;
+	require_once "gsheets.php";
+}
+
  ?>

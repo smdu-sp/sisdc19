@@ -177,7 +177,7 @@ $responsaveis .= "]";
 							<div class="col col-2">
 								<select class="form-control form-control-sm" v-model="itemDoacao.categoria_item">
 									<option disabled selected value="">Categoria</option>                 
-									<option v-if="itemDoacao.tipo_item" v-for="categoria in categoriasTipoitem">{{categoria}}</option>
+									<option v-if="itemDoacao.tipo_item == categoria.tipo" v-for="categoria in categoriasTipoitem">{{categoria.nome}}</option>
 									<option>Outros</option>
 								</select>
 							</div>
@@ -325,6 +325,7 @@ $responsaveis .= "]";
 								v-model="novoItem.valor_total"
 								placeholder="Valor total da doação" title="Valor total da doação"
 								title="Valor total (ex.: 999999,00)"
+								disabled
 								>
 							</div>
 							<div class="col">
@@ -558,6 +559,13 @@ $responsaveis .= "]";
 		computed: {
 			criarNovoItem: function(){
 				this.novoItem = this.itemModel;
+			}
+		},
+		mounted: function() {
+			for (var i = 0; i < this.tiposItem.length; i++) {
+			    for (var j = 0; j < this.tiposItem[i].categorias.length; j++) {
+			        this.categoriasTipoitem.push({nome: this.tiposItem[i].categorias[j], tipo: this.tiposItem[i].tipo});
+			    }
 			}
 		}
 	});

@@ -286,7 +286,7 @@ $link->close();
                 <!-- FIM DOACAO_ITENS -->
 
                 <!-- <td><input class="form-control" v-model="item.valor_total" title="Valor total" :disabled="item.blocked"><div class="valor_mask">{{corrigeValor(item.valor_total)}}</div></td> -->
-                <td><input class="form-control" v-model="item.valor_total" v-on:change="atualizaValor(item)" title="Valor total" :disabled="usuario.rf !== 'd746958'"><div class="valor_mask">{{corrigeValor(item.valor_total)}}</div></td>
+                <td><input class="form-control" v-model="item.valor_total" v-on:change="atualizaValor(item)" title="Valor total" :disabled="usuario.rf !== 'd746958' && usuario.rf !== 'd817518'"><div class="valor_mask">{{corrigeValor(item.valor_total)}}</div></td>
                 <td><input class="form-control" v-model="item.validade_doacao" placeholder="Validade Doação" title="Validade Doação" :disabled="item.blocked"></td>
                 <td>
                     <select id="status" v-model="item.status" class="form-control" style="min-width: 200px" title="Status" :disabled="item.blocked">
