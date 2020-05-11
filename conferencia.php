@@ -74,7 +74,7 @@ $link->close();
                 </div>            
             </div>
             <div class="col-6">
-                <h1>Conferência de registros de doações</h1>
+                <h1><center>SGD - Sistema de Gerenciamento de Doações (COVID-19)</center></h1>
             </div>
             <div class="col-3">
                 <button class="btn btn-danger btn-sm float-right" @click="location.href='logout.php'">Sair do sistema</button>
@@ -111,38 +111,42 @@ $link->close();
     <!-- DOAÇÕES ADICIONADAS -->
     <div id="div-tabela" class="table-responsive" style="resize: both; overflow-x: unset;">
         <h2>Doações cadastradas</h2>
-        <div id="bt_mostrar_todas">
+        <div id="bt_mostrar_todas" class="opcoesFiltro">
             <input id="mostrarTodas" type="checkbox" name="mostrarTodas" v-model="mostrarTodas">
             <label for="mostrarTodas">Mostrar todas</label>
+        </div>
+        <div id="bt_apenas_sei" class="opcoesFiltro" v-if="apenasDadosSei()">            
+            <input id="apenasSei" type="checkbox" v-model="ocultarNotSei">
+            <label for="apenasSei">Ocultar campos não relacionados ao SEI</label>
         </div>
         <div id="soma-total">Soma total: <span>{{ somaTotal() }}</span></div>
         <table class="table table-striped mb-5">
             <tr>
                 <th>#</th>
-                <th>DATA 1º CONTATO</th>
-                <th>ENTRADA DOAÇÃO</th>
-                <th>RESPONSÁVEL ATENDIMENTO</th>
-                <th>DOADOR</th>
-                <th>TIPO DE FORMALIZAÇÃO</th>
-                <th>CONTATO DOADOR</th>
-                <th>TELEFONE DOADOR</th>
-                <th>E-MAIL DOADOR</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">DATA 1º CONTATO</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">ENTRADA DOAÇÃO</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">RESPONSÁVEL ATENDIMENTO</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">DOADOR</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">TIPO DE FORMALIZAÇÃO</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">CONTATO DOADOR</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">TELEFONE DOADOR</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">E-MAIL DOADOR</th>
                 <!-- ITENS -->
-                <th>ITENS</th>
-                <th>TIPO DE ITEM</th>
-                <th>CATEGORIA ITEM</th>
-                <th>DESCRIÇÃO DO ITEM</th>
-                <th>QUANTIDADE</th>
-                <th>UNIDADE</th>
-                <th>DESTINO DA DOAÇÃO</th>
-                <th>LOCAL DE DESTINAÇÃO (ENDEREÇO)</th>
-                <th>RESPONSÁVEL PELO RECEBIMENTO</th>
-                <th>ENTREGA</th>
-                <th>DISTRIBUIÇÃO</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">ITENS</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">TIPO DE ITEM</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">CATEGORIA ITEM</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">DESCRIÇÃO DO ITEM</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">QUANTIDADE</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">UNIDADE</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">DESTINO DA DOAÇÃO</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">LOCAL DE DESTINAÇÃO (ENDEREÇO)</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">RESPONSÁVEL PELO RECEBIMENTO</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">ENTREGA</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">DISTRIBUIÇÃO</th>
                 <!-- FIM ITENS -->
-                <th>VALOR TOTAL DA DOAÇÃO</th>
-                <th>VALIDADE DOAÇÃO</th>
-                <th>STATUS</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">VALOR TOTAL DA DOAÇÃO</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">VALIDADE DOAÇÃO</th>
+                <th v-if="!apenasDadosSei() || !ocultarNotSei">STATUS</th>
                 <th>Nº DO SEI</th>
                 <th>RELATÓRIO DO PROCESSO SEI</th>
                 <th>ITENS PENDENTES NO PROCESSO SEI</th>
@@ -153,16 +157,15 @@ $link->close();
             <!-- <tr v-for="item in itens" :class="item.conferido ? 'table-success' : ''"> -->
             <tr v-for="item in itens" v-if="!item.blocked || mostrarTodas">
                 <td>{{itens.indexOf(item)+1}}</td>
-                <td><input class="form-control" v-model="item.data_entrada" placeholder="Data de entrada" title="Data de entrada" type="date" :disabled="item.blocked"></td>
-                <td><input class="form-control w-100" v-model="item.entrada" placeholder="Entrada" title="Entrada" :disabled="item.blocked"></td>
-                <!-- <td><input class="form-control" v-model="item.responsavel_atendimento" placeholder="Responsável atendimento" title="Responsável atendimento"></td> -->
-                <td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei"><input class="form-control" v-model="item.data_entrada" placeholder="Data de entrada" title="Data de entrada" type="date" :disabled="item.blocked"></td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei"><input class="form-control w-100" v-model="item.entrada" placeholder="Entrada" title="Entrada" :disabled="item.blocked"></td>                
+                <td v-if="!apenasDadosSei() || !ocultarNotSei">
                     <select class="form-control" v-model="item.responsavel_atendimento" title="Gestor / Responsável Atendimento" :disabled="nivelAcesso !== 'total'">
                         <option v-for="gestor in responsaveis_atendimento">{{gestor}}</option>
                     </select>
                 </td>
-                <td><input class="form-control" v-model="item.doador" placeholder="Doador" title="Doador" :disabled="item.blocked"></td>
-                <td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei"><input class="form-control" v-model="item.doador" placeholder="Doador" title="Doador" :disabled="item.blocked"></td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei">
                     <select v-model="item.tipo_formalizacao" class="form-control" title="Tipo de Formalização" style="min-width: 200px" :disabled="item.blocked">
                         <!-- <option disabled selected value="">Tipo de formalização</option> -->
                         <option>Pessoa física</option>
@@ -171,12 +174,12 @@ $link->close();
                         <option>Entidade não governamental</option>
                     </select>
                 </td>
-                <td><input class="form-control" v-model="item.contato" placeholder="Contato" title="Contato" :disabled="item.blocked"></td>
-                <td><input class="form-control" v-model="item.telefone_doador" placeholder="Telefone Doador (11) 1234-5678" title="Telefone Doador (11) 1234-5678" :disabled="item.blocked"></td>
-                <td><input class="form-control" v-model="item.email_doador" placeholder="E-mail Doador" title="E-mail Doador" :disabled="item.blocked"></td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei"><input class="form-control" v-model="item.contato" placeholder="Contato" title="Contato" :disabled="item.blocked"></td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei"><input class="form-control" v-model="item.telefone_doador" placeholder="Telefone Doador (11) 1234-5678" title="Telefone Doador (11) 1234-5678" :disabled="item.blocked"></td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei"><input class="form-control" v-model="item.email_doador" placeholder="E-mail Doador" title="E-mail Doador" :disabled="item.blocked"></td>
  
                 <!-- DOACAO_ITENS  -->
-                <td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei">
                     <!-- ADICIONAR OU REMOVER DOACAO_ITEM -->
                     <div class="doacao-item" v-for="(doacao_item, item_index) in item.doacao_itens">                        
                         <button class="btn btn-danger" v-if="item.doacao_itens.length > 1" @click="removeDoacaoItem(item_index, itens.indexOf(item))" :disabled="item.blocked">X</button>
@@ -185,7 +188,7 @@ $link->close();
                     <button class="btn btn-outline-secondary bt-adiciona-item" 
                     @click="adicionaDoacaoItem(item)" :disabled="item.blocked">Adicionar item</button>
                 </td>
-                <td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei">
                     <!-- TIPO DE ITEM -->
                     <div class="doacao-item" v-for="doacao_item in item.doacao_itens">
                         <select
@@ -200,7 +203,7 @@ $link->close();
                         </select>
                     </div>
                 </td>
-                <td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei">
                     <!-- CATEGORIA -->
                     <div class="doacao-item" v-for="doacao_item in item.doacao_itens">
                         <select class="form-control" v-model="doacao_item.categoria_item" title="Categoria do item" :disabled="item.blocked">
@@ -210,9 +213,9 @@ $link->close();
                         </select>
                     </div>
                 </td>
-                <td><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.descricao_item" placeholder="Descrição do Item" title="Descrição do Item" :disabled="item.blocked"></div></td>
-                <td><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.quantidade" placeholder="Quantidade" title="Quantidade" @keyup="corrigeNumberType(doacao_item, 'quantidade')" :disabled="item.blocked"></div></td>
-                <td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei"><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.descricao_item" placeholder="Descrição do Item" title="Descrição do Item" :disabled="item.blocked"></div></td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei"><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.quantidade" placeholder="Quantidade" title="Quantidade" @keyup="corrigeNumberType(doacao_item, 'quantidade')" :disabled="item.blocked"></div></td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei">
                     <div class="doacao-item" v-for="doacao_item in item.doacao_itens">
                         <select v-model="doacao_item.unidade_medida" class="form-control" title="Unidade de medida" style="min-width: 100px" :disabled="item.blocked">
                             <option selected disabled value="">Unidade de medida</option>
@@ -220,12 +223,12 @@ $link->close();
                         </select>
                     </div>
                 </td>
-                <td><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.destino" placeholder="Destino da doação" title="Destino da doação" :disabled="item.blocked"></div></td>
-                <td><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.endereco_entrega" placeholder="Local de Destinação (Endereço)" title="Local de Destinação (Endereço)" :disabled="item.blocked"></div></td>
-                <td><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.responsavel_recebimento" placeholder="Responsável pelo recebimento da doação" title="Responsável pelo recebimento da doação" :disabled="item.blocked"></div></td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei"><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.destino" placeholder="Destino da doação" title="Destino da doação" :disabled="item.blocked"></div></td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei"><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.endereco_entrega" placeholder="Local de Destinação (Endereço)" title="Local de Destinação (Endereço)" :disabled="item.blocked"></div></td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei"><div class="doacao-item" v-for="doacao_item in item.doacao_itens"><input class="form-control" v-model="doacao_item.responsavel_recebimento" placeholder="Responsável pelo recebimento da doação" title="Responsável pelo recebimento da doação" :disabled="item.blocked"></div></td>
                 
                 <!-- ENTREGAS -->
-                <td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei">
                     <div class="doacao-item" v-for="doacao_item in item.doacao_itens">
                         <div v-for="(entrega, index) in doacao_item.recebimentos" class="form-row my-1 lista-interna">
                             <span class="badge badge-light">{{ index+1 }}</span>
@@ -259,7 +262,7 @@ $link->close();
                     </div>
                 </td>
                 <!-- DISTRIBUIÇÕES -->
-                <td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei">
                     <div class="doacao-item" v-for="doacao_item in item.doacao_itens">
                         <div v-for="(distribuicao, index) in doacao_item.distribuicoes" class="form-row my-1 lista-interna">                        
                             <span class="badge badge-light">{{ index+1 }}</span>
@@ -294,10 +297,9 @@ $link->close();
                 </td>
                 <!-- FIM DOACAO_ITENS -->
 
-                <!-- <td><input class="form-control" v-model="item.valor_total" title="Valor total" :disabled="item.blocked"><div class="valor_mask">{{corrigeValor(item.valor_total)}}</div></td> -->
-                <td><input class="form-control" v-model="item.valor_total" v-on:change="atualizaValor(item)" title="Valor total" :disabled="usuario.rf !== 'd746958' && usuario.rf !== 'd817518'"><div class="valor_mask">{{corrigeValor(item.valor_total)}}</div></td>
-                <td><input class="form-control" v-model="item.validade_doacao" placeholder="Validade Doação" title="Validade Doação" :disabled="item.blocked"></td>
-                <td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei"><input class="form-control" v-model="item.valor_total" v-on:change="atualizaValor(item)" title="Valor total" :disabled="usuario.rf !== 'd746958' && usuario.rf !== 'd817518'"><div class="valor_mask">{{corrigeValor(item.valor_total)}}</div></td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei"><input class="form-control" v-model="item.validade_doacao" placeholder="Validade Doação" title="Validade Doação" :disabled="item.blocked"></td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei">
                     <select id="status" v-model="item.status" class="form-control" style="min-width: 200px" title="Status" :disabled="item.blocked">
                         <option disabled :value="null">Status</option>                                    
                         <option v-for="status in statuses">{{status}}</option>
@@ -368,6 +370,7 @@ $link->close();
             tiposItem: sisprops.tiposItem,
             unidadesDeMedida: sisprops.unidadesDeMedida,
             mostrarTodas: true,
+            ocultarNotSei: true,
             alerta: false,
             mensagemAlerta: '',
             allOtherBlocked: false
@@ -407,6 +410,14 @@ $link->close();
                 }
 
                 return true;
+            },
+            /** VERIFICA SE USUÁRIO PODE ALTERAR APENAS INFORMAÇÕES REFERENTES AO SEI **/
+            apenasDadosSei: function (){
+                if(this.usuario.rf === 'd841268'){
+                    // Dallmann
+                    return true;
+                }
+                return false;
             },
             /** EXPORTA CSV */
             exportarCSV: function () {
@@ -552,24 +563,32 @@ $link->close();
                 delete itemConferido.blocked; 
                 delete itemConferido.saldo_residual;
                 delete itemConferido.saldo_a_distribuir;
+                delete itemConferido.data_inclusao;
+                delete itemConferido.data_alteracao;
+                delete itemConferido.id_responsavel;
 
                 itemConferido.conferido = this.usuario.nome+' - '+this.usuario.rf;
-                /*
-                if(itemConferido.numero_sei.length > 0)
-                    itemConferido.numero_sei = this.apenasNumeros(itemConferido.numero_sei);
-                */
-                // console.log(itemConferido.valor_total.indexOf(','));
 
                 if(itemConferido.valor_total.length > 0) {
                     itemConferido.valor_total = this.consertaMoeda(itemConferido.valor_total)
                     console.log("Valor: ", itemConferido.valor_total);
-                    // COMENTADO PARA AVERIGUAR FALHAS DE ATUALIZAÇÃO DE DOAÇÕES SEM VALOR TOTAL
-                    /*
-                    if(!itemConferido.valor_total){
-                        window.alert('Erro ao atualizar - contate o desenvolvedor. Erro 1901: falha na verificação do valor.')
-                        return;
-                    }
-                    */
+                }
+
+                // REMOVE PROPRIEDADES QUE O USUÁRIO NÃO PODE ALTERAR
+                if(this.apenasDadosSei()) {
+                    delete itemConferido.conferido;
+                    delete itemConferido.data_entrada;
+                    delete itemConferido.entrada;
+                    delete itemConferido.responsavel_atendimento;
+                    delete itemConferido.doador;
+                    delete itemConferido.tipo_formalizacao;
+                    delete itemConferido.contato;
+                    delete itemConferido.telefone_doador;
+                    delete itemConferido.email_doador;
+                    delete itemConferido.doacao_itens;
+                    delete itemConferido.valor_total;
+                    delete itemConferido.validade_doacao;
+                    delete itemConferido.status;
                 }
 
                 var xhttp = new XMLHttpRequest();
@@ -716,6 +735,9 @@ textarea {
     text-align: center;
     width: 100%;
     top: calc(50% - 1em);
+}
+.opcoes-filtro {
+    display: inline-block;
 }
 </style>
 
