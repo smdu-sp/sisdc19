@@ -393,7 +393,7 @@ $responsaveis .= "]";
 <script type="text/javascript" src="js/lodash.min.js"></script>
 <script type="text/javascript" src="js/popper.min.js"></script>
 <script type="text/javascript" src="js/bootstrap.min.js"></script>
-<script type="text/javascript" src="js/sisprops.json"></script>
+<script type="text/javascript" src="js/sisprops.json?updated=20200507"></script>
 
 <!-- Vue.js -->
 <script>

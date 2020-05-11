@@ -3,17 +3,12 @@
 session_start();
 
 // Verifica se usuário está logado
-/*
-if($_SESSION["setorFiscal"] == ''){
-    header('location: index.php');
-    exit;
-}
 
 if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     header("location: login.php");
     exit;
 }
-*/
+
 ?>
  
 <!DOCTYPE html>
@@ -42,7 +37,6 @@ if (!mysqli_set_charset($link, "utf8")) {
 
 // Obtém lista de responsaveis_atendimento (gestores)
 $sql = "SELECT `rf`, `nome`, `nivel_acesso` FROM responsaveis WHERE `nivel_acesso` != 'admin' ORDER BY `nome`;";
-// TODO: substituir pela linha acima
 // $sql = "SELECT `rf`, `nome`, `nivel_acesso` FROM responsaveis WHERE 1 ORDER BY `nome`;";
 $retorno = $link->query($sql);
 $nivel_acesso = "";
@@ -99,6 +93,21 @@ $link->close();
             <button class="btn btn-lg btn-warning col-3" @click="exportarCSV()" title="Exportar arquivo CSV (Excel)"><span class="oi oi-spreadsheet"></span> Exportar planilha</button>
         </center>
     </div>
+    <!-- ALERTA DE OBTENÇÃO DE LISTA -->
+    <!-- <div id="mensagem-alerta" v-if="alerta"><span>{{ mensagemAlerta }}</span></div> -->
+    <div id="modal-alerta" class="modal" tabindex="-1" role="dialog" aria-labelledby="alerta" aria-hidden="true">
+      <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Aguarde um momento</h5>
+                <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button> -->
+            </div>
+            <div class="modal-body">
+                <p>{{ mensagemAlerta }}</p>
+            </div>          
+        </div>
+      </div>
+    </div>
     <!-- DOAÇÕES ADICIONADAS -->
     <div id="div-tabela" class="table-responsive" style="resize: both; overflow-x: unset;">
         <h2>Doações cadastradas</h2>
@@ -106,8 +115,8 @@ $link->close();
             <input id="mostrarTodas" type="checkbox" name="mostrarTodas" v-model="mostrarTodas">
             <label for="mostrarTodas">Mostrar todas</label>
         </div>
-        <div id="soma-total"><p>Soma total:</p>{{ somaTotal() }}</div>
-        <table class="table table-striped">
+        <div id="soma-total">Soma total: <span>{{ somaTotal() }}</span></div>
+        <table class="table table-striped mb-5">
             <tr>
                 <th>#</th>
                 <th>DATA 1º CONTATO</th>
@@ -316,14 +325,14 @@ $link->close();
                 </td>
             </tr>
         </table>        
-    </div>    
+    </div>
 </div>
     
 <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
 <script type="text/javascript" src="js/lodash.min.js"></script>
 <script type="text/javascript" src="js/popper.min.js"></script>
 <script type="text/javascript" src="js/bootstrap.min.js"></script>
-<script type="text/javascript" src="js/sisprops.json"></script>
+<script type="text/javascript" src="js/sisprops.json?updated=20200507"></script>
 
 <!-- Vue.js -->
 <script>
@@ -358,7 +367,10 @@ $link->close();
             statuses: sisprops.statuses,
             tiposItem: sisprops.tiposItem,
             unidadesDeMedida: sisprops.unidadesDeMedida,
-            mostrarTodas: true
+            mostrarTodas: true,
+            alerta: false,
+            mensagemAlerta: '',
+            allOtherBlocked: false
         },
         methods: {
             /** ADICIONA ITEM À DOAÇÃO */
@@ -401,34 +413,53 @@ $link->close();
                 fiscal.rf = this.usuario.rf;
                 window.location = ('exportar-csv.php?rf='+fiscal.rf);
             },
+            ligaModal: function(mensagem) {
+                this.mensagemAlerta = mensagem;
+                this.alerta = true;
+                $('#modal-alerta').modal('show');
+            },
+            desligaModal: function() {                
+                app.alerta = false;
+                window.setTimeout(function(){
+                    $('#modal-alerta').modal('hide');
+                    app.mensagemAlerta = "";
+                }, 100);
+            },
+            blockOutrosItens: function(item, desbloquear = false) {
+                if(this.allOtherBlocked) {
+                    return;
+                }
+                for(var i = this.itens.length-1; i >= 0; i--) {
+                    if (this.itens[i].id !== item.id) {
+                        this.itens[i].blocked = !desbloquear;
+                    }
+                }
+                this.allOtherBlocked = true;
+            },
             /** ADIÇÃO DE ITENS À LISTA */
             obterLista: function (){
-                // if(fiscal.setor === 'TODOS')
-                //     return;
-
-                // ADD para restringir lista de gabinete de SEL/SMDU
+                this.ligaModal("Recarregando lista de doações...");
                 fiscal.rf = this.usuario.rf;
-
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
-
                         app.itens = JSON.parse(this.response);
                         for (var i = app.itens.length - 1; i >= 0; i--) {
                             app.itens[i].blocked = app.isBlocked(app.itens[i].responsavel_atendimento);
+                            let itemNameIndex = 'item_'+i;
+                            app[itemNameIndex] = app.itens[i];
+                            // ADICIONA WATCHER
+                            app.$watch(itemNameIndex, (newVal, oldVal) => {
+                                if(app.allOtherBlocked){
+                                    return;
+                                }
+                                app.blockOutrosItens(oldVal);
+                                app.$forceUpdate();
+                                console.log("Block Others");
+                            }, {deep: true});
                         }
-                        // app.corrigeValores();
-                        /*
-                        for (var i = 0; i < app.itens.length; i++) {
-                            // Percorre doacao_itens
-                            var doacaoItens = app.itens[i].doacao_itens;
-                            for (var i = 0; i < doacaoItens.length; i++) {
-                                if(doacaoItens[i].recebimentos.length > 0)
-                                    app.calculaSaldos(doacaoItens[i]);
-                            }
-                        }
-                        */
-                        
+                        app.allOtherBlocked = false;
+                        app.desligaModal();
                     }
                 };
                 xhttp.open("POST", "conferir.php", true);
@@ -515,6 +546,7 @@ $link->close();
                 }
             },
             conferir: function(itemConferido) {
+                this.ligaModal("Enviando informações...");
                 let adicionarVirgulas = false;
                 // remove propriedades virtuais
                 delete itemConferido.blocked; 
@@ -531,8 +563,13 @@ $link->close();
                 if(itemConferido.valor_total.length > 0) {
                     itemConferido.valor_total = this.consertaMoeda(itemConferido.valor_total)
                     console.log("Valor: ", itemConferido.valor_total);
-                    if(!itemConferido.valor_total)
+                    // COMENTADO PARA AVERIGUAR FALHAS DE ATUALIZAÇÃO DE DOAÇÕES SEM VALOR TOTAL
+                    /*
+                    if(!itemConferido.valor_total){
+                        window.alert('Erro ao atualizar - contate o desenvolvedor. Erro 1901: falha na verificação do valor.')
                         return;
+                    }
+                    */
                 }
 
                 var xhttp = new XMLHttpRequest();
@@ -540,7 +577,6 @@ $link->close();
                     if (this.readyState == 4 && this.status == 200) {
                         console.log(this.response === '1' ? "SUCESSO!" : this.response);
                         app.obterLista();
-                        // app.corrigeValores();
                     }
                 };
                 xhttp.open("PUT", "conferir.php", true);
@@ -645,21 +681,41 @@ textarea {
     top: 25%;
 }
 #soma-total {
-    border: 1px solid gray;
-    width: 10em;
+    width: 100%;
     font-size: 1.5em;
-    color: #05b757;
-    padding: 0.3em 1em;
+    color: black;
     position: fixed;
     background-color: rgba(243, 245, 245, 0.9);
-    border-radius: 10px;
-    top: 30px;
-    right: 30px;
-    box-shadow: 3px 3px rgba(0,0,0,0.3);
+    left: 0;
+    bottom: 0;
+    padding: 0.5em 1em;    
+    box-shadow: 0px -3px 5px rgba(0,0,0,0.3);
     z-index: 3;
 }
-#soma-total p {
+#soma-total span {
+    color: #05b757;
+    margin-left: 1em;
+}
+#mensagem-alerta {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 3;
+}
+#mensagem-alerta span {
+    position: absolute;
+    display: block;
+    background-color: white;
+    padding: 2em;
+    border-radius: 2px;
+    font-size: 2em;
     color: black;
+    text-align: center;
+    width: 100%;
+    top: calc(50% - 1em);
 }
 </style>
 
