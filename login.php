@@ -55,8 +55,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         unset ($_SESSION['IDUsuario']);
         unset ($_SESSION['nomeUsuario']);
         unset ($_SESSION['emailUsuario']);
-        unset ($_SESSION['setorFiscal']);
-        unset ($_SESSION['divisaoFiscal']);
+        unset ($_SESSION['responsavel']);
         header('location:login.php?m="Falha no login - Verifique seu usuario e senha."');
     }
     else {
@@ -68,31 +67,34 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $_SESSION['IDUsuario'] = $inicial;
             $_SESSION['nomeUsuario'] = $nomefr;
             $_SESSION['emailUsuario'] = $emailfr;
-            $_SESSION['setorFiscal'] = '';
-            $_SESSION['divisaoFiscal'] = '';
+            $_SESSION['responsavel'] = '';
             
-            // Verifica se usuário está cadastrado na lista de fiscais
+            // Verifica se usuário está cadastrado na lista de responsaveis
             require_once "config.php";
             if (!mysqli_set_charset($link, "utf8")) {
                 printf("Erro ao definir charset: %s<br>", mysqli_error($link));
                 exit();
             }
-            $sqlQuery = "SELECT * FROM fiscais WHERE `rf`='".strtolower($inicial)."';";
+            $sqlQuery = "SELECT * FROM responsaveis WHERE `rf`='".strtolower($inicial)."';";
             mysqli_query($link, $sqlQuery);
             $retornoQuery = $link->query($sqlQuery);
             $servidor = [];
             if($retornoQuery->num_rows > 0){
                 while ($row = $retornoQuery->fetch_assoc()) {
-                    $_SESSION['setorFiscal'] = $row['setor'];
-                    $_SESSION['divisaoFiscal'] = $row['divisao'];     
+                    $_SESSION['responsavel'] = $row['nome'];
                 }
+            }
+            // LOG DE ACESSO
+            if($_SESSION['responsavel'] != ''){
+                $sql = "INSERT INTO `log_geral` (`rf`, `registro`) VALUES ('".strtolower($inicial)."', 'login');";
+                if(!mysqli_query($link, $sql))
+                    printf("Errormessage: %s\n", mysqli_error($link));
             }
             $link->close();
             
-            // Encerra cadastros
-            
-            if($_SESSION['setorFiscal'] == ''){
-                header('location:login.php?m="Período para cadastro de bens encerrado. Acesso restrito a pontos focais."');
+            if($_SESSION['responsavel'] == ''){
+                // header('location:login.php?m="Período para cadastro de bens encerrado. Acesso restrito a pontos focais."');
+                header('location:login.php?m="Acesso restrito."');
                 return;
             }            
 
@@ -108,8 +110,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cadastro de Bens Patrimoniais</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css">
+    <title>Doações decorrentes da pandemia do COVID-19</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
     <style type="text/css">
         body{ font: 14px sans-serif; }
         .wrapper{ width: 350px; padding: 20px; }
@@ -117,14 +119,12 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 </head>
 <body>
     <div class="wrapper" style="margin: 0 auto;">
-        <div style="width: 200px;
-            clip-path: inset(0px 0px 40px 0px);
-            margin: 0 auto -60px;">
-            <img src="img/logo_smdu.png" alt="Cidade de São Paulo" width="200">
+        <div style="width: 200px; margin: 0 auto;">
+            <img src="img/logo_sp.png" alt="Cidade de São Paulo" width="200">
         </div>
-        <center><h3><strong>SMDU / SEL</strong></h3></center>
+        <!-- <center><h3><strong>Gabinete do Prefeito</strong></h3></center> -->
         <br>
-        <h2>Cadastro de Bens Patrimoniais</h2>
+        <h2>Doações decorrentes da pandemia do COVID-19</h2>
         <p>Digite seu login e senha da rede</p>
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
             <div class="form-group <?php echo (!empty($username_err)) ? 'has-error' : ''; ?>">

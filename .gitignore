@@ -13,5 +13,9 @@ yarn-error.log
 .bkp
 .env.bkp
 config.php
-
+*.sql
 *.jpg
+*.png
+*.bkp
+*.sql
+/google-api-php-client-2.4.1

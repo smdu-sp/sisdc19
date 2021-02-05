@@ -1,0 +1,60 @@
+const sisprops = {
+	"tiposItem": [
+		{
+			"tipo": "Comodato",
+			"categorias": ["Espaço físico"]
+		},
+		{
+			"tipo": "Dinheiro",
+			"categorias": ["Recursos financeiros"]
+		},                
+		{
+			"tipo": "Produto",
+			"categorias": [
+				"Álcool",
+				"Alimentos",
+				"Combustível",
+				"Eletrodomésticos",
+				"EPI",
+				"Insumo Hospitalar",
+				"Produtos de Higiene",
+				"Produtos de Limpeza",
+				"Produtos Hospitalares",
+				"Utensílios"
+			]
+		},
+		{
+			"tipo": "Serviço",
+			"categorias": [
+				"Comunicação",
+				"Consultoria",
+				"Delivery",
+				"Hospedagem",
+				"Logística",
+				"Mão de Obra",
+				"TI",
+				"Transporte"
+			]
+		}
+	],
+	"unidadesDeMedida": [
+		"Unidades",
+		"Litros",
+		"Quilos",
+		"Caixas",
+		"Horas",
+		"m²",
+		"R$",
+	],
+	"statuses": [
+		"Contato Não Iniciado",
+		"Contato Iniciado",
+		"Em Negociação",
+		"Em Formalização",
+		"Formalizado",
+		"Entregue mas não formalizado",
+		"Entrega Parcial",
+		"Encerrado com Termo de Recebimento",
+		"Desistência"
+	]
+}

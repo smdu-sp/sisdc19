@@ -5,8 +5,8 @@ session_start();
 // Verifica se usuário está logado
 
 if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
-    header("location: login.php");
-    exit;
+	header("location: login.php");
+	exit;
 }
 
 ?>
@@ -14,35 +14,41 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
  
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <link rel="stylesheet" href="css/bootstrap.min.css">
-        <link rel="stylesheet" href="css/custom.css">
-        <script src="js/vue.js"></script>
-        <title>SICABE - Cadastro de Bens Patrimoniais</title>        
-    </head>
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/custom.css">
+    <link href="css/open-iconic-bootstrap.css" rel="stylesheet">
+		<script src="js/vue.js"></script>
+		<title>Doações decorrentes da pandemia do COVID-19</title>        
+	</head>
 <body style="margin: 1em">
 
 <?php 
 // Inclui arquivo de configuração
 require_once "config.php";
 
-// Declaração de variáveis
-
 /* Muda o charset para UTF-8 */
 if (!mysqli_set_charset($link, "utf8")) {
-    printf("Erro ao definir charset: %s<br>", mysqli_error($link));
-    exit();
+	printf("Erro ao definir charset: %s<br>", mysqli_error($link));
+	exit();
 }
 
-// Query padrao
-// $sqlQuery = "SELECT * FROM bens_patrimoniais;";
-// $retornoQuery = $link->query($sqlQuery);
-
-// $link->close();
+// Obtém lista de responsaveis_atendimento (gestores)
+$sql = "SELECT `rf`, `nome` FROM responsaveis WHERE `nome` != 'Renan' ORDER BY `nome`;";
+$retorno = $link->query($sql);
+$responsaveis = "[";
+if ($retorno->num_rows > 0) {
+	while ($row = $retorno->fetch_assoc()) {
+		$responsaveis .= "'".$row['nome']."',";
+	}
+}
+$responsaveis = rtrim($responsaveis, ',');
+$responsaveis .= "]";
 
 ?>
 <div class="container" id="app">    
+<<<<<<< HEAD
     <div class="page-header row">
         <div class="col-3">
             <div style="
@@ -326,442 +332,570 @@ if (!mysqli_set_charset($link, "utf8")) {
             <button class="btn btn-success btn-lg" v-on:click="cadastrarBens()">Enviar</button>
         </div>
     </div>
+=======
+	<div class="page-header row">
+		<div class="col-3">
+			<div style="
+				width: 90%;
+				margin: 0 auto -30%;
+				max-width: 150px;
+				text-align: center;">
+				<img src="img/logo_sp.png" alt="Cidade de São Paulo" style="max-width: 100%; max-height: 50%;">
+			</div>            
+		</div>
+		<div class="col">
+			<h1>Doações decorrentes da pandemia do COVID-19</h1>
+		</div>
+		<div class="col-3">            
+			<button class="btn btn-danger btn-sm float-right" @click="location.href='logout.php'">Sair do sistema</button>
+			<br><br>
+			<button class="btn btn-primary float-right" @click="location.href='conferencia.php'">
+				Conferência de dados
+			</button>
+		</div>
+	</div>
+	<br>
+	<br>
+	<div class="container">		
+		<!-- ADICIONAR DOAÇÃO -->
+		<div id="formulario" class="card bg-light mb-3">
+			<div class="card-header"><strong>Cadastrar doação</strong></div>
+		<div class="card-body">            
+			<div class="form-group">
+				<div class="form-row">
+					<div class="col">
+						<!-- ENTRADA, DATA, RESPONSÁVEL, DOADOR, FORMALIZAÇÃO -->
+						<div class="form-row">
+							<div class="input-group input-group-sm col col-3">
+								<div class="input-group-prepend">
+									<span class="input-group-text">Data 1º contato</span>
+								</div>								
+								<input
+									class="form-control form-control-sm"
+									v-model="novoItem.data_entrada"
+									placeholder="Data de entrada" title="Data de entrada"
+									type="date"
+									>
+							</div>
+							<div class="col col-2">
+								<input 
+								class="form-control form-control-sm"
+								v-model="novoItem.entrada"
+								id="entrada"
+								placeholder="Entrada" title="Entrada"
+								>
+							</div>
+							<div class="col col-2">
+								<!-- <input
+								class="form-control form-control-sm"
+								v-model="novoItem.responsavel_atendimento"
+								placeholder="Responsável atendimento" title="Responsável atendimento"
+								> -->
+								<select class="form-control form-control-sm" v-model="novoItem.responsavel_atendimento" title="Gestor">
+									<option disabled selected value="">Gestor</option>
+									<option v-for="responsavel in responsaveis_atendimento">{{ responsavel }}</option>
+								</select>
+							</div>
+							<div class="col col-3">
+								<input 
+								class="form-control form-control-sm"
+								v-model="novoItem.doador"
+								id="doador"
+								placeholder="Doador" title="Doador"
+								>
+							</div>
+							<div class="col col-2">
+								<select id="tipo_formalizacao" v-model="novoItem.tipo_formalizacao" class="form-control form-control-sm">
+									<option disabled selected value="">Tipo de formalização</option>
+									<option>Pessoa física</option>
+									<option>Pessoa jurídica</option>
+									<option>Entidade religiosa</option>
+									<option>Entidade não governamental</option>
+								</select>
+							</div>
+						</div>
+						<br>
+						<!-- CONTATO DOADOR -->
+						<div class="form-row">
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.contato"
+								placeholder="Contato" title="Contato"
+								>
+							</div>
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.telefone_doador"
+								placeholder="Telefone Doador (11) 1234-5678" title="Telefone Doador (11) 1234-5678"
+								>
+							</div>
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.email_doador"
+								placeholder="E-mail Doador" title="E-mail Doador"
+								>
+							</div>
+						</div>
+						<br>
+
+						<!-- ITEM(NS) -->
+						<!-- TIPO, CATEGORIA E DESCRIÇÃO DO ITEM -->
+						<div class="my-2">
+							<span class="mr-4"><strong>Itens</strong></span>
+							<button class="btn btn-primary btn-sm" @click="novoItem.itens_doacao.push(JSON.parse(JSON.stringify(ItemDoacaoObj)))">Adicionar item</button>
+						</div>
+						<div class="form-row item-borda" v-for="(itemDoacao, index) in novoItem.itens_doacao"><div class="col">
+						<div class="form-row">
+							<div class="col col-2">
+								<select
+								id="tipo_item"
+								v-model="itemDoacao.tipo_item"   
+								@change="atualizaTipos()"
+								class="form-control form-control-sm">
+								<option disabled selected value="">Tipo de item</option>
+								<option v-for="i in tiposItem">{{i.tipo}}</option>
+								</select>
+							</div>
+							<div class="col col-2">
+								<select class="form-control form-control-sm" v-model="itemDoacao.categoria_item">
+									<option disabled selected value="">Categoria</option>                 
+									<option v-if="itemDoacao.tipo_item == categoria.tipo" v-for="categoria in categoriasTipoitem">{{categoria.nome}}</option>
+									<option>Outros</option>
+								</select>
+							</div>
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="itemDoacao.descricao_item"
+								placeholder="Descrição do Item" title="Descrição do Item"
+								>
+							</div>
+							<div class="col col-2">
+								<input
+								class="form-control form-control-sm"
+								v-model="itemDoacao.quantidade"
+								placeholder="Quantidade" title="Quantidade"
+								@keyup.prevent="corrigeNumberType(itemDoacao, 'quantidade')"
+								>
+							</div>
+							<div class="col col-2">
+								<select v-model="itemDoacao.unidade_medida" title="Unidade de medida" class="form-control form-control-sm">
+									<option selected disabled value="">Unidade de medida</option>
+									<option v-for="unidade in unidadesDeMedida">{{ unidade }}</option>
+								</select>
+							</div>
+						</div>
+						<br>
+						<!-- DESTINO, ENDEREÇO, RESPONSÁVEL RECEBIMENTO -->
+						<div class="form-row">
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="itemDoacao.destino"
+								placeholder="Destino da doação" title="Destino da doação"
+								>
+							</div>
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="itemDoacao.endereco_entrega"
+								placeholder="Local de Destinação (Endereço)" title="Local de Destinação (Endereço)"
+								>
+							</div>
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="itemDoacao.responsavel_recebimento"
+								placeholder="Responsável pelo recebimento da doação" title="Responsável pelo recebimento da doação"
+								>
+							</div>
+						</div>
+						<br>
+						<!-- QUANTIDADE DE ENTREGAS, DATAS RECEBIMENTO / DISTRIBUIÇÃO -->
+						<div class="form-row">
+							<!-- ENTREGA -->
+							<div class="alert alert-light w-50" role="alert">
+								<strong>Entrega</strong>
+								<hr>
+								<div v-for="(entrega, index) in itemDoacao.entregas" class="form-row my-1">
+									<span class="badge badge-light">{{ index+1 }}</span>
+									<div class="input-group input-group-sm col">
+										<div class="input-group-prepend">
+											<span class="input-group-text" style="font-size: 11px">Data de recebimento</span>
+										</div>
+										<input class="form-control form-control-sm"
+										v-model="entrega.data_recebimento"
+										type="date" 
+										>
+									</div>
+									<div class="col col-4">
+										<input class="form-control form-control-sm"
+										v-model="entrega.qtde_recebida"
+										placeholder="Qtde recebida" title="Qtde recebida"
+										@keyup.prevent="corrigeNumberType(entrega, 'qtde_recebida')"
+										@change="calculaSaldos(itemDoacao)"
+										>
+									</div>
+									<div class="col col-1">
+										<button type="button" class="btn btn-danger btn-sm" @click="confirm('Tem certeza que deseja remover a entrega?') ? itemDoacao.entregas.splice(index, 1) : false">
+										    <span class="oi oi-x"></span>
+										</button>
+									</div>
+								</div>
+								<br>
+								<button class="btn btn-primary float-left" @click="itemDoacao.entregas.push({data_recebimento:'',qtde_recebida:''})">Adicionar entrega</button>
+								<div class="float-right" v-if="itemDoacao.quantidade">
+									<span>Saldo residual: {{ itemDoacao.saldo_residual }}</span>
+								</div>
+							</div>
+							<!-- DISTRIBUIÇÃO -->
+							<div class="alert alert-light w-50" role="alert">
+								<strong>Distribuição</strong>
+								<hr>
+								<div v-for="(distribuicao, index) in itemDoacao.distribuicoes" class="form-row my-1">
+									<span class="badge badge-light">{{ index+1 }}</span>
+									<div class="input-group input-group-sm col">
+										<div class="input-group-prepend">
+											<span class="input-group-text" style="font-size: 11px">Data de distribuição</span>
+										</div>
+										<input class="form-control form-control-sm"
+										v-model="distribuicao.data_distribuicao"
+										type="date" 
+										>
+									</div>
+									<div class="col col-4">
+										<input class="form-control form-control-sm"
+										v-model="distribuicao.qtde_distribuicao"
+										placeholder="Qtde distribuição" title="Qtde distribuição"
+										@keyup.prevent="corrigeNumberType(distribuicao, 'qtde_distribuicao')"
+										@change="calculaSaldos(itemDoacao)"
+										>
+									</div>
+									<div class="col col-1">
+										<button type="button" class="btn btn-danger btn-sm" @click="confirm('Tem certeza que deseja remover a distribuição?') ? itemDoacao.distribuicoes.splice(index, 1) : false">
+										    <span class="oi oi-x"></span>
+										</button>
+									</div>
+								</div>
+								<br>
+								<button class="btn btn-primary" @click="itemDoacao.distribuicoes.push({data_distribuicao: '',qtde_distribuicao:''})">Adicionar distribuição</button>
+								<div class="float-right" v-if="itemDoacao.saldo_a_distribuir">
+									<span>Saldo a distribuir: {{ itemDoacao.saldo_a_distribuir }}</span>
+								</div>
+							</div>
+						</div>
+						<br>
+					</div>
+					<!-- Botão de Remoção de item_doacao -->
+					<div class="col col-1">						
+						<button v-if="novoItem.itens_doacao.length > 1" type="button" class="btn btn-danger btn-sm absolute-center" @click="confirm('Tem certeza que deseja remover o item?') ? novoItem.itens_doacao.splice(index, 1) : false">
+						    <span class="oi oi-x"></span>
+						</button>
+					</div>
+				</div>
+
+					<hr>
+					<br>												
+						<!-- VALOR, VALIDADE, NUMERO SEI -->
+						<div class="form-row">
+							<div class="col input-group input-group-sm">
+								<div class="input-group-prepend">
+									<span class="input-group-text">R$</span>
+								</div>
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.valor_total"
+								placeholder="Valor total da doação" title="Valor total da doação"
+								title="Valor total (ex.: 999999,00)"
+								disabled
+								>
+							</div>
+							<div class="col">
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.validade_doacao"
+								placeholder="Validade Doação" title="Validade Doação"
+								>
+							</div>
+							<div class="col">
+								<select id="status" v-model="novoItem.status" class="form-control form-control-sm">
+									<option disabled selected value="">Status</option>
+									<option v-for="status in statuses">{{status}}</option>
+									<!-- <option>Contato não iniciado</option>
+									<option>Contato iniciado</option>
+									<option>Em processo de formalização</option>
+									<option>Aguardando entrega</option>
+									<option>Produto/serviço entregue</option>
+									<option>Finalizado com termo de recebimento</option>
+									<option>Encerrado</option> -->
+								</select>
+							</div>
+							<div class="col col-3">
+								<input
+								class="form-control form-control-sm"
+								v-model="novoItem.numero_sei"
+								placeholder="Número SEI" title="Número SEI"
+								>
+							</div>
+						</div>
+						<br>
+						<!-- RELATÓRIO SEI, ITENS PENDENTES, OBSERVAÇÃO -->
+						<div class="form-row">
+							<div class="col">
+								<textarea
+								class="form-control"
+								v-model="novoItem.relatorio_sei"
+								placeholder="Relatório do processo SEI" title="Relatório do processo SEI"
+								></textarea>
+							</div>
+							<div class="col">
+								<textarea
+								class="form-control"
+								v-model="novoItem.itens_pendentes_sei"
+								placeholder="Itens pendentes no processo SEI" title="Itens pendentes no processo SEI"
+								></textarea>
+							</div>
+							<div class="col">
+								<textarea class="form-control"
+								v-model="novoItem.observacao"
+								placeholder="Observação" title="Observação"></textarea>
+							</div>
+						</div>
+					</div>					
+				</div>
+				<br>
+				<button class="btn btn-success float-left" style="cursor: pointer;" v-on:click="adicionarItem()">Cadastrar</button>
+			</div>
+		</div>
+		</div>
+	</div>
+>>>>>>> preblock
 </div>
-    
+	
 <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
 <script type="text/javascript" src="js/lodash.min.js"></script>
 <script type="text/javascript" src="js/popper.min.js"></script>
 <script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/sisprops.json?updated=20200507"></script>
 
 <!-- Vue.js -->
 <script>
-    /*
-    /// Construtor de classe não suportado no IE
-    const BemPatrimonial = class {
-        constructor(){
-            this.nomeServidor = '';
-            this.rf = '';
-            this.orgao = '';
-            this.setor = '';
-            this.divisao = '';
-            this.sala = '';
-            this.andar = '';
-            this.chapa = '';
-            this.chapaOutraUnidade = '';
-            this.nomeOutraUnidade = '';
-            this.discriminacao = '';
-            this.descricaoPersonalizada = '';
-            this.servivel = true;
-            this.cor = '';
-            this.comprimento = '';
-            this.profundidade = '';
-            this.altura = '';
-            this.marca = '';
-            this.modelo = '';
-            this.numSerie = '';
-            this.conferido = '';
-        }
-    };
-    */
-    const BemPatrimonial = {
-            nomeServidor: '',
-            rf: '',
-            orgao: '',
-            setor: '',
-            divisao: '',
-            sala: '',
-            andar: '',
-            chapa: '',
-            chapaOutraUnidade: '',
-            nomeOutraUnidade: '',
-            discriminacao: '',
-            descricaoPersonalizada: '',
-            servivel: true,
-            cor: '',
-            comprimento: '',
-            profundidade: '',
-            altura: '',
-            marca: '',
-            modelo: '',
-            numSerie: '',
-            conferido: ''
-    };
-    const isFiscal = <?php echo strlen($_SESSION['setorFiscal']); ?> > 0;
-    var app = new Vue({
-        el: '#app',
-        data: {
-            novoItem: JSON.parse(JSON.stringify(BemPatrimonial)),
-            itens: [],
-            usuario: {
-                nome: "<?php echo $_SESSION['nomeUsuario']; ?>",
-                rf: "<?php echo $_SESSION['IDUsuario']; ?>"
-            },
-            prefeitura: {
-                orgaos: {
-                    sel: {
-                        nome: 'SEL - Secretaria Executiva de Licenciamento',
-                        sigla: 'SEL',
-                        setores: [                            
-                            {sigla: 'Gabinete'},
-                            {sigla: 'ASSEC'},
-                            {sigla: 'ATEL'},
-                            {
-                                sigla: 'RESID',
-                                divisoes: [
-                                    {sigla: 'DRPM'},
-                                    {sigla: 'DRGP'}
-                                ]
-                            },
-                            {
-                                sigla: 'COMIN',
-                                divisoes: [
-                                    {sigla: 'DCIMP'},
-                                    {sigla: 'DCIGP'}
-                                ]
-                            },
-                            {
-                                sigla: 'SERVIN',
-                                divisoes: [
-                                    {sigla: 'DSIMP'},
-                                    {sigla: 'DSIGP'}
-                                ]
-                            },
-                            {
-                                sigla: 'PARHIS',
-                                divisoes: [
-                                    {sigla: 'DHIS'},
-                                    {sigla: 'DHMP'},
-                                    {sigla: 'DPS'},
-                                ]
-                            },
-                            {
-                                sigla: 'SEGUR',
-                                divisoes: [
-                                    {sigla: 'DAE'},
-                                    {sigla: 'DACESS'},
-                                    {sigla: 'DLR'},
-                                    {sigla: 'DMIS'}
-                                ]
-                            },
-                            {
-                                sigla: 'CASE',
-                                divisoes: [
-                                    {sigla: 'STEL'},
-                                    {sigla: 'DCAD'},
-                                    {sigla: 'DLE'},
-                                    {sigla: 'DDU'},
-                                    {sigla: 'GTEL'}
-                                ]
-                            },
-                            {
-                                sigla: 'CGPATRI',
-                                divisoes: [
-                                    {sigla: 'Destinação'},
-                                    {sigla: 'Informação'},
-                                    {sigla: 'Engenharia'},
-                                    {sigla: 'Avaliação'}
-                                ]
-                            },
-                            {
-                                sigla: 'GTEC',
-                                divisoes: []
-                            }
-                        ]
-                    },
-                    smdu: {
-                        nome: 'SMDU - Secretaria Municipal de Desenvolvimento Urbano',
-                        sigla: 'SMDU',
-                        setores: [
-                            {sigla: 'Gabinete'},
-                            {sigla: 'AJ'},
-                            {sigla: 'AOC'},
-                            {sigla: 'ASCOM'},
-                            {sigla: 'ATIC'},
-                            {sigla: 'ATU'},
-                            {
-                                sigla: 'CAF',
-                                divisoes: [
-                                    {sigla: 'DCL'},
-                                    {sigla: 'DGP'},
-                                    {sigla: 'DOF'},
-                                    {sigla: 'DRV'},
-                                    {sigla: 'DSUP'}
-                                ]
-                            },
-                            {
-                                sigla: 'CAP',
-                                divisoes: [
-                                    {sigla: 'DEPROT'},
-                                    {sigla: 'DPCI'},
-                                    {sigla: 'DPD'}
-                                ]
-                            },
-                            {sigla: 'CEIGEO'},
-                            {
-                                sigla: 'CEPEUC',
-                                divisoes: [
-                                    {sigla: 'DCIT'},
-                                    {sigla: 'DVF'},
-                                    {sigla: 'DDOC'}
-                                ]
-                            },
-                            {
-                                sigla: 'DEUSO',
-                                divisoes: [
-                                    {sigla: 'DMUS'},
-                                    {sigla: 'DNUS'},
-                                    {sigla: 'DSIZ'}
-                                ]
-                            },
-                            {
-                                sigla: 'GEOINFO',
-                                divisoes: [
-                                    {sigla: 'DSIG'},
-                                    {sigla: 'DAG'},
-                                    {sigla: 'DAD'},
-                                    {sigla: 'Observatorio de Indicadores'}
-                                ]
-                            },
-                            {
-                                sigla: 'PLANURBE',
-                                divisoes: [
-                                    {sigla: 'DMA'},
-                                    {sigla: 'DOT'},
-                                    {sigla: 'DART'}
-                                ]
-                            }
-                        ]
-                    }
-                }
-            },
-            descritivos: [
-                '01 - Sofá de 3 lugares, em couro sintético',
-                '02 - Rack para ti',
-                '03 - Quadro de cortiça',
-                '04 - Mesa "L", com uma das extremidades arredondada, pés em estrutura metálica',
-                '05 - Mesa retangular, pés em estrutura metálica com rodas',
-                '06 - Estação de trabalho, pés em estrutura metálica',
-                '07 - Mesa de trabalho, pés em estrutura metálica',
-                '08 - Mesa de reunião, pés em estrutura metálica',
-                '09 - Mesa em L “60°”, pés em estrutura metálica',
-                '10 - Mesa de impressora',
-                '11 - Mapoteca vertical, estrutura em aço',
-                '12 - Mapoteca horizontal',
-                '13 - Longarina com assentos estrutura dos pés em aço',
-                '14 - Gaveteiro com rodas, puxadores preto, 03 gavetas',
-                '15 - Frigobar',
-                '16 - Gaveteiro em estrutura metálica, com rodas, 02 gavetas',
-                '17 - Estante em aço, prateleiras',
-                '18 - Estante de aço, prateleiras',
-                '19 - Estação de trabalho pés em estrutura metálica',
-                '20 - Estação de trabalho, pés em estrutura metálica',
-                '21 - Estação de trabalho, pés em estrutura metálica',
-                '22 - Estação de trabalho, pés em estrutura metálica',
-                '23 - Estação de trabalho, pés em madeira',
-                '24 - Estação de trabalho, pés em madeira',
-                '25 - Carrinho para transporte, 4 rodas, estrutura em arame soldado',
-                '26 - Cadeira giratória, sem rodas, apoio de braço acoplado ao assento e encosto',
-                '27 - Cadeira fixa sem apoio de braços',
-                '28 - Cadeira giratória com apoio de braços',
-                '29 - Cadeira fixa, encosto e pés de metal',
-                '30 - Cadeira escolar adulto',
-                '31 - Cadeira fixa sem apoio de braços',
-                '32 - Cadeira giratória com apoio de braços',
-                '33 - Cadeira giratória com apoio de braços',
-                '34 - Cadeira fixa sem apoio de braços',
-                '35 - Cadeira fixa com apoio de braços',
-                '36 - Cadeira fixa com apoio de braços',
-                '37 - Cadeira giratória com apoio de braços',
-                '38 - Cadeira giratória sem apoio de braço, assento alto',
-                '39 - Armário',
-                '40 - Arquivo de aço com gavetas',
-                '41 - Arquivos deslizante com carros',
-                '42 - Mesa em L 90°, pés em madeira',
-                '43 - Armário',
-                '44 - Ar condicionado portátil',
-                '45 - Ar condicionado central',
-                '46 - Aparelho split para ar condicionado',
-                '47 - Mesa de luz, v',
-                '48 - Armário de aço',
-                '49 - Armário com porta de vidro',
-                '50 - Mesa com tampo de vidro',
-                '51 - Mesa de apoio',
-                '52 - Mesa em madeira maciça',
-                '53 - Forno de micro-ondas'
-            ],
-            fotoUrl: '',
-            orgaos: [],
-            setores: [],
-            divisoes: [],
-            andares: [7,8,17,18,19,20,21,22],
-            orgao: '',
-            setor: '',
-            divisao: '',
-            andar: '',
-            sala: '',
-            keepInfo: false
-        },
-        methods: {
-            atualizaFoto: function(){
-                if(this.novoItem.discriminacao === 'Não listado'){
-                    this.fotoUrl = '';
-                    return;
-                }
-                for(i in this.descritivos){
-                    if(this.novoItem.discriminacao === this.descritivos[i]){
-                        let num = i++;
-                        let addZero = num < 9 ? "0" : "";
-                        this.fotoUrl = 'img/bens/'+addZero+i+'.jpg';
-                    }
-                }
-            },
-            /**
-                LIMPA NÚMEROS
-            */
-            apenasNumeros: function (string){
-                var numsStr = string.replace(/[^0-9]/g,'');
-                return numsStr;
-            },
-            /**
-                ADIÇÃO DE ITENS À LISTA
-            */
-            adicionarItem: function (){
-                // Verifica campos obrigatórios
-                let pendentes = [];
-                if(!this.setor)
-                    pendentes.push("setor");
-                // if(this.divisoes && this.divisoes.length > 0 && !this.divisao){
-                //     pendentes.push("divisão");
-                // }
-                if(!this.sala || !this.andar)
-                    pendentes.push("andar / sala");
+	const ItemDoacaoObj = {
+		tipo_item: '',
+		categoria_item: '',
+		descricao_item: '',
+		destino: '',
+		endereco_entrega: '',
+		responsavel_recebimento: '',
+		quantidade: '',
+		unidade_medida: '',
+		entregas: [],
+		distribuicoes: [],
+		saldo_residual: 0,
+		saldo_a_distribuir: 0
+	};
+	const DoacaoObj = {
+		data_entrada: '',
+		entrada: '',
+		responsavel_atendimento: '',
+		doador: '',
+		tipo_formalizacao: '',
+		contato: '',
+    telefone_doador: '',
+    email_doador: '',
+    itens_doacao: [ItemDoacaoObj],
+		valor_total: '',
+		validade_doacao: '',
+		status: '',
+		numero_sei: '',
+		relatorio_sei: '',
+		itens_pendentes_sei: '',
+		observacao: ''
+	};
 
-                if(!this.novoItem.discriminacao)
-                    pendentes.push("discriminação");
-                if(!this.novoItem.cor)
-                    pendentes.push("cor");
-                
-                if(pendentes.length > 0){
-                    let erro = "Por favor, preencha os seguintes campos:";
-                    for(item in pendentes)
-                        erro+="\n"+pendentes[item];
-                    window.alert(erro);
-                    return;
-                }
+	var app = new Vue({
+		el: '#app',
+		data: {
+			novoItem: JSON.parse(JSON.stringify(DoacaoObj)),
+			itens: [],
+			usuario: {
+				nome: "<?php echo $_SESSION['nomeUsuario']; ?>",
+				rf: "<?php echo $_SESSION['IDUsuario']; ?>"
+			},
+			categoriasTipoitem: [],
+			responsaveis_atendimento: <?php echo $responsaveis; ?>,
+			keepInfo: false,
+			statuses: sisprops.statuses,
+			tiposItem: sisprops.tiposItem,
+			unidadesDeMedida: sisprops.unidadesDeMedida
+		},
+		methods: {
+			/**
+				LIMPA NÚMEROS
+			*/
+			apenasNumeros: function (string){
+				var numsStr = string.replace(/[^0-9]/g,'');
+				return numsStr;
+			},
+			/**
+				ADIÇÃO DE ITENS À LISTA
+			*/
+			adicionarItem: function (){
+				// Limpa valor
+				if(this.novoItem.valor_total)
+					this.novoItem.valor_total = this.apenasNumeros(this.novoItem.valor_total)/100;
 
-                // Insere dados do servidor
-                this.novoItem.nomeServidor = this.usuario.nome;
-                this.novoItem.rf = this.usuario.rf;
-                this.novoItem.orgao = this.orgao;
-                this.novoItem.setor = this.setor;
-                this.novoItem.divisao = this.divisao;
-                this.novoItem.sala = this.sala;
-                this.novoItem.andar = this.andar;
+				// Remove itens virtuais
+				for (var i = 0; i < this.novoItem.itens_doacao.length; i++) {					
+					delete this.novoItem.itens_doacao[i].saldo_residual;
+					delete this.novoItem.itens_doacao[i].saldo_a_distribuir;
+				}
+				console.log(this.novoItem);
 
-                // Limpa números de chapa
-                if(this.novoItem.chapa)
-                    this.novoItem.chapa = this.apenasNumeros(this.novoItem.chapa);
-                if(this.novoItem.chapaOutraUnidade)
-                    this.novoItem.chapaOutraUnidade = this.apenasNumeros(this.novoItem.chapaOutraUnidade);
+				// Insere item à lista de cadastro
+				this.itens.push(JSON.parse(JSON.stringify(this.novoItem)));
 
-                // Insere item à lista de cadastro
-                this.itens.push(JSON.parse(JSON.stringify(this.novoItem)));
+				document.getElementById("entrada").focus();
 
-                document.getElementById("chapa").focus();
+				this.novoItem = DoacaoObj;
+				this.cadastrarDoacoes(); // Remover caso seja preciso retomar o modo de inclusão em massa
+			},
+			atualizaTipos: function () {
+				// this.novoItem.categoria_item = "";
+				// TODO: CRIAR FOR PARA PERCORRER TODOS OS ITENS
+				for (var i = 0; i < this.tiposItem.length; i++) {
+					if(this.tiposItem[i].tipo == this.novoItem.tipo_item){
+						this.categoriasTipoitem = this.tiposItem[i].categorias;
+						break;
+					}
+				}
+			},
+			/** 
+				CADASTRO DE Doacoes
+			*/
+			cadastrarDoacoes: function () {
+				if(this.itens.length === 0){
+					window.alert("A lista está vazia! Adicione doações para cadastrar.");
+					return;
+				}
 
-                // let tempItem = this.novoItem;
-                // Limpa formulário se opção "Cadastrar item similar" estiver desmarcada
-                if(app.keepInfo === true){
-                // if(false){
-                    app.novoItem.chapa = '';
-                    app.novoItem.chapaOutraUnidade = '';
-                    app.novoItem.numSerie = '';
-                }
-                else {
-                    this.novoItem = BemPatrimonial;
-                    this.fotoUrl = '';
-                }
-                
-            },
-            /** 
-                CADASTRO DE BENS
-            */
-            cadastrarBens: function () {
-                if(this.itens.length === 0){
-                    window.alert("A lista está vazia! Adicione itens para cadastrar.");
-                    return;
-                }
-                if(!this.orgao){
-                    window.alert('Preencha o campo "Órgão"');
-                    return;
-                }
-                if(!this.setor){
-                    window.alert('Preencha o campo "Setor"');
-                    return;
-                }
+				let listaDeDoacoes = JSON.stringify(this.itens);
+				
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						if(this.response > 0) {
+							// Cadastro realizado com sucesso. Atualiza lista
+							let concordancia = parseInt(this.response) > 1 ? " doações cadastradas" : " doação cadastrada";
+							window.alert(parseInt(this.response)+concordancia+" com sucesso!");
+							app.novoItem = DoacaoObj;
+							app.itens = [];
+							document.getElementById("entrada").focus();
+						}                        
+						else {
+							window.alert("Falha ao cadastrar. Verifique os campos e tente novamente.\nSe o problema persistir, contate o desenvolvedor.");
+							console.warn(this.response);
+						}
+					}
+				};
+				xhttp.open("POST", "cadastrar.php", true);
+				xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+				console.log(listaDeDoacoes.replace(/&/g,'CODREPEAMP',true));
+				xhttp.send("insertList="+listaDeDoacoes.replace('&','CODREPEAMP'));
+			},
+			calculaSaldos: function(item) {
+				let residual = item.quantidade;
+				for (var i = 0; i < item.entregas.length; i++) {
+					if(!isNaN(parseFloat(item.entregas[i].qtde_recebida)))
+						residual -= parseFloat(item.entregas[i].qtde_recebida);
+				}
+				item.saldo_residual = residual;
+				
+				let aDistribuir = item.quantidade - residual;
+				for (var i = 0; i < item.distribuicoes.length; i++) {
+					if(!isNaN(parseFloat(item.distribuicoes[i].qtde_distribuicao))){
+						aDistribuir -= parseFloat(item.distribuicoes[i].qtde_distribuicao);
+					}
+					else {
+						aDistribuir = 0;
+					}
+				}
+				item.saldo_a_distribuir = aDistribuir;
+			},
+			corrigeNumberType: function(objeto, prop) {
+				// Verifica se número colado está no padrão brasileiro de pontuação e corrige de acordo
+				let numero = objeto[prop].toString().replace(/\s/g, '');
+				if(numero.match(/\,00/g) && numero.match(/\,00/g).length == 1) {
+					numero = numero.replace(",00", '').replace(/\./g, '');
+				}
+				if (numero.match(/\./g) && numero.match(/\./g).length > 1) {
+					numero = numero.replace(/\./g, '');
+				}
+				if (numero.match(/\,/g) && numero.match(/\,/g).length > 1) {
+					numero = numero.replace(/\,/g, '')
+				}
+				numero = numero.replace(',','.');
 
-                let listaDeBens = JSON.stringify(this.itens);
-                
-                var xhttp = new XMLHttpRequest();
-                xhttp.onreadystatechange = function() {
-                    if (this.readyState == 4 && this.status == 200) {
-                        if(this.response > 0) {
-                            // Cadastro realizado com sucesso. Atualiza lista
-                            let concordancia = parseInt(this.response) > 1 ? " itens cadastrados" : " item cadastrado";
-                            window.alert(parseInt(this.response)+concordancia+" com sucesso!");
-                            app.novoItem = BemPatrimonial;
-                            app.itens = [];
-                            document.getElementById("chapa").focus();
-                        }                        
-                        else {
-                            window.alert("Falha ao cadastrar. Verifique os campos e tente novamente.\nSe o problema persistir, contate o desenvolvedor.");
-                            console.warn(this.response);
-                        }
-                    }
-                };
-                xhttp.open("POST", "cadastrar.php", true);
-                xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-                console.log(listaDeBens.replace(/&/g,'CODREPEAMP',true));
-                xhttp.send("insertList="+listaDeBens.replace('&','CODREPEAMP'));
-            }
-        },
-        computed: {
-            criarNovoItem: function(){
-                this.novoItem = this.itemModel;
-            }
-        },
-        watch: {
-            orgao: function(){
-                this.setores = [];
-                this.setor = '';
-                if (this.orgao.length > 0){
-                    this.setores = this.prefeitura.orgaos[this.orgao.toLowerCase()].setores;
-                }
-            },
-            setor: function(){
-                this.divisoes = [];
-                this.divisao = '';
-                if (this.setor.length > 0){
-                    let allSetores = this.prefeitura.orgaos[this.orgao.toLowerCase()].setores;
-                    for (var i = 0; i < allSetores.length; i++) {
-                        if (allSetores[i].sigla === this.setor){
-                            this.divisoes = allSetores[i].divisoes;
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-    });
+				objeto[prop] = numero;
+			}
+		},
+		computed: {
+			criarNovoItem: function(){
+				this.novoItem = this.itemModel;
+			}
+		},
+		mounted: function() {
+			for (var i = 0; i < this.tiposItem.length; i++) {
+			    for (var j = 0; j < this.tiposItem[i].categorias.length; j++) {
+			        this.categoriasTipoitem.push({nome: this.tiposItem[i].categorias[j], tipo: this.tiposItem[i].tipo});
+			    }
+			}
+		}
+	});
 </script>
 <style>
 label {
-    margin: 1em auto 0;
+	margin: 1em auto 0;
 }
 input[type=number]::-webkit-inner-spin-button, 
 input[type=number]::-webkit-outer-spin-button { 
   -webkit-appearance: none; 
   margin: 0; 
+}
+#div-tabela {
+	margin-left: 0;
+	position: absolute;
+	left: 10px;
+	max-width: calc(100% - 20px);
+}
+.absolute-center {
+	position: absolute;
+  left: calc(50% - 16px);
+  top: calc(50% - 16px);
+}
+.item-borda {
+	border: 1px solid #dddddd;
+	border-radius: 5px;
+	padding: 1em 0 1em 1em;
+	margin: 5px 0;
+	background-color: rgba(0,0,0,0.02);
+}
+.customRadio {
+    margin-left: 5px;
+    max-height: 30px;
+}
+.customRadio input {
+    position: absolute;
+    margin: auto 25%;
+}
+.customRadio label {
+    line-height: 0.5em;
+}
+textarea {
+	min-height: 150px;
 }
 </style>
 

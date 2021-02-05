@@ -6,92 +6,130 @@ $cadastrados = 0;
 $erros = [];
 
 if($_SERVER["REQUEST_METHOD"] == "POST") {
-	$listaDeBens = json_decode(str_replace("CODREPEAMP","&", $_POST['insertList']));
+	$listaDeDoacoes = json_decode(str_replace("CODREPEAMP","&", $_POST['insertList']));
 
-	$preSql = "INSERT INTO bens_patrimoniais (";
+	$preSql = "INSERT INTO doacoes (";
 	// Nomeia colunas, e quantidade de interrogações depois remove última vírgula
-	$colunas = "";
+	$colunasDoacao = "";
 	
-	foreach ($listaDeBens[0] as $key => $item) {
-		$colunas .= $key.',';		
+	foreach ($listaDeDoacoes[0] as $key => $item) {
+		// Remove Entregas e Distribuições do objeto principal e prepara para inserir nas respectivas tabelas
+		if ($key !== 'itens_doacao') {
+			$colunasDoacao .= $key.',';
+		}
 	}
-	$colunas = rtrim($colunas,',');
-	$preSql .= $colunas.') VALUES (';
 
-	foreach ($listaDeBens as $itemKey => $item) {
-		$valores = "";
-		if($item->discriminacao !== 'Não listado')
-			$item->descricaoPersonalizada = '';
+	$colunasDoacao = rtrim($colunasDoacao,',');
+	$preSql .= $colunasDoacao.') VALUES (';
+
+	foreach ($listaDeDoacoes as $itemKey => $item) {
+		$valores = "";		
+		$itensDoacao = [];
 		
 		foreach ($item as $key => $value) {
-			$valores .= "'".str_replace(["'", "&"], ["\'", "\&"], utf8_decode($value))."',"; // str replace usado para resolver nomes com apóstrofe (encerrava a string prematuramente)			
+			// Sendo um item_doacao, insere valores correspondentes à tabela
+			if ($key === 'itens_doacao') {
+				foreach ($value as $vKey => $vValue) {
+					array_push($itensDoacao, $vValue);					
+				}
+			}
+			else {
+				$valores .= "'".str_replace(["'", "&"], ["\'", "\&"], utf8_decode($value))."',"; // str replace usado para resolver nomes com apóstrofe (encerrava a string prematuramente)
+			}
 		}
 		$valores = rtrim($valores,',');
 		$sql = $preSql.$valores.');';
+		// $sql = "select * from doacoes;"; // TODO: REMOVER
 		if(!mysqli_query($link, $sql)){
 			printf("Errormessage: %s\n", mysqli_error($link));
 		}
-		else
+		else {
+			// DOAÇÃO INSERIDA COM SUCESSO NO BANCO. PROSSEGUE COM INSERÇÃO DOS ITENS
+			$idDoacao = mysqli_insert_id($link);
+
+			// NOMEIA COLUNAS 
+			$sqlItens = "INSERT INTO `doacao_itens` (`id_doacao`, ";
+			$colunasItens = "";
+
+			foreach ($itensDoacao[0] as $key => $item) {
+				if ($key !== 'entregas' && $key !== 'distribuicoes') {
+					$colunasItens .= $key.',';
+				}
+			}
+
+			$colunasItens = rtrim($colunasItens,',');
+			$sqlItens .= $colunasItens.") VALUES ('$idDoacao', ";
+			
+			// ITENS
+			foreach ($itensDoacao as $itemKey => $itemDoacao) {
+				$entregas = [];
+				$distribuicoes = [];
+				// $sqlItens = "INSERT INTO `doacao_itens` (id_doacao, `data_recebimento`, `qtde_recebida`) VALUES ('$idDoacao', '$itemDoacao->data_recebimento', '$itemDoacao->qtde_recebida');";
+				$valoresItens = "";
+
+				foreach ($itemDoacao as $itemKey => $itemValue) {
+					if ($itemKey === 'entregas') {
+						foreach ($itemValue as $vKey => $vValue) {
+							array_push($entregas, $vValue);					
+						}
+					}
+					else if ($itemKey === 'distribuicoes') {
+						foreach ($itemValue as $vKey => $vValue) {
+							array_push($distribuicoes, $vValue);
+						}
+					}
+					else {
+						$valoresItens .= "'".str_replace(["'", "&"], ["\'", "\&"], utf8_decode($itemValue))."',"; // str replace usado para resolver nomes com apóstrofe
+					}
+				}
+				
+				$valoresItens = rtrim($valoresItens,',');
+				$sqlInsertItens = $sqlItens.$valoresItens.');';
+
+				if (!mysqli_query($link, $sqlInsertItens)) {
+					printf("sqlitens: ",$sqlItens);
+					var_dump($sqlInsertItens);
+					printf("Errormessage: %s\n", mysqli_error($link));
+				}
+				else {
+					// ITEM INSERIDO COM SUCESSO. PROSSEGUE COM INSERÇÃO DAS ENTREGAS E DISTRIBUIÇÕES
+					$idItem = mysqli_insert_id($link);
+					// ENTREGAS
+					foreach ($entregas as $entregaKey => $entrega) {
+						$sqlEntrega = "INSERT INTO `item_recebimentos` (`id_item`, `data_recebimento`, `qtde_recebida`) VALUES ('$idItem', '$entrega->data_recebimento', '$entrega->qtde_recebida');";
+						if (!mysqli_query($link, $sqlEntrega)) {
+							printf("Errormessage: %s\n", mysqli_error($link));
+						}
+					}
+					// DISTRIBUICOES
+					foreach ($distribuicoes as $distribuicaoKey => $distribuicao) {
+						$sqlDist = "INSERT INTO `item_distribuicoes` (`id_item`, `data_distribuicao`, `qtde_distribuicao`) VALUES ('$idItem', '$distribuicao->data_distribuicao', '$distribuicao->qtde_distribuicao');";
+						if (!mysqli_query($link, $sqlDist)) {
+							printf("Errormessage: %s\n", mysqli_error($link));
+						}
+					}
+				}
+			}
+			// DISTRIBUICOES
+			
 			$cadastrados+=1;
-
-	}
-	
-	echo $cadastrados;
-	return;
-	// TODO: Quando houver definição de todas as colunas em definitivo, alternar para script com mysqli_prepare
-	// Prepara comando
-	/*
-	$sql = "INSERT INTO bens_patrimoniais (
-		nomeServidor,
-		rf,
-		orgao,
-		setor,
-		divisao,
-		sala,
-		andar,
-		chapa,
-		chapaOutraUnidade,
-		nomeOutraUnidade
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-
-	$listaDeBens = json_decode($_POST['insertList']);
-	
-	if($stmt = mysqli_prepare($link, $sql)){
-		// Vincula as variáveis como parâmetros
-		mysqli_stmt_bind_param($stmt, "ssssssssss", 
-			$param_nomeServidor,
-			$param_rf,
-			$param_orgao,
-			$param_setor,
-			$param_divisao,
-			$param_sala,
-			$param_andar,
-			$param_chapa,
-			$param_chapaOutraUnidade,
-			$param_nomeOutraUnidade
-		);
-
-		foreach ($listaDeBens as $key => $item) {
-			$param_nomeServidor = utf8_decode($item->nomeServidor);
-			$param_rf = $item->rf;
-			$param_orgao = isset($item->orgao) ? utf8_decode($item->orgao) : NULL;
-			$param_setor = isset($item->setor) ? utf8_decode($item->setor) : NULL;
-			$param_divisao = isset($item->divisao) ? utf8_decode($item->divisao) : NULL;
-			$param_sala = isset($item->sala) ? utf8_decode($item->sala) : NULL;
-			$param_andar = isset($item->andar) ? $item->andar : NULL;
-			$param_chapa = isset($item->chapa) ? $item->chapa : NULL;
-			$param_chapaOutraUnidade = isset($item->chapaOutraUnidade) ? $item->chapaOutraUnidade : NULL;
-			$param_nomeOutraUnidade = isset($item->nomeOutraUnidade) ? utf8_decode($item->nomeOutraUnidade) : NULL;
-			if(mysqli_stmt_execute($stmt)){
-				$cadastrados += 1;
-			}
-			else {
-				array_push($erros, json_encode($item));
-			}
 		}
 
-		echo count($erros) > 0 ? json_encode($erros) : $cadastrados;
 	}
-	*/
+	// LOG de cadastro
+	session_start();
+	$sqlLog = "INSERT INTO `log_geral` (`rf`, `registro`) VALUES ('".strtolower($_SESSION['IDUsuario'])."', 'cadastro_doacao');";
+	if(!mysqli_query($link, $sqlLog))
+	    printf("Errormessage: %s\n", mysqli_error($link));
+
+	echo $cadastrados;
+	updtGS();
+	return;	
 }
+
+function updtGS() {
+	global $dbTables;
+	require_once "gsheets.php";
+}
+
  ?>
