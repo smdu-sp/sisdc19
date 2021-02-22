@@ -93,7 +93,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $link->close();
             
             if($_SESSION['responsavel'] == ''){
-                // header('location:login.php?m="Período para cadastro de bens encerrado. Acesso restrito a pontos focais."');
                 header('location:login.php?m="Acesso restrito."');
                 return;
             }            
@@ -122,7 +121,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         <div style="width: 200px; margin: 0 auto;">
             <img src="img/logo_sp.png" alt="Cidade de São Paulo" width="200">
         </div>
-        <!-- <center><h3><strong>Gabinete do Prefeito</strong></h3></center> -->
         <br>
         <h2>Doações decorrentes da pandemia do COVID-19</h2>
         <p>Digite seu login e senha da rede</p>

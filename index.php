@@ -339,13 +339,6 @@ $responsaveis .= "]";
 								<select id="status" v-model="novoItem.status" class="form-control form-control-sm">
 									<option disabled selected value="">Status</option>
 									<option v-for="status in statuses">{{status}}</option>
-									<!-- <option>Contato não iniciado</option>
-									<option>Contato iniciado</option>
-									<option>Em processo de formalização</option>
-									<option>Aguardando entrega</option>
-									<option>Produto/serviço entregue</option>
-									<option>Finalizado com termo de recebimento</option>
-									<option>Encerrado</option> -->
 								</select>
 							</div>
 							<div class="col col-3">
@@ -478,8 +471,6 @@ $responsaveis .= "]";
 				this.cadastrarDoacoes(); // Remover caso seja preciso retomar o modo de inclusão em massa
 			},
 			atualizaTipos: function () {
-				// this.novoItem.categoria_item = "";
-				// TODO: CRIAR FOR PARA PERCORRER TODOS OS ITENS
 				for (var i = 0; i < this.tiposItem.length; i++) {
 					if(this.tiposItem[i].tipo == this.novoItem.tipo_item){
 						this.categoriasTipoitem = this.tiposItem[i].categorias;

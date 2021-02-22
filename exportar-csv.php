@@ -6,12 +6,9 @@ require_once "config.php";
 
 $rf = $_GET['rf'];
 
-// $sql = "SELECT * FROM bens_patrimoniais WHERE `setor`='" . $setor;
 $sql = "SELECT * FROM doacoes;";
 
 $csv  = "doacoes_covid-" . date('d-m-Y-his') . '.csv';
-// Gerar link inpage
-// $file = fopen($csv, 'w');
 
 // Abrir arquivo (download)
 $file = fopen('php://output', 'w');
@@ -35,27 +32,6 @@ function fixedName($nomeColuna) {
         case 'responsavel_atendimento':
             $nomeColuna = 'REPONSAVEL DO ATENDIMENTO / ANDAMENTO';
             break;
-        // "doador"
-        // "tipo_formalizacao"
-        // "descricao_item"
-        // "tipo_item"
-        // "quantidade"
-        // "valor_total"
-        // "destino"
-        // "contato"
-        // "prazo_periodo"
-        // "endereco_entrega"
-        // "responsavel_recebimento"
-        // "status"
-        // "numero_sei"
-        // "observacao"
-        // "comentario_sms"
-        // "relatorio_sei"
-        // "itens_pendentes_sei"
-        // "monitoramento"
-        // "conferido"
-        // "data_inclusao"
-        // "data_alteracao"
         default:            
             break;
     }

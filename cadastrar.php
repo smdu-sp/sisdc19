@@ -64,7 +64,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 			foreach ($itensDoacao as $itemKey => $itemDoacao) {
 				$entregas = [];
 				$distribuicoes = [];
-				// $sqlItens = "INSERT INTO `doacao_itens` (id_doacao, `data_recebimento`, `qtde_recebida`) VALUES ('$idDoacao', '$itemDoacao->data_recebimento', '$itemDoacao->qtde_recebida');";
 				$valoresItens = "";
 
 				foreach ($itemDoacao as $itemKey => $itemValue) {

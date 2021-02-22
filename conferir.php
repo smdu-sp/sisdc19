@@ -7,8 +7,6 @@ if (!mysqli_set_charset($link, "utf8")) {
 	exit();
 }
 
-$erros = [];
-
 if($_SERVER["REQUEST_METHOD"] == "POST") {
 	$fiscal = json_decode($_POST['fiscal']);
 	$sql = "SELECT * FROM doacoes;";
@@ -237,11 +235,6 @@ if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
 	else
 		echo 1;
 	
-	// $sql = "INSERT INTO log_delete (`rf`,`item`) VALUES ('".$usuario."','".$wholeItem."');";
-	// if(!mysqli_query($link, $sql))
-	// 	printf("Errormessage: %s\n", mysqli_error($link));
-	// else
-	// 	echo 1;
 	logDelete($usuario, $wholeItem, $link);
 
 	return;

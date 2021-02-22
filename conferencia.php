@@ -87,35 +87,6 @@ $link->close();
     </div>
     <br>
     <br>
-<<<<<<< HEAD
-    <!-- BENS ADICIONADOS -->
-    <div id="div-tabela" class="table-responsive" style="resize: both;">
-        <h2>Bens registrados em {{fiscal.setor + (fiscal.divisao ? ('/'+fiscal.divisao) : '')}}</h2>
-        <div v-if="!sistemaAberto" class="alert alert-warning">
-            <center><h3>Sistema bloqueado para edição e exclusão.</h3></center>
-        </div>
-        <table class="table table-striped" v-if="fiscal.setor !== 'TODOS' && sistemaAberto">
-            <tr>
-                <th>#</th>
-                <th>Nome do Servidor</th>
-                <th>Nº da chapa</th>
-                <th>Nº chapa outra unidade</th>
-                <th>Nome outra unidade</th>
-                <th style="min-width: 300px;">Discriminação do bem</th>
-                <th>Descrição personalizada</th>
-                <th>Servível</th>
-                <th>Cor</th>
-                <th>Comprimento</th>
-                <th>Profundidade</th>
-                <th>Altura</th>
-                <th>Marca</th>
-                <th>Modelo</th>
-                <th>Nº de série</th>
-                <th v-if="fiscal.setor !== 'TODOS' && sistemaAberto">Conferir/ Corrigir</th>
-                <th v-if="fiscal.setor !== 'TODOS' && sistemaAberto">Excluir</th>
-            </tr>
-            <tr v-for="item in itens" :class="item.conferido ? 'table-success' : ''">
-=======
     <div>
         <center>
             <!-- <button class="btn btn-lg btn-info col-5" @click="obterLista()"><span class="oi oi-reload"></span> Atualizar Lista</button> -->
@@ -185,7 +156,6 @@ $link->close();
             </tr>            
             <!-- <tr v-for="item in itens" :class="item.conferido ? 'table-success' : ''"> -->
             <tr v-for="item in itens" v-if="!item.blocked || mostrarTodas">
->>>>>>> preblock
                 <td>{{itens.indexOf(item)+1}}</td>
                 <td v-if="!apenasDadosSei() || !ocultarNotSei"><input class="form-control" v-model="item.data_entrada" placeholder="Data de entrada" title="Data de entrada" type="date" :disabled="item.blocked"></td>
                 <td v-if="!apenasDadosSei() || !ocultarNotSei"><input class="form-control w-100" v-model="item.entrada" placeholder="Entrada" title="Entrada" :disabled="item.blocked"></td>                
@@ -327,7 +297,7 @@ $link->close();
                 </td>
                 <!-- FIM DOACAO_ITENS -->
 
-                <td v-if="!apenasDadosSei() || !ocultarNotSei"><input class="form-control" v-model="item.valor_total" v-on:change="atualizaValor(item)" title="Valor total" :disabled="usuario.rf !== 'd746958' && usuario.rf !== 'd817518'"><div class="valor_mask">{{corrigeValor(item.valor_total)}}</div></td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei"><input class="form-control" v-model="item.valor_total" v-on:change="atualizaValor(item)" title="Valor total" :disabled="nivelAcesso !== 'total'"><div class="valor_mask">{{corrigeValor(item.valor_total)}}</div></td>
                 <td v-if="!apenasDadosSei() || !ocultarNotSei"><input class="form-control" v-model="item.validade_doacao" placeholder="Validade Doação" title="Validade Doação" :disabled="item.blocked"></td>
                 <td v-if="!apenasDadosSei() || !ocultarNotSei">
                     <select id="status" v-model="item.status" class="form-control" style="min-width: 200px" title="Status" :disabled="item.blocked">
@@ -340,11 +310,7 @@ $link->close();
                 <td><textarea class="form-control" v-model="item.itens_pendentes_sei" placeholder="Itens pendentes no processo SEI" title="Itens pendentes no processo SEI" :disabled="item.blocked"></textarea></td>
                 <td><textarea class="form-control" v-model="item.observacao" placeholder="Observação" title="Observação" :disabled="item.blocked"></textarea></td>
                 <!-- BOTÃO PARA CONFIRMAR ITEM -->
-<<<<<<< HEAD
-                <td v-if="fiscal.setor !== 'TODOS' && sistemaAberto">
-=======
                 <td>
->>>>>>> preblock
                     <center>                        
                         <button type="button" class="btn btn-success btn-sm" @click="conferir(item)" title="Conferir/Atualizar" :disabled="item.blocked">
                             <span :class="item.conferido ? 'oi oi-loop-circular' : 'oi oi-check'"></span>
@@ -352,11 +318,7 @@ $link->close();
                     </center>
                 </td>
                 <!-- BOTÃO PARA REMOVER ITEM -->
-<<<<<<< HEAD
-                <td v-if="fiscal.setor !== 'TODOS' && sistemaAberto">
-=======
                 <td>
->>>>>>> preblock
                     <center>
                         <button type="button" class="btn btn-danger btn-sm" @click="confirm('***************ATENÇÃO!***************\n\nTem certeza que deseja remover o item do cadastro? (esta ação não pode ser desfeita!)') ? remover(item) : false" title="Remover item" :disabled="item.blocked">
                             <span class="oi oi-x"></span>
@@ -364,14 +326,7 @@ $link->close();
                     </center>
                 </td>
             </tr>
-<<<<<<< HEAD
-        </table>
-        <div v-if="fiscal.setor === 'TODOS'" class="alert alert-info">
-            <center><h4>Para agilizar a consulta, a tabela foi desativada. Clique no botão abaixo para visualizar a planilha:</h4></center>
-        </div>
-=======
         </table>        
->>>>>>> preblock
     </div>
 </div>
     
@@ -407,73 +362,6 @@ $link->close();
                 nome: "<?=$_SESSION['nomeUsuario'];?>",
                 rf: "<?=$_SESSION['IDUsuario'];?>"
             },
-<<<<<<< HEAD
-            descritivos: [
-                '01 - Sofá de 3 lugares, em couro sintético',
-                '02 - Rack para ti',
-                '03 - Quadro de cortiça',
-                '04 - Mesa "L", com uma das extremidades arredondada, pés em estrutura metálica',
-                '05 - Mesa retangular, pés em estrutura metálica com rodas',
-                '06 - Estação de trabalho, pés em estrutura metálica',
-                '07 - Mesa de trabalho, pés em estrutura metálica',
-                '08 - Mesa de reunião, pés em estrutura metálica',
-                '09 - Mesa em L “60°”, pés em estrutura metálica',
-                '10 - Mesa de impressora',
-                '11 - Mapoteca vertical, estrutura em aço',
-                '12 - Mapoteca horizontal',
-                '13 - Longarina com assentos estrutura dos pés em aço',
-                '14 - Gaveteiro com rodas, puxadores preto, 03 gavetas',
-                '15 - Frigobar',
-                '16 - Gaveteiro em estrutura metálica, com rodas, 02 gavetas',
-                '17 - Estante em aço, prateleiras',
-                '18 - Estante de aço, prateleiras',
-                '19 - Estação de trabalho pés em estrutura metálica',
-                '20 - Estação de trabalho, pés em estrutura metálica',
-                '21 - Estação de trabalho, pés em estrutura metálica',
-                '22 - Estação de trabalho, pés em estrutura metálica',
-                '23 - Estação de trabalho, pés em madeira',
-                '24 - Estação de trabalho, pés em madeira',
-                '25 - Carrinho para transporte, 4 rodas, estrutura em arame soldado',
-                '26 - Cadeira giratória, sem rodas, apoio de braço acoplado ao assento e encosto',
-                '27 - Cadeira fixa sem apoio de braços',
-                '28 - Cadeira giratória com apoio de braços',
-                '29 - Cadeira fixa, encosto e pés de metal',
-                '30 - Cadeira escolar adulto',
-                '31 - Cadeira fixa sem apoio de braços',
-                '32 - Cadeira giratória com apoio de braços',
-                '33 - Cadeira giratória com apoio de braços',
-                '34 - Cadeira fixa sem apoio de braços',
-                '35 - Cadeira fixa com apoio de braços',
-                '36 - Cadeira fixa com apoio de braços',
-                '37 - Cadeira giratória com apoio de braços',
-                '38 - Cadeira giratória sem apoio de braço, assento alto',
-                '39 - Armário',
-                '40 - Arquivo de aço com gavetas',
-                '41 - Arquivos deslizante com carros',
-                '42 - Mesa em L 90°, pés em madeira',
-                '43 - Armário',
-                '44 - Ar condicionado portátil',
-                '45 - Ar condicionado central',
-                '46 - Aparelho split para ar condicionado',
-                '47 - Mesa de luz, v',
-                '48 - Armário de aço',
-                '49 - Armário com porta de vidro',
-                '50 - Mesa com tampo de vidro',
-                '51 - Mesa de apoio',
-                '52 - Mesa em madeira maciça',
-                '53 - Forno de micro-ondas'
-            ],
-            fotoUrl: '',
-            orgaos: [],
-            setores: [],
-            divisoes: [],
-            orgao: '',
-            setor: '',
-            divisao: '',
-            andar: '',
-            sala: '',
-            sistemaAberto: false
-=======
             categoriasTipoitem: [],
             editaResps: <?=$editaResps;?>,
             nivelAcesso: "<?=$nivel_acesso;?>",
@@ -486,7 +374,6 @@ $link->close();
             alerta: false,
             mensagemAlerta: '',
             allOtherBlocked: false
->>>>>>> preblock
         },
         methods: {
             /** ADICIONA ITEM À DOAÇÃO */
@@ -684,7 +571,6 @@ $link->close();
 
                 if(itemConferido.valor_total.length > 0) {
                     itemConferido.valor_total = this.consertaMoeda(itemConferido.valor_total)
-                    console.log("Valor: ", itemConferido.valor_total);
                 }
 
                 // REMOVE PROPRIEDADES QUE O USUÁRIO NÃO PODE ALTERAR
@@ -707,7 +593,6 @@ $link->close();
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
-                        console.log(this.response === '1' ? "SUCESSO!" : this.response);
                         app.obterLista();
                     }
                 };
@@ -719,7 +604,6 @@ $link->close();
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
-                        console.log(this.response === '11' ? "SUCESSO!" : this.response);
                         if(this.response === '11'){
                             app.obterLista();
                             return itemRemovido;
