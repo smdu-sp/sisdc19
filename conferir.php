@@ -166,12 +166,8 @@ if ($_SERVER["REQUEST_METHOD"] == "PUT") {
 		if(!mysqli_query($link, $sqlLog)) {
 	    printf("Errormessage: %s\n", mysqli_error($link));
 	  }
-	  else {
-	  	updtGS();
-	  }
 		echo 1;
 	}
-	// echo $sql;
 	return;
 }
 if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
@@ -188,7 +184,6 @@ if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
 		if(!mysqli_query($link, $sql))
 			printf("Errormessage: %s\n", mysqli_error($link));
 		else {
-			updtGS();
 			echo 1;
 		}
 	}
@@ -240,8 +235,4 @@ if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
 	return;
 }
 
-function updtGS() {
-	global $dbTables;
-	require_once "gsheets.php";
-}
 ?>
