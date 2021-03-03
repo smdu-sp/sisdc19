@@ -73,11 +73,15 @@ if ($_SERVER["REQUEST_METHOD"] == "PUT") {
 			}
 		}
 		else if ($doacaoKey !== 'data_alteracao') {
+			if($doacaoValue == '') {
+				$sqlDoacao .= "`".$doacaoKey."`=NULL,";				
+				continue;
+			}
 			// $sqlDoacao .= "`".$doacaoKey."`='".utf8_decode($doacaoValue)."',";			
 			$sqlDoacao .= "`".$doacaoKey."`='".$doacaoValue."',";
 		}		
 	}
-
+	
 	$colunasDoacaoItens = "";
 	foreach ($doacaoItens as $coluna => $doacaoItem) {
 		// PERCORRE TODOS OS ITENS (DOACAO_ITEM)
@@ -95,12 +99,15 @@ if ($_SERVER["REQUEST_METHOD"] == "PUT") {
 			// SE ITEM JÁ EXISTIR NO BANCO, ATUALIZA OS DADOS DELE
 			$sqlListaItens = "UPDATE `doacao_itens` SET ";
 			foreach ($itemColunas as $key => $itemCol) {
-				$sqlListaItens .= "`".$itemCol."`='".$doacaoItem->{$itemCol}."',";
-				// DESCOMENTAR LINHA ABAIXO (comentando a de cima) CASO OCORRA ERRO DE CHARSET EM PRODUÇÃO
-				// $sqlListaItens .= "`".$itemCol."`='".utf8_decode($doacaoItem->{$itemCol})."',";
+				$itemVal = $doacaoItem->{$itemCol};
+				if($itemCol == 'quantidade' && !$doacaoItem->{$itemCol}) {
+					// Quantidade invalida. Define 0
+					$itemVal = '0';
+				}
+				$sqlListaItens .= "`".$itemCol."`='".$itemVal."',";
 			}
 			$sqlListaItens = rtrim($sqlListaItens,',');
-			$sqlListaItens .= " WHERE id='$doacaoItem->id';";			
+			$sqlListaItens .= " WHERE id='$doacaoItem->id';";
 		}
 		else {
 			// SE FOR NOVO ITEM, INSERE NO BANCO
