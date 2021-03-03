@@ -34,12 +34,16 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 				}
 			}
 			else {
-				$valores .= "'".str_replace(["'", "&"], ["\'", "\&"], utf8_decode($value))."',"; // str replace usado para resolver nomes com apóstrofe (encerrava a string prematuramente)
+				if($value === '') {
+					$valores .= "NULL,";
+					continue;
+				}
+				$valores .= "'".str_replace(["'", "&"], ["\'", "\&"], $value)."',"; // str replace usado para resolver nomes com apóstrofe (encerrava a string prematuramente)
 			}
 		}
 		$valores = rtrim($valores,',');
 		$sql = $preSql.$valores.');';
-		// $sql = "select * from doacoes;"; // TODO: REMOVER
+
 		if(!mysqli_query($link, $sql)){
 			printf("Errormessage: %s\n", mysqli_error($link));
 		}
@@ -78,7 +82,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 						}
 					}
 					else {
-						$valoresItens .= "'".str_replace(["'", "&"], ["\'", "\&"], utf8_decode($itemValue))."',"; // str replace usado para resolver nomes com apóstrofe
+						if($itemValue === '') {
+							$valoresItens .= "NULL,";
+							continue;
+						}
+						$valoresItens .= "'".str_replace(["'", "&"], ["\'", "\&"], $itemValue)."',"; // str replace usado para resolver nomes com apóstrofe
 					}
 				}
 				

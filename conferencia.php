@@ -297,7 +297,7 @@ $link->close();
                 </td>
                 <!-- FIM DOACAO_ITENS -->
 
-                <td v-if="!apenasDadosSei() || !ocultarNotSei"><input class="form-control" v-model="item.valor_total" v-on:change="atualizaValor(item)" title="Valor total" :disabled="nivelAcesso !== 'total'"><div class="valor_mask">{{corrigeValor(item.valor_total)}}</div></td>
+                <td v-if="!apenasDadosSei() || !ocultarNotSei"><input class="form-control" v-model="item.valor_total" title="Valor total" :disabled="nivelAcesso !== 'total'"><div class="valor_mask">{{corrigeValor(item.valor_total)}}</div></td>
                 <td v-if="!apenasDadosSei() || !ocultarNotSei"><input class="form-control" v-model="item.validade_doacao" placeholder="Validade Doação" title="Validade Doação" :disabled="item.blocked"></td>
                 <td v-if="!apenasDadosSei() || !ocultarNotSei">
                     <select id="status" v-model="item.status" class="form-control" style="min-width: 200px" title="Status" :disabled="item.blocked">
@@ -348,7 +348,7 @@ $link->close();
         destino: '',
         endereco_entrega: '',
         responsavel_recebimento: '',
-        quantidade: '',
+        quantidade: null,
         unidade_medida: '',
         entregas: [],
         distribuicoes: []
@@ -457,6 +457,8 @@ $link->close();
                         app.itens = JSON.parse(this.response);
                         for (var i = app.itens.length - 1; i >= 0; i--) {
                             app.itens[i].blocked = app.isBlocked(app.itens[i].responsavel_atendimento);
+                            // DEBUG: Identifica valores null
+                            app.itens[i].valor_total = app.itens[i].valor_total ? app.itens[i].valor_total : 0;
                             let itemNameIndex = 'item_'+i;
                             app[itemNameIndex] = app.itens[i];
                             // ADICIONA WATCHER
@@ -498,7 +500,7 @@ $link->close();
                 item.saldo_a_distribuir = aDistribuir;
             },
             corrigeValor: function(valor) {
-                valor = valor.toString();
+                valor = valor?.toString() || '0';
                 // Se o valor contiver centavos, converte ponto em vírgula
                 if (valor.indexOf('.') >= 0) {
                     valor = valor.replace('.', ',');
