@@ -325,7 +325,6 @@ $responsaveis .= "]";
 								v-model="novoItem.valor_total"
 								placeholder="Valor total da doação" title="Valor total da doação"
 								title="Valor total (ex.: 999999,00)"
-								disabled
 								>
 							</div>
 							<div class="col">
